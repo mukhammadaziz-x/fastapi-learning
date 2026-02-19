@@ -1,15 +1,22 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
 
-@app.get("/")
-async def index():
-    return {"message": "Hello World!"}
+# GET - retrieves information
+# POST - sends the data
+# PUT - update whole model
+# DELETE - delete data
 
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+class User(BaseModel):
+    id: int
+    name: str
+    age: int
+    gender: str
+    address: str
 
-
-
+@app.get('/')
+def print_hello():
+    message = "Hello FastAPI learners"
+    return f"Message: {message}"
 
