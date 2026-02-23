@@ -32,3 +32,8 @@ async def news_feed(
         new_id: Annotated[int, Path(title="Yangilik id", gt=0, le=1000)],
         search: str = "all"):
     return {'news': ['News1', 'News2', 'News3'], 'new_id': new_id, 'search_key': search}
+
+# gt =--> Grater than '>'
+# ge =--> Grater or equal '>='
+# lt =--> Lower than '<'
+# le =--> Lower or equal '<='
