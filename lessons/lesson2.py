@@ -3,6 +3,7 @@ from typing import Annotated
 
 app = FastAPI()
 
+feed_query = Query(max_length=50, min_length=5)
 @app.get('/news/feed/')
-async def news_feed(search: Annotated[str | None, Query(max_length=50, min_length=5)] = None):
+async def news_feed(search: Annotated[str | None, feed_query] = None):
     return {'news': ['News1', 'News2', 'News3'], 'search_key': search}
