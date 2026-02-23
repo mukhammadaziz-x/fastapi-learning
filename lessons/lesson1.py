@@ -26,7 +26,3 @@ async def get_user(user_type: UserType):
         return {'text': 'Hello, master!'}
     else:
         return {'text': 'Who are you?'}
-
-@app.get('/news/feed/')
-async def news_feed(search: str, start_date: str | None = None):
-    return {'news': ['News1', 'News2', 'News3'], 'search_key': search, 'start_date': start_date}
