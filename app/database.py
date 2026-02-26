@@ -3,10 +3,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from typing import Generator
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 
 DATABASE_URL = os.getenv("DATABASE_URL",
-    "postgresql://postgres:1111111@localhost:5432/fastapi")
+    "postgresql+asyncpg://postgres:1111111@localhost:5432/fastapi")
 
 # echo=True logs all SQL — disable in production
 engine = create_engine(DATABASE_URL, echo=False)
