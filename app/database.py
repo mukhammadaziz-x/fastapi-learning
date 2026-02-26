@@ -2,6 +2,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from typing import Generator
 import os
 
 DATABASE_URL = os.getenv("DATABASE_URL",
@@ -17,3 +18,11 @@ SessionLocal = sessionmaker(
 )
 
 Base = declarative_base()
+
+def get_db() -> Generator:
+    """Yield a DB session; always close after request."""
+    db = SessionLocal()
+    try:
+        yield db          # handed to the route handler
+    finally:
+        db.close()        # runs even if an exception is raised
