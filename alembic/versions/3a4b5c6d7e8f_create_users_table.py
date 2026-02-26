@@ -17,9 +17,12 @@ def upgrade() -> None:
         sa.Column("is_active",  sa.Boolean(),     default=True),
         sa.Column("created_at", sa.DateTime(timezone=True),
                   server_default=sa.text("now()")),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
     )
     op.create_index("ix_users_email", "users", ["email"], unique=True)
+    op.create_index("ix_users_id", "users", ["id"])
 
 def downgrade() -> None:
+    op.drop_index("ix_users_id", table_name="users")
     op.drop_index("ix_users_email", table_name="users")
     op.drop_table("users")

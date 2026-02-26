@@ -1,14 +1,16 @@
 # app/database.py
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from typing import Generator
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker, declarative_base
 import os
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+from typing import Generator
 
-DATABASE_URL = os.getenv("DATABASE_URL",
-    "postgresql+asyncpg://postgres:1111111@localhost:5432/fastapi")
+load_dotenv()
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+psycopg2://postgres:1111111@localhost:5432/fastapi"
+)
 
 # echo=True logs all SQL — disable in production
 engine = create_engine(DATABASE_URL, echo=False)
@@ -20,6 +22,7 @@ SessionLocal = sessionmaker(
 )
 
 Base = declarative_base()
+
 
 def get_db() -> Generator:
     """Yield a DB session; always close after request."""

@@ -1,11 +1,35 @@
-# Test your FastAPI endpoints
+# Test FastAPI CRUD endpoints
 
+### Health check
 GET http://127.0.0.1:8000/
 Accept: application/json
 
-###
+### Create a new user
+POST http://127.0.0.1:8000/users/
+Content-Type: application/json
 
-GET http://127.0.0.1:8000/hello/User
+{
+  "email": "test@example.com",
+  "username": "testuser",
+  "password": "secretpassword123"
+}
+
+### Get all users (with pagination)
+GET http://127.0.0.1:8000/users/?skip=0&limit=10
 Accept: application/json
 
-###
+### Get user by ID
+GET http://127.0.0.1:8000/users/1
+Accept: application/json
+
+### Update user (partial)
+PATCH http://127.0.0.1:8000/users/1
+Content-Type: application/json
+
+{
+  "username": "updated_username"
+}
+
+### Delete user
+DELETE http://127.0.0.1:8000/users/1
+Accept: application/json
