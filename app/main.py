@@ -1,14 +1,25 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.routers import users
 from app.database import engine, Base
 
-# Create all tables (for development; use Alembic migrations in production)
-Base.metadata.create_all(bind=engine)
+# Import models so Base.metadata knows about them
+import app.models.user  # noqa: F401
+
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    # Create all tables on startup (dev only; use Alembic in production)
+    Base.metadata.create_all(bind=engine)
+    yield
+    engine.dispose()
+
 
 app = FastAPI(
     title="FastAPI CRUD App",
     description="Users CRUD API with PostgreSQL",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # Include routers
