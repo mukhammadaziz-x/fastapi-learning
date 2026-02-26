@@ -1,15 +1,23 @@
 # app/crud/user.py
+import bcrypt
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
-from passlib.context import CryptContext
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def hash_password(password: str) -> str:
+    """Hash a password using bcrypt."""
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def verify_password(plain: str, hashed: str) -> bool:
+    """Verify a password against a bcrypt hash."""
+    return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
 
 
 # ── Create ──────────────────────────────────────────────
 def create_user(db: Session, user: UserCreate) -> User:
-    hashed = pwd_context.hash(user.password)   # Never store plaintext
+    hashed = hash_password(user.password)   # Never store plaintext
     db_user = User(
         email      = user.email,
         username   = user.username,
@@ -59,7 +67,7 @@ def update_user(db: Session, user_id: int, payload: UserUpdate) -> User | None:
 
     # Hash password before storing
     if "password" in update_data:
-        update_data["hashed_pwd"] = pwd_context.hash(update_data.pop("password"))
+        update_data["hashed_pwd"] = hash_password(update_data.pop("password"))
 
     for field, value in update_data.items():
         setattr(user, field, value)

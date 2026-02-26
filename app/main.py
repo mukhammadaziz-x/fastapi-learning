@@ -17,9 +17,7 @@ async def lifespan(application: FastAPI):
 
 app = FastAPI(
     title="FastAPI CRUD App",
-    description="Users CRUD API with PostgreSQL",
-    version="1.0.0",
-    lifespan=lifespan,
+    description="Users CRUD API with PostgreSQL"
 )
 
 # Include routers
