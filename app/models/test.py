@@ -49,8 +49,8 @@ class Test(Base):
     max_fullscreen_violations = Column(Integer, default=3)  # Количество позволенных нарушений
 
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     teacher = relationship("Teacher", back_populates="tests")
     questions = relationship("Question", back_populates="test")
@@ -74,7 +74,7 @@ class Question(Base):
     correct_answer = Column(String(1), nullable=True)  # A, B, C, D
 
     points = Column(Integer, default=1)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, server_default=func.now())
 
     test = relationship("Test", back_populates="questions")
     student_answers = relationship("StudentAnswer", back_populates="question")
@@ -99,7 +99,7 @@ class TestResult(Base):
 
     started_at = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, server_default=func.now())
 
     test = relationship("Test", back_populates="results")
     student = relationship("Student", back_populates="test_results")
@@ -120,7 +120,7 @@ class StudentAnswer(Base):
     is_correct = Column(Boolean, default=False)
     points_earned = Column(Integer, default=0)
 
-    answered_at = Column(DateTime, default=datetime.utcnow)
+    answered_at = Column(DateTime, server_default=func.now())
 
     result = relationship("TestResult", back_populates="answers")
     question = relationship("Question", back_populates="student_answers")
@@ -135,7 +135,7 @@ class FullscreenViolation(Base):
     violation_type = Column(String(50), default="left_fullscreen")  # left_fullscreen, inactive, etc
     violation_count = Column(Integer, default=1)
 
-    detected_at = Column(DateTime, default=datetime.utcnow)
+    detected_at = Column(DateTime, server_default=func.now())
 
     result = relationship("TestResult", back_populates="violations")
 

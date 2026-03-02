@@ -12,7 +12,7 @@ from app.schemas.test import TestCreate, TestUpdate, QuestionCreate, StudentAnsw
 def create_test(db: Session, test_data: TestCreate, teacher_id: int) -> Test:
     """Создаёт новый тест."""
     db_test = Test(
-        **test_data.dict(),
+        **test_data.model_dump(),
         teacher_id=teacher_id
     )
     db.add(db_test)
@@ -44,7 +44,7 @@ def update_test(db: Session, test_id: int, test_data: TestUpdate) -> Test | None
     if not db_test:
         return None
 
-    update_data = test_data.dict(exclude_unset=True)
+    update_data = test_data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(db_test, field, value)
 
@@ -69,7 +69,7 @@ def is_test_accessible(db: Session, test_id: int) -> bool:
     if not test or not test.is_active:
         return False
 
-    now = datetime.utcnow()
+    now = datetime.now()
     return test.start_date <= now <= test.end_date
 
 
@@ -78,7 +78,7 @@ def is_test_accessible(db: Session, test_id: int) -> bool:
 def create_question(db: Session, test_id: int, question_data: QuestionCreate) -> Question:
     """Создаёт новый вопрос в тесте."""
     db_question = Question(
-        **question_data.dict(),
+        **question_data.model_dump(),
         test_id=test_id
     )
     db.add(db_question)
