@@ -183,7 +183,8 @@ async def google_callback(code: str, state: str = "student", db: Session = Depen
     access_token = create_access_token(data={"sub": str(user.id), "role": user.role})
     refresh_tok = create_refresh_token(data={"sub": str(user.id)})
 
-    user_data = UserResponse.model_validate(user).model_dump()
+    # JSON-friendly user data (datetime -> ISO string)
+    user_data = UserResponse.model_validate(user).model_dump(mode="json")
 
     # Small HTML page that stores tokens in localStorage and redirects to dashboard
     html = f"""
