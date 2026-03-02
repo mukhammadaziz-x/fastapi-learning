@@ -73,20 +73,31 @@ async function handleLogin(e) {
 
 async function handleRegister(e) {
     e.preventDefault();
-    const btn = document.getElementById('reg-btn');
+    const btn = document.getElementById('register-btn');
     const email = document.getElementById('reg-email').value.trim();
     const username = document.getElementById('reg-username').value.trim();
     const fullname = document.getElementById('reg-fullname').value.trim();
     const password = document.getElementById('reg-password').value;
-    const role = document.getElementById('reg-role').value;
+
+    const emailRegex = /[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+/;
+    const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$/;
 
     if (!email || !username || !password) {
         showAlert('alert-msg', 'Barcha maydonlarni to\'ldiring', 'error');
         return;
     }
 
-    if (password.length < 6) {
-        showAlert('alert-msg', 'Parol kamida 6 belgidan iborat bo\'lishi kerak', 'error');
+    if (!emailRegex.test(email)) {
+        showAlert('alert-msg', 'Email noto\'g\'ri formatda', 'error');
+        return;
+    }
+
+    if (!passwordRegex.test(password)) {
+        showAlert(
+            'alert-msg',
+            'Parol kamida 8 ta belgi, 1 ta katta harf, 1 ta kichik harf, 1 ta raqam va 1 ta maxsus belgi bo\'lishi kerak',
+            'error'
+        );
         return;
     }
 
@@ -101,8 +112,7 @@ async function handleRegister(e) {
                 email,
                 username,
                 full_name: fullname || null,
-                password,
-                role,
+                password
             }),
         });
         const data = await res.json();
@@ -123,8 +133,8 @@ async function handleRegister(e) {
 }
 
 function googleLogin() {
-    const role = document.getElementById('reg-role')?.value || 'student';
-    window.location.href = `/api/v1/auth/google/login?role=${role}`;
+    // Google orqali kirish hozircha faqat studentlar uchun
+    window.location.href = `/api/v1/auth/google/login`;
 }
 
 function redirectToDashboard(role) {

@@ -8,80 +8,88 @@
     <link rel="stylesheet" href="/static/css/common.css">
     <link rel="stylesheet" href="/static/css/dashboard.css">
 </head>
-<body>
+<body class="role-teacher">
     <!-- Navbar -->
-    <nav class="navbar" id="navbar"></nav>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <span>EduPlatform</span>
+        </div>
+        <div class="navbar-right">
+            <div class="navbar-user">
+                <div class="navbar-avatar" id="user-avatar"></div>
+                <span class="navbar-username" id="user-name"></span>
+                <span class="role-badge" id="user-role-badge">teacher</span>
+            </div>
+            <button type="button" class="btn-logout" onclick="logout()">Chiqish</button>
+        </div>
+    </nav>
 
-    <!-- Content -->
-    <div class="container dashboard-teacher">
-        <div class="page-content">
-            <div class="page-header">
-                <h1 class="page-title">📚 O'qituvchi paneli</h1>
-                <p class="page-subtitle">Fanlaringiz, topshiriqlar va natijalarni boshqaring</p>
+    <div class="dashboard-shell">
+        <!-- Sidebar -->
+        <aside class="sidebar sidebar-teacher">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Menyu</div>
+                <a href="#overview" class="sidebar-link">📊 Umumiy ko'rinish</a>
+                <a href="#subjects" class="sidebar-link">📖 Fanlarim</a>
+                <a href="#pending" class="sidebar-link">⏳ Tekshiriladiganlar</a>
             </div>
 
-            <!-- Stats -->
-            <div class="stat-grid" style="margin-bottom: 2rem;">
-                <div class="stat-card">
-                    <div class="stat-icon">📖</div>
-                    <div class="stat-label">Fanlarim</div>
-                    <div class="stat-value" id="s-subjects">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">📝</div>
-                    <div class="stat-label">Topshiriqlar</div>
-                    <div class="stat-value" id="s-assignments">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">👥</div>
-                    <div class="stat-label">Talabalar</div>
-                    <div class="stat-value" id="s-students">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">⏳</div>
-                    <div class="stat-label">Tekshirish kutmoqda</div>
-                    <div class="stat-value" id="s-pending">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">🤖</div>
-                    <div class="stat-label">AI belgilangan</div>
-                    <div class="stat-value" id="s-flagged">—</div>
-                </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">Tezkor harakatlar</div>
+                <button type="button" class="btn btn-primary btn-block sidebar-btn" onclick="location.hash='#subjects'">
+                    ➕ Fan yaratish
+                </button>
+                <button type="button" class="btn btn-secondary btn-block sidebar-btn" onclick="location.hash='#subjects'">
+                    📋 Topshiriq yaratish
+                </button>
+                <button type="button" class="btn btn-secondary btn-block sidebar-btn" onclick="location.hash='#pending'">
+                    ✅ Yechimlarni baholash
+                </button>
             </div>
+        </aside>
 
-            <!-- Quick Actions -->
-            <div class="section">
-                <div class="section-header">
-                    <h2 class="section-title">⚡ Tezkor harakatlar</h2>
+        <!-- Content -->
+        <main class="dashboard-main container dashboard-teacher">
+            <div class="page-content" id="overview">
+                <div class="page-header">
+                    <h1 class="page-title">📚 O'qituvchi paneli</h1>
+                    <p class="page-subtitle">Fanlaringiz, topshiriqlar va natijalarni boshqaring</p>
                 </div>
-                <div class="actions-grid">
-                    <a class="action-card" href="/docs#/Subjects/create_subject_api_v1_subjects__post" target="_blank">
-                        <div class="action-icon">➕</div>
-                        <div class="action-name">Fan yaratish</div>
-                        <div class="action-desc">Yangi fan qo'shish</div>
-                    </a>
-                    <a class="action-card" href="/docs#/Assignments" target="_blank">
-                        <div class="action-icon">📋</div>
-                        <div class="action-name">Topshiriq yaratish</div>
-                        <div class="action-desc">Topshiriq va savollar yaratish</div>
-                    </a>
-                    <a class="action-card" href="/docs#/Enrollments" target="_blank">
-                        <div class="action-icon">📨</div>
-                        <div class="action-name">Talaba qo'shish</div>
-                        <div class="action-desc">Talabani fanga yozish</div>
-                    </a>
-                    <a class="action-card" href="/docs#/Submissions" target="_blank">
-                        <div class="action-icon">✅</div>
-                        <div class="action-name">Tekshirish</div>
-                        <div class="action-desc">Yechimlarni baholash</div>
-                    </a>
+
+                <!-- Stats -->
+                <div class="stat-grid" style="margin-bottom: 2rem;">
+                    <div class="stat-card">
+                        <div class="stat-icon">📖</div>
+                        <div class="stat-label">Fanlarim</div>
+                        <div class="stat-value" id="s-subjects">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📝</div>
+                        <div class="stat-label">Topshiriqlar</div>
+                        <div class="stat-value" id="s-assignments">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-label">Talabalar</div>
+                        <div class="stat-value" id="s-students">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏳</div>
+                        <div class="stat-label">Tekshirish kutmoqda</div>
+                        <div class="stat-value" id="s-pending">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🤖</div>
+                        <div class="stat-label">AI belgilangan</div>
+                        <div class="stat-value" id="s-flagged">—</div>
+                    </div>
                 </div>
             </div>
 
             <!-- Two columns -->
             <div class="two-col">
                 <!-- Subjects -->
-                <div class="section">
+                <div class="section" id="subjects">
                     <div class="section-header">
                         <h2 class="section-title">📖 Fanlarim</h2>
                     </div>
@@ -91,7 +99,7 @@
                 </div>
 
                 <!-- Pending -->
-                <div class="section">
+                <div class="section" id="pending">
                     <div class="section-header">
                         <h2 class="section-title">⏳ Tekshirish kerak</h2>
                     </div>
@@ -113,7 +121,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <script src="/static/js/app.js"></script>

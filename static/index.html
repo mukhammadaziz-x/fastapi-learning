@@ -26,7 +26,7 @@
                 </div>
 
                 <!-- Message -->
-                <div id="msg" class="msg"></div>
+                <div id="alert-msg" class="msg"></div>
 
                 <!-- LOGIN FORM -->
                 <form id="login-form" onsubmit="handleLogin(event)">
@@ -57,14 +57,14 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Parol</label>
-                        <input class="form-input" type="password" id="reg-password" placeholder="Kamida 6 ta belgi" required minlength="6">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Rol</label>
-                        <select class="form-select" id="reg-role">
-                            <option value="student">Talaba</option>
-                            <option value="teacher">O'qituvchi</option>
-                        </select>
+                        <input
+                            class="form-input"
+                            type="password"
+                            id="reg-password"
+                            placeholder="Kamida 8 ta belgi, 1 katta, 1 kichik, 1 raqam, 1 maxsus belgi"
+                            required
+                            minlength="8"
+                        >
                     </div>
                     <button type="submit" class="btn btn-primary btn-block btn-lg" id="register-btn">Ro'yxatdan o'tish</button>
                 </form>
@@ -79,9 +79,7 @@
                 </button>
             </div>
 
-            <div class="login-footer">
-                <p>API docs: <a href="/docs" target="_blank">/docs</a></p>
-            </div>
+            <!-- Footer (optional) -->
         </div>
     </div>
 

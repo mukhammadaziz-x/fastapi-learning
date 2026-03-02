@@ -8,9 +8,14 @@ from datetime import datetime
 class RegisterRequest(BaseModel):
     email: EmailStr
     username: str = Field(min_length=3, max_length=100)
-    password: str = Field(min_length=6)
+    password: str = Field(
+        min_length=8,
+        pattern=r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$",
+        description="Kamida 8 ta belgi, 1 ta katta harf, 1 ta kichik harf, 1 ta raqam va 1 ta maxsus belgi bo'lishi kerak.",
+    )
     full_name: Optional[str] = None
-    role: str = Field(default="student", pattern="^(admin|teacher|student)$")
+    # Public registration har doim student sifatida yaratiladi
+    role: str = Field(default="student", pattern="^(student)$")
     student_id_number: Optional[str] = None
 
 
@@ -95,4 +100,7 @@ class UserPublicProfile(BaseModel):
 
 class PasswordChangeRequest(BaseModel):
     old_password: str
-    new_password: str = Field(min_length=6)
+    new_password: str = Field(
+        min_length=8,
+        pattern=r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$",
+    )

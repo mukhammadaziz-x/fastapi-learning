@@ -123,6 +123,16 @@ function getInitials(name) {
 function setNavbar(user) {
     const nameEl = document.getElementById('user-name');
     const avatarEl = document.getElementById('user-avatar');
+    const roleBadgeEl = document.getElementById('user-role-badge');
+
+    // Body role class (for role-specific accent colors)
+    if (document.body) {
+        document.body.classList.remove('role-admin', 'role-teacher', 'role-student');
+        if (user.role === 'admin') document.body.classList.add('role-admin');
+        if (user.role === 'teacher') document.body.classList.add('role-teacher');
+        if (user.role === 'student') document.body.classList.add('role-student');
+    }
+
     if (nameEl) nameEl.textContent = user.full_name || user.username;
     if (avatarEl) {
         if (user.avatar_url) {
@@ -130,6 +140,10 @@ function setNavbar(user) {
         } else {
             avatarEl.textContent = getInitials(user.full_name || user.username);
         }
+    }
+    if (roleBadgeEl) {
+        roleBadgeEl.textContent = user.role;
+        roleBadgeEl.className = `role-badge role-badge-${user.role}`;
     }
 }
 

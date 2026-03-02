@@ -8,88 +8,103 @@
     <link rel="stylesheet" href="/static/css/common.css">
     <link rel="stylesheet" href="/static/css/dashboard.css">
 </head>
-<body>
+<body class="role-student">
     <!-- Navbar -->
-    <nav class="navbar" id="navbar"></nav>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <span>EduPlatform</span>
+        </div>
+        <div class="navbar-right">
+            <div class="navbar-user">
+                <div class="navbar-avatar" id="user-avatar"></div>
+                <span class="navbar-username" id="user-name"></span>
+                <span class="role-badge" id="user-role-badge">student</span>
+            </div>
+            <button type="button" class="btn-logout" onclick="logout()">Chiqish</button>
+        </div>
+    </nav>
 
-    <!-- Content -->
-    <div class="container dashboard-student">
-        <div class="page-content">
-            <div class="page-header">
-                <h1 class="page-title">🎓 Talaba paneli</h1>
-                <p class="page-subtitle">O'qish natijalari va statistikangiz</p>
+    <div class="dashboard-shell">
+        <!-- Sidebar -->
+        <aside class="sidebar sidebar-student">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Menyu</div>
+                <a href="#overview" class="sidebar-link">📊 Umumiy ko'rinish</a>
+                <a href="#subjects" class="sidebar-link">📖 Fanlar bo'yicha kuch</a>
+                <a href="#leaderboard" class="sidebar-link">🏆 Reyting</a>
+                <a href="#results" class="sidebar-link">📋 Natijalarim</a>
             </div>
 
-            <!-- Stats -->
-            <div class="stat-grid" style="margin-bottom: 1.5rem;">
-                <div class="stat-card">
-                    <div class="stat-icon">📊</div>
-                    <div class="stat-label">O'rtacha ball</div>
-                    <div class="stat-value" id="s-score">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">🏆</div>
-                    <div class="stat-label">Reyting</div>
-                    <div class="stat-value" id="s-rank">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">✅</div>
-                    <div class="stat-label">Bajarilgan</div>
-                    <div class="stat-value" id="s-completed">—</div>
-                    <div class="stat-sub">jami: <span id="s-total">0</span> ta</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">⭐</div>
-                    <div class="stat-label">Reyting bali</div>
-                    <div class="stat-value" id="s-points">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">🔥</div>
-                    <div class="stat-label">Streak</div>
-                    <div class="stat-value" id="s-streak">—</div>
-                    <div class="stat-sub">kunlik faollik</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">⏱️</div>
-                    <div class="stat-label">Sarflangan vaqt</div>
-                    <div class="stat-value" id="s-time">—</div>
-                </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">Tezkor harakatlar</div>
+                <button type="button" class="btn btn-primary btn-block sidebar-btn" onclick="location.hash='#overview'">
+                    📝 Topshiriq boshlash
+                </button>
+                <button type="button" class="btn btn-secondary btn-block sidebar-btn" onclick="location.hash='#leaderboard'">
+                    🏆 Reytingni ko'rish
+                </button>
+                <button type="button" class="btn btn-secondary btn-block sidebar-btn" onclick="location.hash='#results'">
+                    📋 Oxirgi natijalar
+                </button>
             </div>
+        </aside>
 
-            <!-- Completion -->
-            <div class="completion-bar">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="completion-progress" style="width: 0%"></div>
+        <!-- Content -->
+        <main class="dashboard-main container dashboard-student">
+            <div class="page-content" id="overview">
+                <div class="page-header">
+                    <h1 class="page-title">🎓 Talaba paneli</h1>
+                    <p class="page-subtitle">O'qish natijalari va statistikangiz</p>
                 </div>
-                <div class="progress-text" id="completion-text">0 / 0 (0%)</div>
-            </div>
 
-            <!-- Quick Actions -->
-            <div class="section">
-                <div class="section-header">
-                    <h2 class="section-title">⚡ Tezkor harakatlar</h2>
+                <!-- Stats -->
+                <div class="stat-grid" style="margin-bottom: 1.5rem;">
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-label">O'rtacha ball</div>
+                        <div class="stat-value" id="s-score">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🏆</div>
+                        <div class="stat-label">Reyting</div>
+                        <div class="stat-value" id="s-rank">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-label">Bajarilgan</div>
+                        <div class="stat-value" id="s-completed">—</div>
+                        <div class="stat-sub">jami: <span id="s-total">0</span> ta</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⭐</div>
+                        <div class="stat-label">Reyting bali</div>
+                        <div class="stat-value" id="s-points">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-label">Streak</div>
+                        <div class="stat-value" id="s-streak">—</div>
+                        <div class="stat-sub">kunlik faollik</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-label">Sarflangan vaqt</div>
+                        <div class="stat-value" id="s-time">—</div>
+                    </div>
                 </div>
-                <div class="actions-grid">
-                    <a class="action-card" href="/docs#/Submissions/start_submission_api_v1_submissions_start_post" target="_blank">
-                        <div class="action-icon">📝</div>
-                        <div class="action-name">Topshiriq boshlash</div>
-                        <div class="action-desc">Yangi topshiriq yechishni boshlash</div>
-                    </a>
-                    <a class="action-card" href="/docs#/Leaderboard%20%26%20Analytics" target="_blank">
-                        <div class="action-icon">🏆</div>
-                        <div class="action-name">Reyting</div>
-                        <div class="action-desc">Global reyting jadvali</div>
-                    </a>
-                    <a class="action-card" href="/docs#/Submissions/get_my_submissions_api_v1_submissions_my_get" target="_blank">
-                        <div class="action-icon">📋</div>
-                        <div class="action-name">Natijalarim</div>
-                        <div class="action-desc">Barcha yechimlarim</div>
-                    </a>
+
+                <!-- Completion -->
+                <div class="completion-bar">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="completion-progress" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text" id="completion-text">0 / 0 (0%)</div>
                 </div>
+
             </div>
 
             <!-- Two columns -->
-            <div class="two-col">
+            <div class="two-col" id="subjects">
                 <!-- Subject strengths -->
                 <div class="section">
                     <div class="section-header">
@@ -112,7 +127,7 @@
             </div>
 
             <!-- Leaderboard preview -->
-            <div class="section">
+            <div class="section" id="leaderboard">
                 <div class="section-header">
                     <h2 class="section-title">🏆 Top 5 reyting</h2>
                 </div>
@@ -122,7 +137,7 @@
             </div>
 
             <!-- Recent results -->
-            <div class="section">
+            <div class="section" id="results">
                 <div class="section-header">
                     <h2 class="section-title">📋 So'nggi natijalar</h2>
                 </div>
@@ -143,7 +158,7 @@
                     </table>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <script src="/static/js/app.js"></script>
