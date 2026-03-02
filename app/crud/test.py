@@ -123,7 +123,7 @@ def create_test_result(db: Session, test_id: int, student_id: int) -> TestResult
         test_id=test_id,
         student_id=student_id,
         status="in_progress",
-        started_at=datetime.utcnow(),
+        started_at=datetime.now(),
         max_score=max_score
     )
     db.add(db_result)
@@ -171,7 +171,7 @@ def submit_test(db: Session, result_id: int) -> TestResult | None:
         result.was_failed_for_violation = True
         result.score = 0
         result.percentage = 0
-        result.completed_at = datetime.utcnow()
+        result.completed_at = datetime.now()
         db.commit()
         db.refresh(result)
         return result
@@ -183,7 +183,7 @@ def submit_test(db: Session, result_id: int) -> TestResult | None:
     result.score = total_score
     result.percentage = (total_score / result.max_score * 100) if result.max_score > 0 else 0
     result.status = "completed"
-    result.completed_at = datetime.utcnow()
+    result.completed_at = datetime.now()
 
     db.commit()
     db.refresh(result)

@@ -61,7 +61,7 @@ def get_test(
     ).scalar() or 0
 
     response = TestDetailedResponse(
-        **TestResponse.model_validate(test).dict(),
+        **TestResponse.model_validate(test).model_dump(),
         completed_count=completed_count,
         pending_count=pending_count
     )
@@ -261,7 +261,7 @@ def report_fullscreen_violation(
         result.was_failed_for_violation = True
         result.score = 0
         result.percentage = 0
-        result.completed_at = datetime.utcnow()
+        result.completed_at = datetime.now()
         db.commit()
 
         raise HTTPException(
