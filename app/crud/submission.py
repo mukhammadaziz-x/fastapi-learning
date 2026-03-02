@@ -57,6 +57,21 @@ def get_assignment_submissions(db: Session, assignment_id: int, status: str = No
     return q.order_by(Submission.submitted_at.desc().nullsfirst()).all()
 
 
+def get_pending_review_submissions(db: Session, teacher_id: int, limit: int = 50) -> list[Submission]:
+    """Get submissions that need teacher review (submitted status) for teacher's assignments."""
+    return (
+        db.query(Submission)
+        .join(Assignment, Submission.assignment_id == Assignment.id)
+        .filter(
+            Assignment.teacher_id == teacher_id,
+            Submission.status == "submitted",
+        )
+        .order_by(Submission.submitted_at.desc())
+        .limit(limit)
+        .all()
+    )
+
+
 def get_active_submission(db: Session, assignment_id: int, student_id: int) -> Optional[Submission]:
     """Get the current in-progress submission."""
     return db.query(Submission).filter(
