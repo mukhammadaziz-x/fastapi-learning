@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPlatform — Teacher Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+    <link rel="stylesheet" href="/static/css/variables.css">
+    <link rel="stylesheet" href="/static/css/common.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <!-- ═══ NAVBAR ═══ -->
+    <nav class="navbar">
+        <a class="navbar-brand" href="/dashboard/teacher">
+            <span class="logo-icon">🎓</span>
+            <span>EduPlatform</span>
+        </a>
+        <div class="navbar-right">
+            <div class="navbar-user">
+                <div class="navbar-avatar" id="user-avatar"></div>
+                <span class="navbar-username" id="user-name"></span>
+                <span class="role-badge role-badge-teacher">TEACHER</span>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="logout()">Chiqish</button>
+        </div>
+    </nav>
+
+    <!-- ═══ CONTENT ═══ -->
+    <div class="dashboard-content teacher-accent">
+
+        <div class="page-header">
+            <h1 class="page-title">👨‍🏫 Teacher Dashboard</h1>
+            <p class="page-subtitle">Fanlar, topshiriqlar va talabalarni boshqarish</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stat-grid" style="margin-bottom: 2rem;">
+            <div class="stat-card">
+                <div class="stat-icon">📚</div>
+                <div class="stat-label">Mening fanlarim</div>
+                <div class="stat-value" id="s-subjects">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📝</div>
+                <div class="stat-label">Topshiriqlar</div>
+                <div class="stat-value" id="s-assignments">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👨‍🎓</div>
+                <div class="stat-label">Talabalar</div>
+                <div class="stat-value" id="s-students">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-label">Tekshirish kutmoqda</div>
+                <div class="stat-value" id="s-pending">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🤖</div>
+                <div class="stat-label">AI shubhali</div>
+                <div class="stat-value" id="s-flagged">—</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">⚡ Tezkor amallar</h2>
+            </div>
+            <div class="actions-grid">
+                <button class="action-card" onclick="window.open('/docs#/Subjects','_blank')">
+                    <div class="action-icon">📚</div>
+                    <div class="action-name">Fan yaratish</div>
+                    <div class="action-desc">Yangi fan qo'shish</div>
+                </button>
+                <button class="action-card" onclick="window.open('/docs#/Assignments','_blank')">
+                    <div class="action-icon">📝</div>
+                    <div class="action-name">Topshiriq yaratish</div>
+                    <div class="action-desc">Test, vazifa, imtihon</div>
+                </button>
+                <button class="action-card" onclick="window.open('/docs#/Submissions','_blank')">
+                    <div class="action-icon">✅</div>
+                    <div class="action-name">Tekshirish</div>
+                    <div class="action-desc">Yechimlarni ko'rish va baholash</div>
+                </button>
+                <button class="action-card" onclick="window.open('/docs#/Leaderboard%20%26%20Analytics','_blank')">
+                    <div class="action-icon">🏆</div>
+                    <div class="action-name">Leaderboard</div>
+                    <div class="action-desc">Reyting jadvali</div>
+                </button>
+            </div>
+        </div>
+
+        <div class="two-col">
+            <!-- My Subjects -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📚 Mening fanlarim</h2>
+                </div>
+                <div id="subjects-grid"></div>
+            </div>
+
+            <!-- Pending Reviews -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">⏳ Tekshirish kutmoqda</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Topshiriq</th>
+                                <th>Talaba</th>
+                                <th>Ball</th>
+                                <th>Baho</th>
+                                <th>Sana</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pending-table">
+                            <tr><td colspan="5" class="loading-text"><div class="spinner"></div> Yuklanmoqda...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/teacher.js"></script>
+</body>
+</html>
