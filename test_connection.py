@@ -1,14 +1,15 @@
-"""Test PostgreSQL connection."""
 import sys
+import os
+os.environ["PYTHONIOENCODING"] = "utf-8"
 
 try:
     from app.database import engine
+    from sqlalchemy import text
     with engine.connect() as conn:
-        result = conn.execute(__import__('sqlalchemy').text("SELECT 1"))
-        print("✅ PostgreSQL connection successful!")
-        print(f"   Result: {result.fetchone()}")
+        result = conn.execute(text("SELECT 1"))
+        row = result.fetchone()
+        print("SUCCESS: PostgreSQL connection OK. Result: " + str(row))
 except Exception as e:
-    print(f"❌ PostgreSQL connection failed: {e}", file=sys.stderr)
-    print("   Make sure PostgreSQL is running and database 'fastapi' exists.")
-    print(f"   Error type: {type(e).__name__}")
+    print("FAIL: " + str(type(e).__name__) + ": " + str(e))
+    sys.exit(1)
 
