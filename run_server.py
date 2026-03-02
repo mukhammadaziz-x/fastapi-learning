@@ -1,60 +1,53 @@
 #!/usr/bin/env python3
 """
-FastAPI Development Server Launcher
-Handles port conflicts and firewall issues
+EduPlatform — Serverni ishga tushirish
+Har doim shu faylni run qiling: python run_server.py
 """
 
 import subprocess
 import socket
 import sys
-import time
+import os
 
-def is_port_available(port):
-    """Check if port is available"""
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    result = sock.connect_ex(('127.0.0.1', port))
-    sock.close()
-    return result != 0
-
-def find_available_port(start_port=7000):
-    """Find first available port starting from start_port"""
-    for port in range(start_port, start_port + 1000):
-        if is_port_available(port):
+# Bo'sh port topish
+def find_port(start=9000):
+    for port in range(start, start + 100):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.bind(("0.0.0.0", port))
+            s.close()
             return port
+        except OSError:
+            continue
     return None
 
 def main():
-    print("=" * 60)
-    print("FastAPI Development Server Launcher")
-    print("=" * 60)
+    print("=" * 55)
+    print("  EduPlatform — Educational Startup Server")
+    print("=" * 55)
 
-    # Find available port
-    port = find_available_port(7000)
-
-    if port is None:
-        print("ERROR: Could not find any available port!")
+    port = find_port(9000)
+    if not port:
+        print("XATO: Bo'sh port topilmadi!")
         sys.exit(1)
 
-    print(f"\nAvailable port found: {port}")
-    print(f"\nStarting FastAPI server...")
-    print(f"Documentation will be at: http://127.0.0.1:{port}/docs")
-    print(f"\nPress Ctrl+C to stop the server\n")
+    print(f"\n  Port: {port}")
+    print(f"  API:  http://localhost:{port}")
+    print(f"  Docs: http://localhost:{port}/docs")
+    print(f"\n  To'xtatish: Ctrl+C\n")
 
-    # Start server
     cmd = [
-        sys.executable,
-        "-m", "uvicorn",
+        sys.executable, "-m", "uvicorn",
         "app.main:app",
-        "--host", "127.0.0.1",
+        "--host", "0.0.0.0",
         "--port", str(port),
-        "--reload"
+        "--reload",
     ]
 
     try:
-        subprocess.run(cmd, cwd=__file__.replace("run_server.py", ""))
+        subprocess.run(cmd, cwd=os.path.dirname(os.path.abspath(__file__)))
     except KeyboardInterrupt:
-        print("\n\nServer stopped.")
-        sys.exit(0)
+        print("\n\nServer to'xtatildi.")
 
 if __name__ == "__main__":
     main()
