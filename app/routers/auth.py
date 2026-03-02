@@ -183,8 +183,9 @@ async def google_callback(code: str, state: str = "student", db: Session = Depen
     access_token = create_access_token(data={"sub": str(user.id), "role": user.role})
     refresh_tok = create_refresh_token(data={"sub": str(user.id)})
 
-    # JSON-friendly user data (datetime -> ISO string)
+    # JSON-friendly user data (datetime -> ISO string) and serialized for JS
     user_data = UserResponse.model_validate(user).model_dump(mode="json")
+    user_json = json.dumps(user_data)
 
     # Small HTML page that stores tokens in localStorage and redirects to dashboard
     html = f"""
@@ -198,7 +199,7 @@ async def google_callback(code: str, state: str = "student", db: Session = Depen
         <script>
             try {{
                 window.localStorage.setItem('token', {json.dumps(access_token)});
-                window.localStorage.setItem('user', {json.dumps(user_data)});
+                window.localStorage.setItem('user', {json.dumps(user_json)});
                 // refresh token hozircha frontendan foydalanilmaydi, lekin kerak bo'lsa saqlab qo'yish mumkin:
                 window.localStorage.setItem('refresh_token', {json.dumps(refresh_tok)});
             }} catch (e) {{
