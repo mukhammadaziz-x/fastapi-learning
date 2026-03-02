@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance Checker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #0ea5e9;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --dark-2: #1e293b;
+            --dark-3: #334155;
+            --gray: #94a3b8;
+            --light: #f1f5f9;
+            --white: #ffffff;
+            --gradient-1: linear-gradient(135deg, #6366f1, #8b5cf6, #a78bfa);
+            --gradient-2: linear-gradient(135deg, #0ea5e9, #6366f1);
+            --gradient-3: linear-gradient(135deg, #f59e0b, #ef4444);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.15);
+            --shadow-glow: 0 0 40px rgba(99,102,241,0.3);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark);
+            color: var(--white);
+            overflow-x: hidden;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1rem 3rem;
+            background: rgba(15,23,42,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(99,102,241,0.15);
+            transition: all 0.3s;
+        }
+        .navbar.scrolled { background: rgba(15,23,42,0.95); box-shadow: var(--shadow-lg); }
+        .nav-logo {
+            display: flex; align-items: center; gap: 0.75rem;
+            font-size: 1.4rem; font-weight: 800;
+            background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        .nav-logo i { -webkit-text-fill-color: var(--primary); font-size: 1.6rem; }
+        .nav-links { display: flex; align-items: center; gap: 2rem; }
+        .nav-links a {
+            color: var(--gray); text-decoration: none; font-weight: 500;
+            transition: color 0.3s; font-size: 0.95rem;
+        }
+        .nav-links a:hover { color: var(--white); }
+        .nav-btn {
+            padding: 0.6rem 1.5rem; border-radius: 10px; font-weight: 600;
+            text-decoration: none; transition: all 0.3s; font-size: 0.9rem; cursor: pointer; border: none;
+        }
+        .btn-outline { color: var(--primary-light); border: 2px solid var(--primary); background: transparent; }
+        .btn-outline:hover { background: var(--primary); color: var(--white); }
+        .btn-primary { background: var(--gradient-1); color: var(--white); border: none; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-glow); }
+
+        /* ===== HERO ===== */
+        .hero {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            padding: 6rem 2rem 4rem; position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: ''; position: absolute; top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(ellipse at 30% 50%, rgba(99,102,241,0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 50%, rgba(14,165,233,0.06) 0%, transparent 50%);
+            animation: float 15s ease-in-out infinite;
+        }
+        @keyframes float { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-2%,3%) rotate(1deg); } }
+        .hero-grid { position: absolute; inset: 0; background-image:
+            linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+        .hero-content { position: relative; z-index: 2; max-width: 800px; text-align: center; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.5rem 1.2rem; border-radius: 50px;
+            background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.25);
+            color: var(--primary-light); font-size: 0.85rem; font-weight: 600;
+            margin-bottom: 2rem;
+        }
+        .hero-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .hero h1 {
+            font-size: 4rem; font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+        }
+        .hero h1 .gradient {
+            background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero p { font-size: 1.2rem; color: var(--gray); line-height: 1.7; margin-bottom: 2.5rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .hero-actions .btn {
+            padding: 0.9rem 2.2rem; border-radius: 12px; font-weight: 700;
+            font-size: 1rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.6rem;
+            transition: all 0.3s; cursor: pointer; border: none;
+        }
+        .hero-actions .btn-hero-primary { background: var(--gradient-1); color: var(--white); }
+        .hero-actions .btn-hero-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 40px rgba(99,102,241,0.4); }
+        .hero-actions .btn-hero-secondary { background: rgba(255,255,255,0.05); color: var(--white); border: 1px solid rgba(255,255,255,0.1); }
+        .hero-actions .btn-hero-secondary:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+
+        /* ===== FEATURES ===== */
+        .features { padding: 6rem 2rem; position: relative; }
+        .section-header { text-align: center; margin-bottom: 4rem; }
+        .section-header h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; }
+        .section-header p { color: var(--gray); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+        .features-grid {
+            max-width: 1200px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;
+        }
+        .feature-card {
+            background: rgba(30,41,59,0.5); border: 1px solid rgba(99,102,241,0.1);
+            border-radius: 20px; padding: 2rem; transition: all 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .feature-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: var(--gradient-1); opacity: 0; transition: opacity 0.4s;
+        }
+        .feature-card:hover { transform: translateY(-5px); border-color: rgba(99,102,241,0.3); box-shadow: var(--shadow-glow); }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-icon {
+            width: 56px; height: 56px; border-radius: 14px;
+            background: rgba(99,102,241,0.12); display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; color: var(--primary-light); margin-bottom: 1.2rem;
+        }
+        .feature-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.6rem; }
+        .feature-card p { color: var(--gray); font-size: 0.95rem; line-height: 1.6; }
+
+        /* ===== HOW IT WORKS ===== */
+        .how-it-works { padding: 6rem 2rem; background: rgba(30,41,59,0.3); }
+        .steps-container { max-width: 900px; margin: 0 auto; }
+        .step {
+            display: flex; gap: 2rem; align-items: flex-start; margin-bottom: 3rem;
+            padding: 2rem; border-radius: 16px; background: rgba(15,23,42,0.5);
+            border: 1px solid rgba(99,102,241,0.08); transition: all 0.3s;
+        }
+        .step:hover { border-color: rgba(99,102,241,0.2); transform: translateX(5px); }
+        .step-number {
+            min-width: 50px; height: 50px; border-radius: 14px;
+            background: var(--gradient-1); display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; font-weight: 800;
+        }
+        .step h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.4rem; }
+        .step p { color: var(--gray); font-size: 0.95rem; line-height: 1.6; }
+
+        /* ===== ENTER TOKEN ===== */
+        .token-section { padding: 6rem 2rem; }
+        .token-card {
+            max-width: 600px; margin: 0 auto; padding: 3rem;
+            background: rgba(30,41,59,0.5); border: 1px solid rgba(99,102,241,0.15);
+            border-radius: 24px; text-align: center;
+        }
+        .token-card h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .token-card p { color: var(--gray); margin-bottom: 2rem; }
+        .token-input-group { display: flex; gap: 0.75rem; }
+        .token-input-group input {
+            flex: 1; padding: 0.9rem 1.2rem; border-radius: 12px;
+            background: rgba(15,23,42,0.8); border: 2px solid rgba(99,102,241,0.2);
+            color: var(--white); font-size: 1rem; font-family: 'Inter', sans-serif;
+            transition: border-color 0.3s; outline: none;
+        }
+        .token-input-group input:focus { border-color: var(--primary); }
+        .token-input-group input::placeholder { color: var(--gray); }
+        .token-input-group button {
+            padding: 0.9rem 1.8rem; border-radius: 12px;
+            background: var(--gradient-1); color: var(--white);
+            font-weight: 700; border: none; cursor: pointer; font-size: 0.95rem;
+            transition: all 0.3s; white-space: nowrap;
+        }
+        .token-input-group button:hover { transform: translateY(-2px); box-shadow: var(--shadow-glow); }
+        .token-status { margin-top: 1rem; font-size: 0.9rem; min-height: 1.5rem; }
+        .token-status.error { color: var(--danger); }
+        .token-status.success { color: var(--success); }
+
+        /* ===== FOOTER ===== */
+        footer {
+            padding: 3rem 2rem; text-align: center;
+            border-top: 1px solid rgba(99,102,241,0.1); color: var(--gray); font-size: 0.9rem;
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 200;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
+            align-items: center; justify-content: center; padding: 2rem;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--dark-2); border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 24px; padding: 2.5rem; max-width: 480px; width: 100%;
+            position: relative; animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-close {
+            position: absolute; top: 1rem; right: 1rem; background: none; border: none;
+            color: var(--gray); font-size: 1.2rem; cursor: pointer; transition: color 0.3s;
+        }
+        .modal-close:hover { color: var(--white); }
+        .modal h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .modal p { color: var(--gray); margin-bottom: 1.5rem; font-size: 0.95rem; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--gray); margin-bottom: 0.4rem; }
+        .form-group input {
+            width: 100%; padding: 0.75rem 1rem; border-radius: 10px;
+            background: rgba(15,23,42,0.8); border: 2px solid rgba(99,102,241,0.15);
+            color: var(--white); font-size: 0.95rem; font-family: 'Inter', sans-serif;
+            outline: none; transition: border-color 0.3s;
+        }
+        .form-group input:focus { border-color: var(--primary); }
+        .form-submit {
+            width: 100%; padding: 0.85rem; border-radius: 12px;
+            background: var(--gradient-1); color: var(--white); font-weight: 700;
+            border: none; cursor: pointer; font-size: 1rem; transition: all 0.3s;
+            margin-top: 0.5rem;
+        }
+        .form-submit:hover { transform: translateY(-2px); box-shadow: var(--shadow-glow); }
+        .form-error { color: var(--danger); font-size: 0.85rem; margin-top: 0.5rem; min-height: 1.2rem; }
+        .form-success { color: var(--success); font-size: 0.85rem; margin-top: 0.5rem; }
+
+        .tab-switch { display: flex; gap: 0; margin-bottom: 1.5rem; background: rgba(15,23,42,0.5); border-radius: 10px; overflow: hidden; }
+        .tab-switch button {
+            flex: 1; padding: 0.7rem; background: none; border: none; color: var(--gray);
+            font-weight: 600; cursor: pointer; transition: all 0.3s; font-size: 0.9rem;
+        }
+        .tab-switch button.active { background: var(--primary); color: var(--white); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .navbar { padding: 1rem 1.5rem; }
+            .nav-links { display: none; }
+            .token-input-group { flex-direction: column; }
+            .step { flex-direction: column; gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+    <a href="/" class="nav-logo"><i class="fas fa-graduation-cap"></i> PerformanceIQ</a>
+    <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#take-test">Take Test</a>
+    </div>
+    <div style="display:flex;gap:0.75rem;">
+        <button class="nav-btn btn-outline" onclick="openModal('login')">Log In</button>
+        <button class="nav-btn btn-primary" onclick="openModal('register')">Sign Up</button>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-content">
+        <div class="hero-badge"><span class="dot"></span> Secure Testing Platform</div>
+        <h1>Smart <span class="gradient">Student Performance</span> Checker</h1>
+        <p>Create tests, monitor fullscreen compliance, detect violations in real-time, and analyze student performance — all in one powerful platform.</p>
+        <div class="hero-actions">
+            <button class="btn btn-hero-primary" onclick="openModal('register')">
+                <i class="fas fa-rocket"></i> Get Started Free
+            </button>
+            <a href="#take-test" class="btn btn-hero-secondary">
+                <i class="fas fa-play"></i> Enter Test Token
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+    <div class="section-header">
+        <h2>Powerful <span style="background:var(--gradient-1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Features</span></h2>
+        <p>Everything you need to manage tests securely and analyze student performance effectively.</p>
+    </div>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-expand"></i></div>
+            <h3>Fullscreen Monitoring</h3>
+            <p>Enforces fullscreen mode during tests. Automatically detects when students leave fullscreen and tracks violations.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-shield-halved"></i></div>
+            <h3>Violation Detection</h3>
+            <p>If a student exits fullscreen more than 3 times, the test automatically fails with a score of 0. Zero tolerance for cheating.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-link"></i></div>
+            <h3>Secure Access Links</h3>
+            <p>Generate unique, time-limited tokens for each student. Links expire after the teacher-defined period.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-clock"></i></div>
+            <h3>Time-Bound Tests</h3>
+            <p>Set exact start and end dates. Students can only access tests within the active window defined by the teacher.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-chart-bar"></i></div>
+            <h3>Performance Analytics</h3>
+            <p>Real-time score tracking, completion rates, violation logs, and detailed per-student analysis.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+            <h3>Instant Results</h3>
+            <p>Auto-grading for multiple choice questions with instant score calculation and percentage display.</p>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works" id="how-it-works">
+    <div class="section-header">
+        <h2>How It <span style="background:var(--gradient-2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Works</span></h2>
+        <p>Simple 4-step process to create and manage secure tests.</p>
+    </div>
+    <div class="steps-container">
+        <div class="step">
+            <div class="step-number">1</div>
+            <div>
+                <h3>Teacher Registers & Creates Test</h3>
+                <p>Sign up as a teacher, create a test with questions, set time limits and the access window (start/end dates).</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div>
+                <h3>Generate Access Links</h3>
+                <p>Add students and generate unique, time-limited access tokens. Share the link with each student.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div>
+                <h3>Student Takes Test in Fullscreen</h3>
+                <p>Students open their unique link, enter fullscreen mode, and answer questions. Violations are tracked in real-time.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <div>
+                <h3>View Results & Analytics</h3>
+                <p>See scores, violation counts, pass/fail status, and detailed per-question analysis — instantly after submission.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- TAKE TEST -->
+<section class="token-section" id="take-test">
+    <div class="token-card">
+        <h2><i class="fas fa-key" style="color:var(--accent);margin-right:0.5rem;"></i> Enter Your Test Token</h2>
+        <p>Paste the unique access token provided by your teacher to start your exam.</p>
+        <div class="token-input-group">
+            <input type="text" id="tokenInput" placeholder="e.g. a1b2c3d4-e5f6-7890-abcd-ef1234567890">
+            <button onclick="validateToken()"><i class="fas fa-arrow-right"></i> Go</button>
+        </div>
+        <div class="token-status" id="tokenStatus"></div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 PerformanceIQ — Student Performance Checker. Built with FastAPI & ❤️</p>
+</footer>
+
+<!-- TEACHER AUTH MODAL -->
+<div class="modal-overlay" id="authModal">
+    <div class="modal">
+        <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+
+        <div id="loginForm">
+            <h2>Welcome Back</h2>
+            <p>Log in to your teacher dashboard</p>
+            <div class="tab-switch">
+                <button class="active" onclick="switchTab('login')">Log In</button>
+                <button onclick="switchTab('register')">Sign Up</button>
+            </div>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="loginUsername" placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter password">
+            </div>
+            <button class="form-submit" onclick="loginTeacher()"><i class="fas fa-sign-in-alt"></i> Log In</button>
+            <div class="form-error" id="loginError"></div>
+        </div>
+
+        <div id="registerForm" style="display:none;">
+            <h2>Create Account</h2>
+            <p>Register as a teacher to create and manage tests</p>
+            <div class="tab-switch">
+                <button onclick="switchTab('login')">Log In</button>
+                <button class="active" onclick="switchTab('register')">Sign Up</button>
+            </div>
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="regName" placeholder="John Smith">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="regEmail" placeholder="john@school.edu">
+            </div>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="regUsername" placeholder="Choose a username">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="regPassword" placeholder="Create a password">
+            </div>
+            <button class="form-submit" onclick="registerTeacher()"><i class="fas fa-user-plus"></i> Create Account</button>
+            <div class="form-error" id="registerError"></div>
+            <div class="form-success" id="registerSuccess"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = '';
+
+// Navbar scroll effect
+window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// Modal
+function openModal(type) {
+    document.getElementById('authModal').classList.add('active');
+    switchTab(type);
+}
+function closeModal() {
+    document.getElementById('authModal').classList.remove('active');
+}
+
+function switchTab(tab) {
+    document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+    // Update tab buttons
+    document.querySelectorAll('.tab-switch button').forEach(b => b.classList.remove('active'));
+}
+
+// Auth
+async function loginTeacher() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errEl = document.getElementById('loginError');
+    errEl.textContent = '';
+
+    if (!username || !password) { errEl.textContent = 'Please fill in all fields'; return; }
+
+    try {
+        const res = await fetch(`${API}/api/v1/teachers/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Login failed');
+
+        localStorage.setItem('teacher', JSON.stringify(data));
+        window.location.href = '/teacher';
+    } catch (e) { errEl.textContent = e.message; }
+}
+
+async function registerTeacher() {
+    const full_name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const username = document.getElementById('regUsername').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const errEl = document.getElementById('registerError');
+    const sucEl = document.getElementById('registerSuccess');
+    errEl.textContent = ''; sucEl.textContent = '';
+
+    if (!full_name || !email || !username || !password) { errEl.textContent = 'Please fill in all fields'; return; }
+
+    try {
+        const res = await fetch(`${API}/api/v1/teachers/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, username, password, full_name })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Registration failed');
+
+        sucEl.textContent = 'Account created! Logging you in...';
+        // Auto login
+        const loginRes = await fetch(`${API}/api/v1/teachers/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const loginData = await loginRes.json();
+        localStorage.setItem('teacher', JSON.stringify(loginData));
+        setTimeout(() => { window.location.href = '/teacher'; }, 500);
+    } catch (e) { errEl.textContent = e.message; }
+}
+
+// Token validation
+async function validateToken() {
+    const token = document.getElementById('tokenInput').value.trim();
+    const statusEl = document.getElementById('tokenStatus');
+    statusEl.className = 'token-status'; statusEl.textContent = '';
+
+    if (!token) { statusEl.className = 'token-status error'; statusEl.textContent = 'Please enter a token'; return; }
+
+    try {
+        const res = await fetch(`${API}/api/v1/access-tokens/validate/${token}`);
+        const data = await res.json();
+        if (!data.valid) {
+            statusEl.className = 'token-status error';
+            statusEl.textContent = `⚠️ ${data.error}`;
+        } else {
+            statusEl.className = 'token-status success';
+            statusEl.textContent = `✅ Valid! Test: "${data.test_title}" — Redirecting...`;
+            setTimeout(() => { window.location.href = `/student/test/${token}`; }, 800);
+        }
+    } catch (e) {
+        statusEl.className = 'token-status error';
+        statusEl.textContent = 'Connection error. Please try again.';
+    }
+}
+
+// Enter key on token input
+document.getElementById('tokenInput').addEventListener('keypress', e => { if (e.key === 'Enter') validateToken(); });
+
+// Close modal on outside click
+document.getElementById('authModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('authModal')) closeModal();
+});
+</script>
+</body>
+</html>
