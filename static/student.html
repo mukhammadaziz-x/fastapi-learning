@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPlatform — Talaba</title>
+    <link rel="stylesheet" href="/static/css/variables.css">
+    <link rel="stylesheet" href="/static/css/common.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar"></nav>
+
+    <!-- Content -->
+    <div class="container dashboard-student">
+        <div class="page-content">
+            <div class="page-header">
+                <h1 class="page-title">🎓 Talaba paneli</h1>
+                <p class="page-subtitle">O'qish natijalari va statistikangiz</p>
+            </div>
+
+            <!-- Stats -->
+            <div class="stat-grid" style="margin-bottom: 1.5rem;">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-label">O'rtacha ball</div>
+                    <div class="stat-value" id="s-score">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-label">Reyting</div>
+                    <div class="stat-value" id="s-rank">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-label">Bajarilgan</div>
+                    <div class="stat-value" id="s-completed">—</div>
+                    <div class="stat-sub">jami: <span id="s-total">0</span> ta</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-label">Reyting bali</div>
+                    <div class="stat-value" id="s-points">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-label">Streak</div>
+                    <div class="stat-value" id="s-streak">—</div>
+                    <div class="stat-sub">kunlik faollik</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏱️</div>
+                    <div class="stat-label">Sarflangan vaqt</div>
+                    <div class="stat-value" id="s-time">—</div>
+                </div>
+            </div>
+
+            <!-- Completion -->
+            <div class="completion-bar">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="completion-progress" style="width: 0%"></div>
+                </div>
+                <div class="progress-text" id="completion-text">0 / 0 (0%)</div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">⚡ Tezkor harakatlar</h2>
+                </div>
+                <div class="actions-grid">
+                    <a class="action-card" href="/docs#/Submissions/start_submission_api_v1_submissions_start_post" target="_blank">
+                        <div class="action-icon">📝</div>
+                        <div class="action-name">Topshiriq boshlash</div>
+                        <div class="action-desc">Yangi topshiriq yechishni boshlash</div>
+                    </a>
+                    <a class="action-card" href="/docs#/Leaderboard%20%26%20Analytics" target="_blank">
+                        <div class="action-icon">🏆</div>
+                        <div class="action-name">Reyting</div>
+                        <div class="action-desc">Global reyting jadvali</div>
+                    </a>
+                    <a class="action-card" href="/docs#/Submissions/get_my_submissions_api_v1_submissions_my_get" target="_blank">
+                        <div class="action-icon">📋</div>
+                        <div class="action-name">Natijalarim</div>
+                        <div class="action-desc">Barcha yechimlarim</div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Two columns -->
+            <div class="two-col">
+                <!-- Subject strengths -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">📊 Fan bo'yicha kuch</h2>
+                    </div>
+                    <div id="subject-strengths">
+                        <div class="loading-text"><div class="spinner"></div> Yuklanmoqda...</div>
+                    </div>
+                </div>
+
+                <!-- Grade distribution -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">📈 Baho taqsimoti</h2>
+                    </div>
+                    <div id="grade-dist">
+                        <div class="loading-text"><div class="spinner"></div> Yuklanmoqda...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaderboard preview -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">🏆 Top 5 reyting</h2>
+                </div>
+                <div id="leaderboard-preview">
+                    <div class="loading-text"><div class="spinner"></div> Yuklanmoqda...</div>
+                </div>
+            </div>
+
+            <!-- Recent results -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📋 So'nggi natijalar</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Topshiriq</th>
+                                <th>Ball</th>
+                                <th>Foiz</th>
+                                <th>Baho</th>
+                                <th>Sana</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-table">
+                            <tr><td colspan="5" class="loading-text"><div class="spinner"></div> Yuklanmoqda...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/student.js"></script>
+</body>
+</html>

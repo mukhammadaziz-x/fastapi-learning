@@ -50,12 +50,12 @@ function renderGradeDistribution(dist) {
         const count = dist[g] || 0;
         const pct = Math.round((count / total) * 100);
         return `
-            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
-                <span class="${gradeClass(g)}" style="min-width:100px;text-align:center;">${g}</span>
-                <div class="progress-bar" style="flex:1;">
+            <div class="grade-row">
+                <span class="${gradeClass(g)} grade-badge">${g}</span>
+                <div class="progress-bar">
                     <div class="progress-fill" style="width:${pct}%;background:${percentColor(g === 'DISTINCTION' ? 90 : g === 'MERIT' ? 75 : g === 'PASS' ? 60 : 30)};"></div>
                 </div>
-                <span style="font-size:0.85rem;color:var(--text-secondary);min-width:40px;text-align:right;">${count}</span>
+                <span class="grade-count">${count}</span>
             </div>
         `;
     }).join('');
@@ -101,14 +101,14 @@ async function loadLeaderboardPreview() {
         }
 
         container.innerHTML = lb.entries.map((e, i) => `
-            <div style="display:flex;align-items:center;gap:1rem;padding:0.75rem 0;${i < lb.entries.length - 1 ? 'border-bottom:1px solid var(--border-light);' : ''}${e.user_id === user?.id ? 'background:rgba(99,102,241,0.06);margin:0 -1rem;padding-left:1rem;padding-right:1rem;border-radius:8px;' : ''}">
-                <span class="rank-display ${rankBadge(e.rank)}" style="min-width:40px;justify-content:center;padding:4px 10px;font-size:0.85rem;">${e.rank <= 3 ? ['🥇','🥈','🥉'][e.rank-1] : '#' + e.rank}</span>
-                <div class="navbar-avatar" style="width:32px;height:32px;font-size:0.75rem;">${getInitials(e.full_name || e.username)}</div>
-                <div style="flex:1;">
-                    <div style="font-weight:600;font-size:0.9rem;">${e.full_name || e.username}${e.user_id === user?.id ? ' (Siz)' : ''}</div>
-                    <div style="font-size:0.75rem;color:var(--text-muted);">${e.average_percentage.toFixed(1)}% · ${e.assignments_completed} topshiriq</div>
+            <div class="lb-entry${e.user_id === user?.id ? ' lb-me' : ''}">
+                <span class="rank-display ${rankBadge(e.rank)}">${e.rank <= 3 ? ['🥇','🥈','🥉'][e.rank-1] : '#' + e.rank}</span>
+                <div class="lb-avatar">${getInitials(e.full_name || e.username)}</div>
+                <div class="lb-info">
+                    <div class="lb-name">${e.full_name || e.username}${e.user_id === user?.id ? ' (Siz)' : ''}</div>
+                    <div class="lb-meta">${e.average_percentage.toFixed(1)}% · ${e.assignments_completed} topshiriq</div>
                 </div>
-                <div style="font-weight:700;color:var(--primary-light);font-size:0.9rem;">${Math.round(e.ranking_points)} pt</div>
+                <div class="lb-points">${Math.round(e.ranking_points)} pt</div>
             </div>
         `).join('');
 
@@ -132,10 +132,10 @@ async function loadSubjectStrengths() {
             const strength = pct >= 80 ? 'Yaxshi' : pct >= 60 ? 'O\'rtacha' : 'Yaxshilash kerak';
             const color = percentColor(pct);
             return `
-                <div style="margin-bottom:1rem;">
-                    <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;">
-                        <span style="font-weight:600;font-size:0.9rem;">${s.subject}</span>
-                        <span style="font-size:0.8rem;color:${color};font-weight:600;">${pct.toFixed(0)}% — ${strength}</span>
+                <div class="strength-item">
+                    <div class="strength-header">
+                        <span class="strength-name">${s.subject}</span>
+                        <span class="strength-score" style="color:${color};">${pct.toFixed(0)}% — ${strength}</span>
                     </div>
                     <div class="progress-bar">
                         <div class="progress-fill" style="width:${pct}%;background:${color};"></div>

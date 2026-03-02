@@ -1,0 +1,143 @@
+/* ═══════════════════════════════════════════════════════════
+   EduPlatform — Dashboard Styles
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Accent colors by role ── */
+.dashboard-admin .stat-value { color: var(--primary-light); }
+.dashboard-teacher .stat-value { color: var(--success-light); }
+.dashboard-student .stat-value { color: var(--accent-light); }
+
+.dashboard-admin .stat-card::after { background: var(--gradient-admin); }
+.dashboard-teacher .stat-card::after { background: var(--gradient-teacher); }
+.dashboard-student .stat-card::after { background: var(--gradient-student); }
+
+/* ── Completion progress ── */
+.completion-bar {
+    margin-bottom: 2rem;
+}
+
+.completion-bar .progress-bar {
+    height: 10px;
+    margin-bottom: 0.4rem;
+}
+
+.completion-bar .progress-text {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    text-align: right;
+}
+
+/* ── Rank display ── */
+.rank-display {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.82rem;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+}
+
+.rank-gold { background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+.rank-silver { background: rgba(148, 163, 184, 0.12); border-color: rgba(148, 163, 184, 0.2); color: #94a3b8; }
+.rank-bronze { background: rgba(180, 83, 9, 0.12); border-color: rgba(180, 83, 9, 0.2); color: #d97706; }
+
+/* ── Leaderboard entry ── */
+.lb-entry {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.lb-entry:last-child { border-bottom: none; }
+
+.lb-entry.lb-me {
+    background: rgba(99, 102, 241, 0.04);
+    margin: 0 -1.75rem;
+    padding-left: 1.75rem;
+    padding-right: 1.75rem;
+    border-radius: var(--radius-sm);
+}
+
+.lb-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.lb-info { flex: 1; min-width: 0; }
+.lb-name { font-weight: 600; font-size: 0.875rem; }
+.lb-meta { font-size: 0.72rem; color: var(--text-muted); }
+.lb-points { font-weight: 700; color: var(--primary-light); font-size: 0.875rem; }
+
+/* ── Subject strengths ── */
+.strength-item {
+    margin-bottom: 1rem;
+}
+
+.strength-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.35rem;
+}
+
+.strength-name { font-weight: 600; font-size: 0.875rem; }
+
+.strength-score {
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+/* ── Grade distribution ── */
+.grade-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.grade-row .grade-badge { min-width: 100px; text-align: center; justify-content: center; }
+
+.grade-row .progress-bar { flex: 1; }
+
+.grade-count {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    min-width: 30px;
+    text-align: right;
+    font-weight: 600;
+}
+
+/* ── Feedback pills ── */
+.feedback-positive { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.feedback-negative { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+/* ── Streak badge ── */
+.streak-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: rgba(245, 158, 11, 0.1);
+    color: #fbbf24;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .two-col { grid-template-columns: 1fr; }
+}

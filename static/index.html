@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPlatform — Kirish</title>
+    <link rel="stylesheet" href="/static/css/variables.css">
+    <link rel="stylesheet" href="/static/css/common.css">
+    <link rel="stylesheet" href="/static/css/login.css">
+</head>
+<body>
+    <div class="login-page">
+        <div class="login-container">
+            <!-- Logo -->
+            <div class="login-logo">
+                <h1>🎓 <span>EduPlatform</span></h1>
+                <p>Ta'lim platformasiga xush kelibsiz</p>
+            </div>
+
+            <!-- Card -->
+            <div class="login-card">
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('login')">Kirish</button>
+                    <button class="tab" onclick="showTab('register')">Ro'yxatdan o'tish</button>
+                </div>
+
+                <!-- Message -->
+                <div id="msg" class="msg"></div>
+
+                <!-- LOGIN FORM -->
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label">Foydalanuvchi nomi yoki email</label>
+                        <input class="form-input" type="text" id="login-username" placeholder="username yoki email" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Parol</label>
+                        <input class="form-input" type="password" id="login-password" placeholder="Parolingiz" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg" id="login-btn">Kirish</button>
+                </form>
+
+                <!-- REGISTER FORM -->
+                <form id="register-form" class="hidden" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label class="form-label">To'liq ism</label>
+                        <input class="form-input" type="text" id="reg-fullname" placeholder="Ismingiz Familiyangiz">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input class="form-input" type="email" id="reg-email" placeholder="email@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Foydalanuvchi nomi</label>
+                        <input class="form-input" type="text" id="reg-username" placeholder="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Parol</label>
+                        <input class="form-input" type="password" id="reg-password" placeholder="Kamida 6 ta belgi" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Rol</label>
+                        <select class="form-select" id="reg-role">
+                            <option value="student">Talaba</option>
+                            <option value="teacher">O'qituvchi</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg" id="register-btn">Ro'yxatdan o'tish</button>
+                </form>
+
+                <!-- Divider -->
+                <div class="divider">yoki</div>
+
+                <!-- Google -->
+                <button class="btn-google" onclick="googleLogin()">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                    Google orqali kirish
+                </button>
+            </div>
+
+            <div class="login-footer">
+                <p>API docs: <a href="/docs" target="_blank">/docs</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/login.js"></script>
+</body>
+</html>
