@@ -11,10 +11,17 @@ class TeacherBase(BaseModel):
 
 class TeacherCreate(TeacherBase):
     password: str
+    full_name: Optional[str] = None
+
+
+class TeacherLogin(BaseModel):
+    username: str
+    password: str
 
 
 class TeacherResponse(TeacherBase):
     id: int
+    full_name: Optional[str] = None
     is_active: bool
     created_at: datetime
 
@@ -183,4 +190,43 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     test_access_link: Optional[str] = None
+
+
+# ========== ACCESS TOKEN REQUEST SCHEMAS ==========
+class AccessTokenCreate(BaseModel):
+    test_id: int
+    student_id: int
+    expires_at: datetime
+
+
+class AccessTokenResponse(BaseModel):
+    id: int
+    token: str
+    test_id: int
+    student_id: int
+    is_active: bool
+    is_used: bool
+    created_at: datetime
+    expires_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class AccessTokenValidation(BaseModel):
+    valid: bool
+    error: Optional[str] = None
+    test_title: Optional[str] = None
+    student_name: Optional[str] = None
+    test_id: Optional[int] = None
+    student_id: Optional[int] = None
+    time_limit_minutes: Optional[int] = None
+    max_fullscreen_violations: Optional[int] = None
+    total_questions: Optional[int] = None
+
+
+class BulkAccessTokenCreate(BaseModel):
+    test_id: int
+    student_ids: List[int]
+    expires_at: datetime
 
