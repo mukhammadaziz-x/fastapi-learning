@@ -22,7 +22,8 @@ async def lifespan(application: FastAPI):
 app = FastAPI(
     title="Student Performance Checker",
     description="Complete test management system with fullscreen monitoring and violation detection",
-    version="2.0.0"
+    version="2.0.0",
+    lifespan=lifespan
 )
 
 # Add CORS middleware
