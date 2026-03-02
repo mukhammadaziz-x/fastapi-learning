@@ -53,7 +53,7 @@ def get_users(
     """Paginated list of active users."""
     return (
         db.query(User)
-        .filter(User.is_active == True)
+        .filter(User.is_active.is_(True))
         .order_by(User.created_at.desc())
         .offset(skip)
         .limit(limit)
