@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard — PerformanceIQ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root{--primary:#6366f1;--primary-dark:#4f46e5;--primary-light:#818cf8;--secondary:#0ea5e9;--accent:#f59e0b;--success:#10b981;--danger:#ef4444;--warning:#f59e0b;--dark:#0f172a;--dark-2:#1e293b;--dark-3:#334155;--gray:#94a3b8;--light:#f1f5f9;--white:#fff;--gradient-1:linear-gradient(135deg,#6366f1,#8b5cf6);--shadow-glow:0 0 30px rgba(99,102,241,0.2);}
+        body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--white);min-height:100vh;}
+
+        /* Sidebar */
+        .sidebar{position:fixed;left:0;top:0;bottom:0;width:260px;background:var(--dark-2);border-right:1px solid rgba(99,102,241,0.1);padding:1.5rem;display:flex;flex-direction:column;z-index:50;}
+        .sidebar-logo{display:flex;align-items:center;gap:0.75rem;font-size:1.2rem;font-weight:800;background:var(--gradient-1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:2rem;text-decoration:none;}
+        .sidebar-logo i{-webkit-text-fill-color:var(--primary);font-size:1.4rem;}
+        .sidebar-nav{flex:1;display:flex;flex-direction:column;gap:0.3rem;}
+        .sidebar-nav a{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;border-radius:10px;color:var(--gray);text-decoration:none;font-weight:500;font-size:0.9rem;transition:all 0.3s;}
+        .sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(99,102,241,0.1);color:var(--white);}
+        .sidebar-nav a.active{background:var(--primary);color:var(--white);}
+        .sidebar-nav a i{width:20px;text-align:center;}
+        .sidebar-user{padding-top:1rem;border-top:1px solid rgba(99,102,241,0.1);display:flex;align-items:center;gap:0.75rem;}
+        .sidebar-user .avatar{width:36px;height:36px;border-radius:10px;background:var(--gradient-1);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;}
+        .sidebar-user .info{flex:1;}
+        .sidebar-user .info .name{font-size:0.85rem;font-weight:600;}
+        .sidebar-user .info .role{font-size:0.75rem;color:var(--gray);}
+        .logout-btn{background:none;border:none;color:var(--gray);cursor:pointer;font-size:1rem;transition:color 0.3s;}
+        .logout-btn:hover{color:var(--danger);}
+
+        /* Main */
+        .main{margin-left:260px;padding:2rem;min-height:100vh;}
+        .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;}
+        .page-header h1{font-size:1.8rem;font-weight:800;}
+        .page-header p{color:var(--gray);font-size:0.9rem;margin-top:0.25rem;}
+
+        /* Stats */
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem;}
+        .stat-card{background:var(--dark-2);border:1px solid rgba(99,102,241,0.1);border-radius:16px;padding:1.5rem;transition:all 0.3s;}
+        .stat-card:hover{border-color:rgba(99,102,241,0.3);transform:translateY(-2px);}
+        .stat-card .stat-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:0.75rem;}
+        .stat-card .stat-value{font-size:1.8rem;font-weight:800;}
+        .stat-card .stat-label{color:var(--gray);font-size:0.85rem;margin-top:0.2rem;}
+
+        /* Buttons */
+        .btn{padding:0.65rem 1.3rem;border-radius:10px;font-weight:600;font-size:0.9rem;cursor:pointer;border:none;transition:all 0.3s;display:inline-flex;align-items:center;gap:0.5rem;font-family:'Inter',sans-serif;}
+        .btn-primary{background:var(--gradient-1);color:var(--white);}
+        .btn-primary:hover{box-shadow:var(--shadow-glow);transform:translateY(-1px);}
+        .btn-secondary{background:rgba(99,102,241,0.1);color:var(--primary-light);border:1px solid rgba(99,102,241,0.2);}
+        .btn-secondary:hover{background:rgba(99,102,241,0.2);}
+        .btn-success{background:var(--success);color:var(--white);}
+        .btn-danger{background:var(--danger);color:var(--white);}
+        .btn-sm{padding:0.45rem 0.9rem;font-size:0.8rem;border-radius:8px;}
+        .btn-icon{width:36px;height:36px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:8px;}
+
+        /* Cards / Panels */
+        .panel{background:var(--dark-2);border:1px solid rgba(99,102,241,0.1);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;}
+        .panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+        .panel-header h2{font-size:1.1rem;font-weight:700;}
+
+        /* Table */
+        .table-wrap{overflow-x:auto;}
+        table{width:100%;border-collapse:collapse;}
+        th,td{padding:0.75rem 1rem;text-align:left;font-size:0.85rem;border-bottom:1px solid rgba(99,102,241,0.06);}
+        th{color:var(--gray);font-weight:600;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em;}
+        td{color:var(--light);}
+        tr:hover td{background:rgba(99,102,241,0.03);}
+
+        /* Badges */
+        .badge{display:inline-block;padding:0.25rem 0.65rem;border-radius:6px;font-size:0.75rem;font-weight:600;}
+        .badge-success{background:rgba(16,185,129,0.15);color:var(--success);}
+        .badge-danger{background:rgba(239,68,68,0.15);color:var(--danger);}
+        .badge-warning{background:rgba(245,158,11,0.15);color:var(--warning);}
+        .badge-info{background:rgba(14,165,233,0.15);color:var(--secondary);}
+        .badge-primary{background:rgba(99,102,241,0.15);color:var(--primary-light);}
+
+        /* Forms */
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+        .form-group{margin-bottom:1rem;}
+        .form-group label{display:block;font-size:0.85rem;font-weight:600;color:var(--gray);margin-bottom:0.4rem;}
+        .form-group input,.form-group textarea,.form-group select{width:100%;padding:0.7rem 1rem;border-radius:10px;background:rgba(15,23,42,0.8);border:2px solid rgba(99,102,241,0.15);color:var(--white);font-size:0.9rem;font-family:'Inter',sans-serif;outline:none;transition:border-color 0.3s;}
+        .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--primary);}
+        .form-group textarea{resize:vertical;min-height:80px;}
+        .form-group select option{background:var(--dark-2);}
+
+        /* Views */
+        .view{display:none;}
+        .view.active{display:block;}
+
+        /* Token display */
+        .token-display{background:rgba(15,23,42,0.8);border:1px solid rgba(99,102,241,0.2);border-radius:10px;padding:0.75rem 1rem;font-family:monospace;font-size:0.85rem;word-break:break-all;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;gap:0.5rem;}
+        .token-display:hover{border-color:var(--primary);}
+        .token-display .copy-icon{color:var(--gray);font-size:0.8rem;}
+
+        /* Empty state */
+        .empty-state{text-align:center;padding:3rem 1rem;color:var(--gray);}
+        .empty-state i{font-size:3rem;color:var(--dark-3);margin-bottom:1rem;}
+        .empty-state p{font-size:0.95rem;}
+
+        /* Question card */
+        .question-card{background:rgba(15,23,42,0.5);border:1px solid rgba(99,102,241,0.08);border-radius:12px;padding:1.2rem;margin-bottom:0.75rem;transition:all 0.3s;}
+        .question-card:hover{border-color:rgba(99,102,241,0.2);}
+        .question-card .q-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;}
+        .question-card .q-num{font-weight:700;color:var(--primary-light);font-size:0.85rem;}
+        .question-card .q-text{font-size:0.95rem;margin-bottom:0.5rem;}
+        .question-card .q-options{display:grid;grid-template-columns:1fr 1fr;gap:0.3rem;}
+        .question-card .q-option{font-size:0.8rem;color:var(--gray);padding:0.3rem 0;}
+        .question-card .q-option.correct{color:var(--success);font-weight:600;}
+
+        /* Toast */
+        .toast{position:fixed;top:1.5rem;right:1.5rem;z-index:1000;padding:0.85rem 1.5rem;border-radius:12px;font-weight:600;font-size:0.9rem;animation:toastIn 0.3s ease;display:none;align-items:center;gap:0.5rem;}
+        .toast.show{display:flex;}
+        .toast-success{background:var(--success);color:var(--white);}
+        .toast-error{background:var(--danger);color:var(--white);}
+        @keyframes toastIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+
+        /* Scrollbar */
+        ::-webkit-scrollbar{width:6px;}
+        ::-webkit-scrollbar-track{background:transparent;}
+        ::-webkit-scrollbar-thumb{background:var(--dark-3);border-radius:3px;}
+
+        /* Loader */
+        .loader{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:var(--white);border-radius:50%;animation:spin 0.6s linear infinite;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+    </style>
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+    <a href="/" class="sidebar-logo"><i class="fas fa-graduation-cap"></i> PerformanceIQ</a>
+    <nav class="sidebar-nav">
+        <a href="#" class="active" onclick="showView('dashboard')"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="#" onclick="showView('tests')"><i class="fas fa-file-alt"></i> My Tests</a>
+        <a href="#" onclick="showView('create-test')"><i class="fas fa-plus-circle"></i> Create Test</a>
+        <a href="#" onclick="showView('students')"><i class="fas fa-users"></i> Students</a>
+        <a href="#" onclick="showView('results')"><i class="fas fa-chart-bar"></i> Results</a>
+    </nav>
+    <div class="sidebar-user">
+        <div class="avatar" id="userAvatar">T</div>
+        <div class="info">
+            <div class="name" id="userName">Teacher</div>
+            <div class="role">Teacher</div>
+        </div>
+        <button class="logout-btn" onclick="logout()" title="Log out"><i class="fas fa-sign-out-alt"></i></button>
+    </div>
+</aside>
+
+<!-- Main Content -->
+<div class="main">
+
+    <!-- DASHBOARD VIEW -->
+    <div class="view active" id="view-dashboard">
+        <div class="page-header">
+            <div>
+                <h1>Dashboard</h1>
+                <p>Welcome back! Here's an overview of your testing activity.</p>
+            </div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:rgba(99,102,241,0.12);color:var(--primary-light);"><i class="fas fa-file-alt"></i></div>
+                <div class="stat-value" id="statTests">0</div>
+                <div class="stat-label">Total Tests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:rgba(14,165,233,0.12);color:var(--secondary);"><i class="fas fa-users"></i></div>
+                <div class="stat-value" id="statStudents">0</div>
+                <div class="stat-label">Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:rgba(16,185,129,0.12);color:var(--success);"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-value" id="statActive">0</div>
+                <div class="stat-label">Active Tests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:rgba(245,158,11,0.12);color:var(--accent);"><i class="fas fa-link"></i></div>
+                <div class="stat-value" id="statTokens">0</div>
+                <div class="stat-label">Access Links</div>
+            </div>
+        </div>
+
+        <!-- Recent Tests -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2><i class="fas fa-clock" style="color:var(--primary-light);margin-right:0.5rem;"></i> Recent Tests</h2>
+                <button class="btn btn-secondary btn-sm" onclick="showView('create-test')"><i class="fas fa-plus"></i> New Test</button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Title</th><th>Questions</th><th>Time Limit</th><th>Access Window</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="dashboardTestsBody"></tbody>
+                </table>
+            </div>
+            <div class="empty-state" id="dashboardEmpty" style="display:none;">
+                <i class="fas fa-file-circle-plus"></i>
+                <p>No tests yet. Create your first test!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MY TESTS VIEW -->
+    <div class="view" id="view-tests">
+        <div class="page-header">
+            <div><h1>My Tests</h1><p>Manage all your created tests</p></div>
+            <button class="btn btn-primary" onclick="showView('create-test')"><i class="fas fa-plus"></i> Create Test</button>
+        </div>
+        <div class="panel">
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Title</th><th>Questions</th><th>Time</th><th>Start</th><th>End</th><th>Max Violations</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="testsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- CREATE TEST VIEW -->
+    <div class="view" id="view-create-test">
+        <div class="page-header"><div><h1>Create New Test</h1><p>Set up a new test with questions and time limits</p></div></div>
+
+        <div class="panel">
+            <div class="panel-header"><h2><i class="fas fa-info-circle" style="color:var(--secondary);margin-right:0.5rem;"></i> Test Details</h2></div>
+            <div class="form-group"><label>Test Title</label><input type="text" id="testTitle" placeholder="e.g. Mathematics Mid-Term Exam"></div>
+            <div class="form-group"><label>Description</label><textarea id="testDesc" placeholder="Describe the test..."></textarea></div>
+            <div class="form-row">
+                <div class="form-group"><label>Start Date & Time</label><input type="datetime-local" id="testStart"></div>
+                <div class="form-group"><label>End Date & Time</label><input type="datetime-local" id="testEnd"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Time Limit (minutes)</label><input type="number" id="testTimeLimit" value="60" min="5"></div>
+                <div class="form-group"><label>Max Fullscreen Violations</label><input type="number" id="testMaxViolations" value="3" min="1"></div>
+            </div>
+            <button class="btn btn-primary" onclick="createTest()"><i class="fas fa-save"></i> Create Test</button>
+        </div>
+
+        <!-- Add Questions (shown after test creation) -->
+        <div class="panel" id="questionsPanel" style="display:none;">
+            <div class="panel-header">
+                <h2><i class="fas fa-question-circle" style="color:var(--accent);margin-right:0.5rem;"></i> Questions</h2>
+                <span class="badge badge-info" id="questionCount">0 questions</span>
+            </div>
+            <div id="questionsList"></div>
+
+            <div style="background:rgba(15,23,42,0.5);border:1px solid rgba(99,102,241,0.1);border-radius:12px;padding:1.5rem;margin-top:1rem;">
+                <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:1rem;"><i class="fas fa-plus" style="color:var(--primary-light);"></i> Add Question</h3>
+                <div class="form-group"><label>Question Text</label><textarea id="qText" placeholder="Enter the question..."></textarea></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Option A</label><input type="text" id="qOptA" placeholder="Option A"></div>
+                    <div class="form-group"><label>Option B</label><input type="text" id="qOptB" placeholder="Option B"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Option C</label><input type="text" id="qOptC" placeholder="Option C"></div>
+                    <div class="form-group"><label>Option D</label><input type="text" id="qOptD" placeholder="Option D"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Correct Answer</label>
+                        <select id="qCorrect"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select>
+                    </div>
+                    <div class="form-group"><label>Points</label><input type="number" id="qPoints" value="1" min="1"></div>
+                </div>
+                <button class="btn btn-success" onclick="addQuestion()"><i class="fas fa-plus"></i> Add Question</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STUDENTS VIEW -->
+    <div class="view" id="view-students">
+        <div class="page-header">
+            <div><h1>Students</h1><p>Manage your students and generate test access links</p></div>
+        </div>
+
+        <!-- Add Student -->
+        <div class="panel">
+            <div class="panel-header"><h2><i class="fas fa-user-plus" style="color:var(--success);margin-right:0.5rem;"></i> Add Student</h2></div>
+            <div class="form-row">
+                <div class="form-group"><label>Student Name</label><input type="text" id="studentName" placeholder="Full name"></div>
+                <div class="form-group"><label>Email</label><input type="email" id="studentEmail" placeholder="student@email.com"></div>
+            </div>
+            <button class="btn btn-success" onclick="addStudent()"><i class="fas fa-plus"></i> Add Student</button>
+        </div>
+
+        <!-- Students List -->
+        <div class="panel">
+            <div class="panel-header"><h2>Student List</h2></div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Name</th><th>Email</th><th>Created</th><th>Actions</th></tr></thead>
+                    <tbody id="studentsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Generate Access Links -->
+        <div class="panel">
+            <div class="panel-header"><h2><i class="fas fa-link" style="color:var(--accent);margin-right:0.5rem;"></i> Generate Access Links</h2></div>
+            <div class="form-row">
+                <div class="form-group"><label>Select Test</label><select id="linkTestSelect"><option value="">Choose a test...</option></select></div>
+                <div class="form-group"><label>Link Expires At</label><input type="datetime-local" id="linkExpiry"></div>
+            </div>
+            <div class="form-group">
+                <label>Select Students</label>
+                <div id="studentCheckboxes" style="max-height:200px;overflow-y:auto;background:rgba(15,23,42,0.5);border-radius:10px;padding:0.75rem;"></div>
+            </div>
+            <button class="btn btn-primary" onclick="generateLinks()"><i class="fas fa-magic"></i> Generate Links</button>
+
+            <!-- Generated Links -->
+            <div id="generatedLinks" style="margin-top:1.5rem;display:none;">
+                <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:0.75rem;color:var(--success);"><i class="fas fa-check-circle"></i> Generated Access Links</h3>
+                <div id="linksContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULTS VIEW -->
+    <div class="view" id="view-results">
+        <div class="page-header"><div><h1>Results</h1><p>View student test results and performance</p></div></div>
+        <div class="panel">
+            <div class="form-group">
+                <label>Select Test</label>
+                <select id="resultTestSelect" onchange="loadResults()"><option value="">Choose a test...</option></select>
+            </div>
+        </div>
+        <div class="panel" id="resultsPanel" style="display:none;">
+            <div class="panel-header"><h2>Student Results</h2><span class="badge badge-info" id="resultsCount">0 results</span></div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Student</th><th>Score</th><th>Percentage</th><th>Violations</th><th>Status</th><th>Completed</th></tr></thead>
+                    <tbody id="resultsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const API = '';
+let teacher = null;
+let currentTestId = null;
+let questionOrder = 0;
+let tests = [];
+let students = [];
+
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+    const stored = localStorage.getItem('teacher');
+    if (!stored) { window.location.href = '/'; return; }
+    teacher = JSON.parse(stored);
+    document.getElementById('userName').textContent = teacher.full_name || teacher.username;
+    document.getElementById('userAvatar').textContent = (teacher.full_name || teacher.username)[0].toUpperCase();
+    loadDashboard();
+});
+
+function logout() { localStorage.removeItem('teacher'); window.location.href = '/'; }
+
+function showView(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(`view-${name}`).classList.add('active');
+    document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+    event.target.closest('a')?.classList.add('active');
+
+    if (name === 'dashboard') loadDashboard();
+    else if (name === 'tests') loadTests();
+    else if (name === 'students') { loadStudents(); loadTestsForSelect(); }
+    else if (name === 'results') loadTestsForResults();
+}
+
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.className = `toast show toast-${type}`;
+    t.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ========== DASHBOARD ==========
+async function loadDashboard() {
+    try {
+        const res = await fetch(`${API}/api/v1/tests?teacher_id=${teacher.id}`);
+        tests = await res.json();
+
+        const sRes = await fetch(`${API}/api/v1/students/teacher/${teacher.id}`);
+        students = await sRes.json();
+
+        document.getElementById('statTests').textContent = tests.length;
+        document.getElementById('statStudents').textContent = students.length;
+
+        const now = new Date();
+        const active = tests.filter(t => new Date(t.start_date) <= now && new Date(t.end_date) >= now);
+        document.getElementById('statActive').textContent = active.length;
+
+        // Token count
+        let tokenCount = 0;
+        for (const t of tests) {
+            try {
+                const tkRes = await fetch(`${API}/api/v1/access-tokens/test/${t.id}`);
+                const tokens = await tkRes.json();
+                tokenCount += tokens.length;
+            } catch(e) {}
+        }
+        document.getElementById('statTokens').textContent = tokenCount;
+
+        // Recent tests table
+        const tbody = document.getElementById('dashboardTestsBody');
+        const empty = document.getElementById('dashboardEmpty');
+        if (tests.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+        empty.style.display = 'none';
+
+        tbody.innerHTML = tests.slice(0, 5).map(t => {
+            const status = getTestStatus(t);
+            return `<tr>
+                <td><strong>${t.title}</strong></td>
+                <td>${t.questions?.length || 0}</td>
+                <td>${t.time_limit_minutes} min</td>
+                <td style="font-size:0.8rem;">${fmtDate(t.start_date)} — ${fmtDate(t.end_date)}</td>
+                <td>${status}</td>
+                <td>
+                    <button class="btn btn-secondary btn-sm" onclick="viewTest(${t.id})"><i class="fas fa-eye"></i></button>
+                </td>
+            </tr>`;
+        }).join('');
+    } catch(e) { console.error(e); }
+}
+
+function getTestStatus(t) {
+    const now = new Date();
+    const start = new Date(t.start_date);
+    const end = new Date(t.end_date);
+    if (now < start) return '<span class="badge badge-warning">Scheduled</span>';
+    if (now > end) return '<span class="badge badge-danger">Ended</span>';
+    return '<span class="badge badge-success">Active</span>';
+}
+
+function fmtDate(d) { return new Date(d).toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }); }
+
+// ========== TESTS ==========
+async function loadTests() {
+    const res = await fetch(`${API}/api/v1/tests?teacher_id=${teacher.id}`);
+    tests = await res.json();
+    const tbody = document.getElementById('testsTableBody');
+    tbody.innerHTML = tests.map(t => `<tr>
+        <td><strong>${t.title}</strong></td>
+        <td>${t.questions?.length || 0}</td>
+        <td>${t.time_limit_minutes} min</td>
+        <td style="font-size:0.8rem;">${fmtDate(t.start_date)}</td>
+        <td style="font-size:0.8rem;">${fmtDate(t.end_date)}</td>
+        <td>${t.max_fullscreen_violations}</td>
+        <td>${getTestStatus(t)}</td>
+        <td>
+            <button class="btn btn-secondary btn-sm" onclick="viewTest(${t.id})" title="View"><i class="fas fa-eye"></i></button>
+            <button class="btn btn-danger btn-sm" onclick="deleteTest(${t.id})" title="Delete"><i class="fas fa-trash"></i></button>
+        </td>
+    </tr>`).join('');
+}
+
+async function viewTest(id) {
+    showView('create-test');
+    currentTestId = id;
+    const res = await fetch(`${API}/api/v1/tests/${id}`);
+    const t = await res.json();
+    document.getElementById('testTitle').value = t.title;
+    document.getElementById('testDesc').value = t.description || '';
+    document.getElementById('testStart').value = t.start_date?.slice(0,16);
+    document.getElementById('testEnd').value = t.end_date?.slice(0,16);
+    document.getElementById('testTimeLimit').value = t.time_limit_minutes;
+    document.getElementById('testMaxViolations').value = t.max_fullscreen_violations;
+    document.getElementById('questionsPanel').style.display = 'block';
+    loadQuestions(id);
+}
+
+async function createTest() {
+    const data = {
+        title: document.getElementById('testTitle').value,
+        description: document.getElementById('testDesc').value,
+        start_date: new Date(document.getElementById('testStart').value).toISOString(),
+        end_date: new Date(document.getElementById('testEnd').value).toISOString(),
+        time_limit_minutes: parseInt(document.getElementById('testTimeLimit').value),
+        max_fullscreen_violations: parseInt(document.getElementById('testMaxViolations').value),
+        total_questions: 10
+    };
+
+    if (!data.title || !data.start_date || !data.end_date) { showToast('Fill in all required fields', 'error'); return; }
+
+    try {
+        const res = await fetch(`${API}/api/v1/tests?teacher_id=${teacher.id}`, {
+            method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
+        });
+        if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
+        const test = await res.json();
+        currentTestId = test.id;
+        questionOrder = 0;
+        document.getElementById('questionsPanel').style.display = 'block';
+        showToast('Test created successfully!');
+    } catch(e) { showToast(e.message, 'error'); }
+}
+
+async function deleteTest(id) {
+    if (!confirm('Delete this test?')) return;
+    await fetch(`${API}/api/v1/tests/${id}?teacher_id=${teacher.id}`, { method: 'DELETE' });
+    showToast('Test deleted');
+    loadTests();
+}
+
+// ========== QUESTIONS ==========
+async function loadQuestions(testId) {
+    const res = await fetch(`${API}/api/v1/tests/${testId}/questions?hide_answers=false`);
+    const questions = await res.json();
+    questionOrder = questions.length;
+    document.getElementById('questionCount').textContent = `${questions.length} questions`;
+    document.getElementById('questionsList').innerHTML = questions.map(q => `
+        <div class="question-card">
+            <div class="q-header">
+                <span class="q-num">Q${q.order}. (${q.points} pts)</span>
+                <button class="btn btn-danger btn-sm btn-icon" onclick="deleteQuestion(${q.id})" title="Delete"><i class="fas fa-trash"></i></button>
+            </div>
+            <div class="q-text">${q.question_text}</div>
+            <div class="q-options">
+                <div class="q-option ${q.correct_answer==='A'?'correct':''}">A) ${q.option_a||''}</div>
+                <div class="q-option ${q.correct_answer==='B'?'correct':''}">B) ${q.option_b||''}</div>
+                <div class="q-option ${q.correct_answer==='C'?'correct':''}">C) ${q.option_c||''}</div>
+                <div class="q-option ${q.correct_answer==='D'?'correct':''}">D) ${q.option_d||''}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function addQuestion() {
+    questionOrder++;
+    const data = {
+        question_text: document.getElementById('qText').value,
+        question_type: 'multiple_choice',
+        order: questionOrder,
+        option_a: document.getElementById('qOptA').value,
+        option_b: document.getElementById('qOptB').value,
+        option_c: document.getElementById('qOptC').value,
+        option_d: document.getElementById('qOptD').value,
+        correct_answer: document.getElementById('qCorrect').value,
+        points: parseInt(document.getElementById('qPoints').value) || 1,
+    };
+    if (!data.question_text) { showToast('Enter question text', 'error'); return; }
+
+    try {
+        const res = await fetch(`${API}/api/v1/tests/${currentTestId}/questions`, {
+            method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('Failed to add question');
+        showToast('Question added!');
+        ['qText','qOptA','qOptB','qOptC','qOptD'].forEach(id => document.getElementById(id).value = '');
+        loadQuestions(currentTestId);
+    } catch(e) { showToast(e.message, 'error'); }
+}
+
+async function deleteQuestion(qId) {
+    await fetch(`${API}/api/v1/tests/${currentTestId}/questions/${qId}`, { method: 'DELETE' });
+    showToast('Question deleted');
+    loadQuestions(currentTestId);
+}
+
+// ========== STUDENTS ==========
+async function loadStudents() {
+    const res = await fetch(`${API}/api/v1/students/teacher/${teacher.id}`);
+    students = await res.json();
+    document.getElementById('studentsTableBody').innerHTML = students.map(s => `<tr>
+        <td><strong>${s.name}</strong></td>
+        <td>${s.email}</td>
+        <td style="font-size:0.8rem;">${fmtDate(s.created_at)}</td>
+        <td><span class="badge badge-success">Active</span></td>
+    </tr>`).join('');
+
+    // Update checkboxes
+    document.getElementById('studentCheckboxes').innerHTML = students.map(s => `
+        <label style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0;cursor:pointer;color:var(--light);font-size:0.9rem;">
+            <input type="checkbox" value="${s.id}" style="accent-color:var(--primary);"> ${s.name} (${s.email})
+        </label>
+    `).join('');
+}
+
+async function addStudent() {
+    const name = document.getElementById('studentName').value.trim();
+    const email = document.getElementById('studentEmail').value.trim();
+    if (!name || !email) { showToast('Fill in all fields', 'error'); return; }
+
+    try {
+        const res = await fetch(`${API}/api/v1/students`, {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ name, email, teacher_id: teacher.id })
+        });
+        if (!res.ok) throw new Error('Failed to add student');
+        showToast('Student added!');
+        document.getElementById('studentName').value = '';
+        document.getElementById('studentEmail').value = '';
+        loadStudents();
+    } catch(e) { showToast(e.message, 'error'); }
+}
+
+async function loadTestsForSelect() {
+    const res = await fetch(`${API}/api/v1/tests?teacher_id=${teacher.id}`);
+    tests = await res.json();
+    document.getElementById('linkTestSelect').innerHTML = '<option value="">Choose a test...</option>' +
+        tests.map(t => `<option value="${t.id}">${t.title}</option>`).join('');
+}
+
+async function generateLinks() {
+    const testId = document.getElementById('linkTestSelect').value;
+    const expiry = document.getElementById('linkExpiry').value;
+    const checked = [...document.querySelectorAll('#studentCheckboxes input:checked')].map(c => parseInt(c.value));
+
+    if (!testId || !expiry || checked.length === 0) { showToast('Select test, expiry, and students', 'error'); return; }
+
+    try {
+        const res = await fetch(`${API}/api/v1/access-tokens/bulk`, {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ test_id: parseInt(testId), student_ids: checked, expires_at: new Date(expiry).toISOString() })
+        });
+        const tokens = await res.json();
+
+        const container = document.getElementById('linksContainer');
+        container.innerHTML = tokens.map(t => {
+            const student = students.find(s => s.id === t.student_id);
+            const link = `${window.location.origin}/student/test/${t.token}`;
+            return `<div style="margin-bottom:0.75rem;">
+                <div style="font-size:0.85rem;font-weight:600;margin-bottom:0.3rem;">${student?.name || 'Student'}</div>
+                <div class="token-display" onclick="copyLink('${link}')">
+                    <i class="fas fa-copy copy-icon"></i>
+                    <span>${link}</span>
+                </div>
+            </div>`;
+        }).join('');
+        document.getElementById('generatedLinks').style.display = 'block';
+        showToast(`${tokens.length} access links generated!`);
+    } catch(e) { showToast(e.message, 'error'); }
+}
+
+function copyLink(link) {
+    navigator.clipboard.writeText(link);
+    showToast('Link copied to clipboard!');
+}
+
+// ========== RESULTS ==========
+async function loadTestsForResults() {
+    const res = await fetch(`${API}/api/v1/tests?teacher_id=${teacher.id}`);
+    tests = await res.json();
+    document.getElementById('resultTestSelect').innerHTML = '<option value="">Choose a test...</option>' +
+        tests.map(t => `<option value="${t.id}">${t.title}</option>`).join('');
+}
+
+async function loadResults() {
+    const testId = document.getElementById('resultTestSelect').value;
+    if (!testId) { document.getElementById('resultsPanel').style.display = 'none'; return; }
+
+    const res = await fetch(`${API}/api/v1/tests/${testId}/results`);
+    const results = await res.json();
+
+    document.getElementById('resultsPanel').style.display = 'block';
+    document.getElementById('resultsCount').textContent = `${results.length} results`;
+
+    document.getElementById('resultsTableBody').innerHTML = results.map(r => {
+        const statusBadge = r.status === 'completed' ? '<span class="badge badge-success">Completed</span>' :
+                          r.status === 'failed' ? '<span class="badge badge-danger">Failed</span>' :
+                          r.status === 'in_progress' ? '<span class="badge badge-warning">In Progress</span>' :
+                          '<span class="badge badge-info">Pending</span>';
+        const violationBadge = r.was_failed_for_violation ?
+            '<span class="badge badge-danger"><i class="fas fa-exclamation-triangle"></i> VIOLATION FAIL</span>' :
+            `<span class="${r.fullscreen_violations > 0 ? 'badge badge-warning' : ''}">${r.fullscreen_violations}</span>`;
+
+        return `<tr>
+            <td>Student #${r.student_id}</td>
+            <td><strong>${r.score}/${r.max_score}</strong></td>
+            <td>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <div style="flex:1;height:6px;background:var(--dark-3);border-radius:3px;overflow:hidden;">
+                        <div style="width:${r.percentage}%;height:100%;background:${r.percentage>=60?'var(--success)':'var(--danger)'};border-radius:3px;"></div>
+                    </div>
+                    <span style="font-size:0.85rem;font-weight:600;">${r.percentage.toFixed(1)}%</span>
+                </div>
+            </td>
+            <td>${violationBadge}</td>
+            <td>${statusBadge}</td>
+            <td style="font-size:0.8rem;">${r.completed_at ? fmtDate(r.completed_at) : '—'}</td>
+        </tr>`;
+    }).join('');
+}
+</script>
+</body>
+</html>

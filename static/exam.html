@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam — PerformanceIQ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root{--primary:#6366f1;--primary-dark:#4f46e5;--primary-light:#818cf8;--success:#10b981;--danger:#ef4444;--warning:#f59e0b;--dark:#0f172a;--dark-2:#1e293b;--dark-3:#334155;--gray:#94a3b8;--white:#fff;--gradient-1:linear-gradient(135deg,#6366f1,#8b5cf6);}
+        body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--white);min-height:100vh;}
+
+        /* Pre-exam screen */
+        .pre-exam{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;}
+        .pre-exam-card{max-width:550px;width:100%;background:var(--dark-2);border:1px solid rgba(99,102,241,0.15);border-radius:24px;padding:3rem;text-align:center;}
+        .pre-exam-card .icon{width:80px;height:80px;border-radius:20px;background:rgba(99,102,241,0.12);display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--primary-light);margin:0 auto 1.5rem;}
+        .pre-exam-card h1{font-size:1.8rem;font-weight:800;margin-bottom:0.5rem;}
+        .pre-exam-card .subtitle{color:var(--gray);margin-bottom:2rem;}
+        .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:2rem;text-align:left;}
+        .info-item{background:rgba(15,23,42,0.5);border-radius:12px;padding:1rem;}
+        .info-item .label{font-size:0.75rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;}
+        .info-item .value{font-size:1rem;font-weight:700;}
+        .warning-box{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:1rem;margin-bottom:2rem;text-align:left;}
+        .warning-box h3{color:var(--warning);font-size:0.9rem;margin-bottom:0.3rem;}
+        .warning-box p{font-size:0.85rem;color:var(--gray);line-height:1.5;}
+        .warning-box ul{font-size:0.85rem;color:var(--gray);padding-left:1.2rem;margin-top:0.3rem;line-height:1.7;}
+        .btn-start{width:100%;padding:1rem;border-radius:14px;background:var(--gradient-1);color:var(--white);font-weight:700;font-size:1.1rem;border:none;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:0.75rem;}
+        .btn-start:hover{box-shadow:0 0 40px rgba(99,102,241,0.4);transform:translateY(-2px);}
+        .btn-start:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none;}
+
+        /* Exam UI */
+        .exam-container{display:none;min-height:100vh;flex-direction:column;}
+
+        /* Top bar */
+        .exam-topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0.75rem 2rem;background:rgba(15,23,42,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(99,102,241,0.1);}
+        .exam-topbar .left{display:flex;align-items:center;gap:1rem;}
+        .exam-topbar .logo{font-weight:800;font-size:1rem;background:var(--gradient-1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+        .exam-topbar .test-name{font-size:0.9rem;color:var(--gray);}
+        .exam-topbar .center{display:flex;align-items:center;gap:1.5rem;}
+        .timer{display:flex;align-items:center;gap:0.5rem;font-weight:700;font-size:1.1rem;}
+        .timer i{color:var(--warning);}
+        .timer.danger{color:var(--danger);animation:pulse 1s infinite;}
+        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+        .violation-counter{display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.9rem;border-radius:8px;font-size:0.85rem;font-weight:600;}
+        .violation-counter.safe{background:rgba(16,185,129,0.12);color:var(--success);}
+        .violation-counter.warn{background:rgba(245,158,11,0.12);color:var(--warning);}
+        .violation-counter.critical{background:rgba(239,68,68,0.15);color:var(--danger);animation:pulse 1s infinite;}
+        .progress-info{font-size:0.85rem;color:var(--gray);}
+
+        /* Question area */
+        .exam-body{flex:1;padding:5rem 2rem 2rem;display:flex;align-items:center;justify-content:center;}
+        .question-panel{max-width:700px;width:100%;animation:fadeIn 0.4s ease;}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(15px);}to{opacity:1;transform:translateY(0);}}
+        .q-number{font-size:0.85rem;color:var(--primary-light);font-weight:700;margin-bottom:0.5rem;}
+        .q-text{font-size:1.4rem;font-weight:700;line-height:1.5;margin-bottom:2rem;}
+        .options{display:flex;flex-direction:column;gap:0.75rem;}
+        .option{display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;border-radius:14px;background:rgba(30,41,59,0.5);border:2px solid rgba(99,102,241,0.1);cursor:pointer;transition:all 0.3s;font-size:1rem;}
+        .option:hover{border-color:rgba(99,102,241,0.3);background:rgba(99,102,241,0.05);}
+        .option.selected{border-color:var(--primary);background:rgba(99,102,241,0.1);}
+        .option .letter{width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;transition:all 0.3s;}
+        .option.selected .letter{background:var(--primary);color:var(--white);}
+        .option .text{flex:1;}
+
+        /* Navigation */
+        .q-nav{display:flex;align-items:center;justify-content:space-between;margin-top:2rem;}
+        .q-nav button{padding:0.7rem 1.5rem;border-radius:10px;font-weight:600;font-size:0.9rem;cursor:pointer;border:none;transition:all 0.3s;display:flex;align-items:center;gap:0.5rem;font-family:'Inter',sans-serif;}
+        .btn-prev{background:rgba(99,102,241,0.1);color:var(--primary-light);}
+        .btn-prev:hover{background:rgba(99,102,241,0.2);}
+        .btn-next{background:var(--gradient-1);color:var(--white);}
+        .btn-next:hover{box-shadow:0 0 30px rgba(99,102,241,0.3);}
+        .btn-submit{background:var(--success);color:var(--white);}
+        .btn-submit:hover{box-shadow:0 0 30px rgba(16,185,129,0.3);}
+
+        /* Question dots */
+        .q-dots{display:flex;gap:0.35rem;flex-wrap:wrap;justify-content:center;}
+        .q-dot{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;cursor:pointer;transition:all 0.3s;border:1px solid rgba(99,102,241,0.15);background:rgba(30,41,59,0.5);color:var(--gray);}
+        .q-dot.current{background:var(--primary);color:var(--white);border-color:var(--primary);}
+        .q-dot.answered{background:rgba(16,185,129,0.15);color:var(--success);border-color:rgba(16,185,129,0.3);}
+
+        /* Violation overlay */
+        .violation-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(239,68,68,0.95);backdrop-filter:blur(20px);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;animation:flashIn 0.2s ease;}
+        .violation-overlay.show{display:flex;}
+        @keyframes flashIn{from{opacity:0;}to{opacity:1;}}
+        .violation-overlay .big-icon{font-size:5rem;margin-bottom:1rem;animation:shake 0.5s ease;}
+        @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-10px);}75%{transform:translateX(10px);}}
+        .violation-overlay h1{font-size:2rem;font-weight:900;margin-bottom:0.5rem;}
+        .violation-overlay p{font-size:1.1rem;opacity:0.9;max-width:500px;margin-bottom:1.5rem;}
+        .violation-overlay .count{font-size:3rem;font-weight:900;background:rgba(0,0,0,0.3);padding:0.5rem 2rem;border-radius:12px;margin-bottom:1rem;}
+        .violation-overlay button{padding:0.8rem 2rem;border-radius:12px;background:rgba(255,255,255,0.2);color:var(--white);font-weight:700;border:2px solid rgba(255,255,255,0.3);cursor:pointer;font-size:1rem;transition:all 0.3s;}
+        .violation-overlay button:hover{background:rgba(255,255,255,0.3);}
+
+        /* Failed overlay */
+        .failed-overlay{display:none;position:fixed;inset:0;z-index:10000;background:rgba(15,23,42,0.98);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;}
+        .failed-overlay.show{display:flex;}
+        .failed-overlay .fail-icon{font-size:6rem;color:var(--danger);margin-bottom:1.5rem;}
+        .failed-overlay h1{font-size:2.5rem;font-weight:900;color:var(--danger);margin-bottom:0.5rem;}
+        .failed-overlay p{color:var(--gray);font-size:1.1rem;max-width:500px;margin-bottom:2rem;}
+        .failed-overlay a{padding:0.8rem 2rem;border-radius:12px;background:var(--dark-2);color:var(--white);font-weight:600;text-decoration:none;border:1px solid rgba(99,102,241,0.2);transition:all 0.3s;}
+        .failed-overlay a:hover{border-color:var(--primary);}
+
+        /* Error screen */
+        .error-screen{min-height:100vh;display:none;align-items:center;justify-content:center;padding:2rem;}
+        .error-screen.show{display:flex;}
+        .error-card{max-width:450px;width:100%;background:var(--dark-2);border:1px solid rgba(239,68,68,0.2);border-radius:24px;padding:3rem;text-align:center;}
+        .error-card .error-icon{font-size:4rem;color:var(--danger);margin-bottom:1rem;}
+        .error-card h2{font-size:1.5rem;font-weight:800;margin-bottom:0.5rem;}
+        .error-card p{color:var(--gray);margin-bottom:1.5rem;}
+        .error-card a{color:var(--primary-light);text-decoration:none;font-weight:600;}
+
+        /* Loading */
+        .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;}
+        .spinner{width:40px;height:40px;border:3px solid var(--dark-3);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+    </style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading" id="loadingScreen">
+    <div class="spinner"></div>
+    <p style="color:var(--gray);">Validating your access token...</p>
+</div>
+
+<!-- Error Screen -->
+<div class="error-screen" id="errorScreen">
+    <div class="error-card">
+        <div class="error-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <h2>Access Denied</h2>
+        <p id="errorMessage">This test link is invalid or has expired.</p>
+        <a href="/">← Back to Home</a>
+    </div>
+</div>
+
+<!-- Pre-Exam Screen -->
+<div class="pre-exam" id="preExam" style="display:none;">
+    <div class="pre-exam-card">
+        <div class="icon"><i class="fas fa-file-alt"></i></div>
+        <h1 id="examTitle">Exam</h1>
+        <p class="subtitle">Welcome, <strong id="studentName">Student</strong></p>
+        <div class="info-grid">
+            <div class="info-item"><div class="label">Questions</div><div class="value" id="infoQuestions">0</div></div>
+            <div class="info-item"><div class="label">Time Limit</div><div class="value" id="infoTime">60 min</div></div>
+            <div class="info-item"><div class="label">Max Violations</div><div class="value" id="infoViolations">3</div></div>
+            <div class="info-item"><div class="label">Status</div><div class="value" style="color:var(--success);">Ready</div></div>
+        </div>
+        <div class="warning-box">
+            <h3><i class="fas fa-exclamation-triangle"></i> Important Rules</h3>
+            <ul>
+                <li>The test will run in <strong>fullscreen mode only</strong></li>
+                <li>Exiting fullscreen counts as a <strong>violation</strong></li>
+                <li>After <strong id="ruleViolations">3</strong> violations, the test will <strong>automatically fail</strong> with a score of 0</li>
+                <li>You cannot retake this test once started</li>
+            </ul>
+        </div>
+        <button class="btn-start" onclick="startExam()" id="btnStart">
+            <i class="fas fa-expand"></i> Enter Fullscreen & Start Exam
+        </button>
+    </div>
+</div>
+
+<!-- Exam Container -->
+<div class="exam-container" id="examContainer">
+    <div class="exam-topbar">
+        <div class="left">
+            <span class="logo">PerformanceIQ</span>
+            <span class="test-name" id="topbarTestName"></span>
+        </div>
+        <div class="center">
+            <div class="timer" id="timerDisplay"><i class="fas fa-clock"></i> <span id="timerText">60:00</span></div>
+            <div class="violation-counter safe" id="violationBadge">
+                <i class="fas fa-shield-halved"></i>
+                <span id="violationText">0 / 3 violations</span>
+            </div>
+        </div>
+        <div class="progress-info" id="progressInfo">Q 1 / 10</div>
+    </div>
+
+    <div class="exam-body">
+        <div class="question-panel">
+            <div class="q-dots" id="questionDots"></div>
+            <div style="margin-top:2rem;">
+                <div class="q-number" id="qNumber">Question 1</div>
+                <div class="q-text" id="qText"></div>
+                <div class="options" id="optionsContainer"></div>
+            </div>
+            <div class="q-nav">
+                <button class="btn-prev" id="btnPrev" onclick="prevQuestion()"><i class="fas fa-arrow-left"></i> Previous</button>
+                <button class="btn-next" id="btnNext" onclick="nextQuestion()">Next <i class="fas fa-arrow-right"></i></button>
+                <button class="btn-submit btn-next" id="btnSubmit" onclick="submitExam()" style="display:none;">
+                    <i class="fas fa-check-circle"></i> Submit Exam
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Violation Overlay -->
+<div class="violation-overlay" id="violationOverlay">
+    <div class="big-icon">⚠️</div>
+    <h1>Fullscreen Violation!</h1>
+    <p>You left fullscreen mode. This has been recorded as a violation.</p>
+    <div class="count" id="violationCount">1 / 3</div>
+    <p style="font-size:0.9rem;opacity:0.7;">Return to fullscreen to continue your exam.</p>
+    <button onclick="returnToFullscreen()"><i class="fas fa-expand"></i> Return to Fullscreen</button>
+</div>
+
+<!-- Failed Overlay -->
+<div class="failed-overlay" id="failedOverlay">
+    <div class="fail-icon"><i class="fas fa-times-circle"></i></div>
+    <h1>EXAM FAILED</h1>
+    <p>You have been disqualified for exceeding the maximum number of fullscreen violations. Your score is <strong>0</strong>.</p>
+    <a href="/">← Return to Home</a>
+</div>
+
+<script>
+const API = '';
+let token = '';
+let testInfo = null;
+let resultId = null;
+let questions = [];
+let currentQ = 0;
+let answers = {};
+let violations = 0;
+let maxViolations = 3;
+let timeLeft = 0;
+let timerInterval = null;
+let examStarted = false;
+let examFinished = false;
+
+// Get token from URL
+token = window.location.pathname.split('/').pop();
+
+document.addEventListener('DOMContentLoaded', () => { validateToken(); });
+
+async function validateToken() {
+    try {
+        const res = await fetch(`${API}/api/v1/access-tokens/validate/${token}`);
+        const data = await res.json();
+
+        document.getElementById('loadingScreen').style.display = 'none';
+
+        if (!data.valid) {
+            document.getElementById('errorMessage').textContent = data.error;
+            document.getElementById('errorScreen').classList.add('show');
+            return;
+        }
+
+        testInfo = data;
+        maxViolations = data.max_fullscreen_violations;
+
+        document.getElementById('examTitle').textContent = data.test_title;
+        document.getElementById('studentName').textContent = data.student_name;
+        document.getElementById('infoQuestions').textContent = data.total_questions;
+        document.getElementById('infoTime').textContent = data.time_limit_minutes + ' min';
+        document.getElementById('infoViolations').textContent = maxViolations;
+        document.getElementById('ruleViolations').textContent = maxViolations;
+        document.getElementById('preExam').style.display = 'flex';
+
+    } catch(e) {
+        document.getElementById('loadingScreen').style.display = 'none';
+        document.getElementById('errorMessage').textContent = 'Connection error. Please try again.';
+        document.getElementById('errorScreen').classList.add('show');
+    }
+}
+
+async function startExam() {
+    const btn = document.getElementById('btnStart');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;"></div> Starting...';
+
+    try {
+        // Enter fullscreen
+        await document.documentElement.requestFullscreen();
+
+        // Start test on server
+        const res = await fetch(`${API}/api/v1/take-test/${token}/start`, { method: 'POST' });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail);
+        }
+        const result = await res.json();
+        resultId = result.id;
+
+        // Load questions
+        const qRes = await fetch(`${API}/api/v1/tests/${testInfo.test_id}/questions?hide_answers=true`);
+        questions = await qRes.json();
+
+        if (questions.length === 0) {
+            alert('No questions available for this test.');
+            return;
+        }
+
+        // Setup exam
+        timeLeft = testInfo.time_limit_minutes * 60;
+        violations = 0;
+        examStarted = true;
+
+        document.getElementById('preExam').style.display = 'none';
+        document.getElementById('examContainer').style.display = 'flex';
+        document.getElementById('topbarTestName').textContent = testInfo.test_title;
+        updateViolationBadge();
+
+        // Render question dots
+        renderDots();
+        showQuestion(0);
+        startTimer();
+
+        // Listen for fullscreen changes
+        document.addEventListener('fullscreenchange', onFullscreenChange);
+
+    } catch(e) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-expand"></i> Enter Fullscreen & Start Exam';
+        alert(e.message);
+    }
+}
+
+function onFullscreenChange() {
+    if (!examStarted || examFinished) return;
+
+    if (!document.fullscreenElement) {
+        // Violation!
+        violations++;
+        reportViolation();
+
+        if (violations >= maxViolations) {
+            examFinished = true;
+            clearInterval(timerInterval);
+            document.getElementById('violationOverlay').classList.remove('show');
+            document.getElementById('failedOverlay').classList.add('show');
+            return;
+        }
+
+        document.getElementById('violationCount').textContent = `${violations} / ${maxViolations}`;
+        document.getElementById('violationOverlay').classList.add('show');
+        updateViolationBadge();
+    }
+}
+
+async function reportViolation() {
+    try {
+        await fetch(`${API}/api/v1/take-test/results/${resultId}/violation`, { method: 'POST' });
+    } catch(e) { console.error('Failed to report violation:', e); }
+}
+
+async function returnToFullscreen() {
+    try {
+        await document.documentElement.requestFullscreen();
+        document.getElementById('violationOverlay').classList.remove('show');
+    } catch(e) { /* user may need to click again */ }
+}
+
+function updateViolationBadge() {
+    const badge = document.getElementById('violationBadge');
+    const text = document.getElementById('violationText');
+    text.textContent = `${violations} / ${maxViolations} violations`;
+
+    badge.className = 'violation-counter';
+    if (violations === 0) badge.classList.add('safe');
+    else if (violations < maxViolations - 1) badge.classList.add('warn');
+    else badge.classList.add('critical');
+}
+
+// Timer
+function startTimer() {
+    updateTimerDisplay();
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            submitExam();
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const mins = Math.floor(timeLeft / 60);
+    const secs = timeLeft % 60;
+    const text = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+    document.getElementById('timerText').textContent = text;
+
+    const timer = document.getElementById('timerDisplay');
+    if (timeLeft < 60) timer.classList.add('danger');
+    else timer.classList.remove('danger');
+}
+
+// Questions
+function renderDots() {
+    const container = document.getElementById('questionDots');
+    container.innerHTML = questions.map((q, i) =>
+        `<div class="q-dot" onclick="showQuestion(${i})">${i+1}</div>`
+    ).join('');
+}
+
+function updateDots() {
+    const dots = document.querySelectorAll('.q-dot');
+    dots.forEach((d, i) => {
+        d.className = 'q-dot';
+        if (i === currentQ) d.classList.add('current');
+        else if (answers[questions[i].id]) d.classList.add('answered');
+    });
+}
+
+function showQuestion(index) {
+    currentQ = index;
+    const q = questions[index];
+    document.getElementById('qNumber').textContent = `Question ${index + 1} of ${questions.length}`;
+    document.getElementById('qText').textContent = q.question_text;
+    document.getElementById('progressInfo').textContent = `Q ${index+1} / ${questions.length}`;
+
+    const opts = document.getElementById('optionsContainer');
+    const options = [
+        { letter: 'A', text: q.option_a },
+        { letter: 'B', text: q.option_b },
+        { letter: 'C', text: q.option_c },
+        { letter: 'D', text: q.option_d },
+    ].filter(o => o.text);
+
+    opts.innerHTML = options.map(o => `
+        <div class="option ${answers[q.id] === o.letter ? 'selected' : ''}" onclick="selectAnswer('${q.id}','${o.letter}')">
+            <div class="letter">${o.letter}</div>
+            <div class="text">${o.text}</div>
+        </div>
+    `).join('');
+
+    // Nav buttons
+    document.getElementById('btnPrev').style.display = index === 0 ? 'none' : 'flex';
+    const isLast = index === questions.length - 1;
+    document.getElementById('btnNext').style.display = isLast ? 'none' : 'flex';
+    document.getElementById('btnSubmit').style.display = isLast ? 'flex' : 'none';
+
+    updateDots();
+}
+
+async function selectAnswer(questionId, letter) {
+    answers[questionId] = letter;
+    showQuestion(currentQ); // re-render
+
+    // Submit to server
+    try {
+        await fetch(`${API}/api/v1/take-test/results/${resultId}/answer`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question_id: parseInt(questionId), answer_choice: letter })
+        });
+    } catch(e) { console.error('Failed to save answer:', e); }
+}
+
+function nextQuestion() { if (currentQ < questions.length - 1) showQuestion(currentQ + 1); }
+function prevQuestion() { if (currentQ > 0) showQuestion(currentQ - 1); }
+
+async function submitExam() {
+    if (examFinished) return;
+
+    const unanswered = questions.filter(q => !answers[q.id]).length;
+    if (unanswered > 0 && !confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`)) return;
+
+    examFinished = true;
+    clearInterval(timerInterval);
+
+    try {
+        const res = await fetch(`${API}/api/v1/take-test/results/${resultId}/submit`, { method: 'POST' });
+        const result = await res.json();
+
+        // Exit fullscreen
+        if (document.fullscreenElement) {
+            try { await document.exitFullscreen(); } catch(e) {}
+        }
+        document.removeEventListener('fullscreenchange', onFullscreenChange);
+
+        // Redirect to results
+        window.location.href = `/results/${resultId}`;
+    } catch(e) {
+        alert('Failed to submit exam: ' + e.message);
+        examFinished = false;
+    }
+}
+</script>
+</body>
+</html>
