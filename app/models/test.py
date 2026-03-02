@@ -2,6 +2,8 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, Float, Foreig
 from sqlalchemy.orm import relationship
 from app.database import Base
 from datetime import datetime
+import uuid
+
 
 class Teacher(Base):
     __tablename__ = "teachers"
@@ -10,11 +12,12 @@ class Teacher(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)
     username = Column(String(100), unique=True, nullable=False)
     hashed_pwd = Column(String, nullable=False)
+    full_name = Column(String(255), nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    tests = relationship("Test", back_populates="teacher")
-    students = relationship("Student", back_populates="teacher")
+    tests = relationship("Test", back_populates="teacher", cascade="all, delete-orphan")
+    students = relationship("Student", back_populates="teacher", cascade="all, delete-orphan")
 
 
 class Student(Base):
@@ -28,7 +31,8 @@ class Student(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     teacher = relationship("Teacher", back_populates="students")
-    test_results = relationship("TestResult", back_populates="student")
+    test_results = relationship("TestResult", back_populates="student", cascade="all, delete-orphan")
+    access_tokens = relationship("TestAccessToken", back_populates="student", cascade="all, delete-orphan")
 
 
 class Test(Base):
@@ -53,8 +57,9 @@ class Test(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     teacher = relationship("Teacher", back_populates="tests")
-    questions = relationship("Question", back_populates="test")
-    results = relationship("TestResult", back_populates="test")
+    questions = relationship("Question", back_populates="test", cascade="all, delete-orphan")
+    results = relationship("TestResult", back_populates="test", cascade="all, delete-orphan")
+    access_tokens = relationship("TestAccessToken", back_populates="test", cascade="all, delete-orphan")
 
 
 class Question(Base):
@@ -77,7 +82,7 @@ class Question(Base):
     created_at = Column(DateTime, server_default=func.now())
 
     test = relationship("Test", back_populates="questions")
-    student_answers = relationship("StudentAnswer", back_populates="question")
+    student_answers = relationship("StudentAnswer", back_populates="question", cascade="all, delete-orphan")
 
 
 class TestResult(Base):
@@ -103,8 +108,8 @@ class TestResult(Base):
 
     test = relationship("Test", back_populates="results")
     student = relationship("Student", back_populates="test_results")
-    answers = relationship("StudentAnswer", back_populates="result")
-    violations = relationship("FullscreenViolation", back_populates="result")
+    answers = relationship("StudentAnswer", back_populates="result", cascade="all, delete-orphan")
+    violations = relationship("FullscreenViolation", back_populates="result", cascade="all, delete-orphan")
 
 
 class StudentAnswer(Base):
@@ -138,4 +143,23 @@ class FullscreenViolation(Base):
     detected_at = Column(DateTime, server_default=func.now())
 
     result = relationship("TestResult", back_populates="violations")
+
+
+class TestAccessToken(Base):
+    """Token-based access links for students to access tests."""
+    __tablename__ = "test_access_tokens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    token = Column(String(255), unique=True, nullable=False, index=True, default=lambda: str(uuid.uuid4()))
+    test_id = Column(Integer, ForeignKey("tests.id"), nullable=False)
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
+
+    is_active = Column(Boolean, default=True)
+    is_used = Column(Boolean, default=False)
+
+    created_at = Column(DateTime, server_default=func.now())
+    expires_at = Column(DateTime, nullable=False)
+
+    test = relationship("Test", back_populates="access_tokens")
+    student = relationship("Student", back_populates="access_tokens")
 
