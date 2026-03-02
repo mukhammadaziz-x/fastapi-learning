@@ -23,7 +23,7 @@ class TeacherResponse(TeacherBase):
     id: int
     full_name: Optional[str] = None
     is_active: bool
-    created_at: datetime
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -43,7 +43,7 @@ class StudentResponse(StudentBase):
     id: int
     teacher_id: int
     is_active: bool
-    created_at: datetime
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -68,7 +68,7 @@ class QuestionCreate(QuestionBase):
 class QuestionResponse(QuestionCreate):
     id: int
     test_id: int
-    created_at: datetime
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -103,8 +103,8 @@ class TestResponse(TestBase):
     id: int
     teacher_id: int
     is_active: bool
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
     questions: List[QuestionResponse] = []
 
     class Config:
@@ -132,7 +132,7 @@ class StudentAnswerResponse(BaseModel):
     answer_choice: Optional[str] = None
     is_correct: bool
     points_earned: int
-    answered_at: datetime
+    answered_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -142,7 +142,7 @@ class FullscreenViolationResponse(BaseModel):
     id: int
     violation_type: str
     violation_count: int
-    detected_at: datetime
+    detected_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -164,7 +164,7 @@ class TestResultResponse(BaseModel):
     was_failed_for_violation: bool
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
     answers: List[StudentAnswerResponse] = []
     violations: List[FullscreenViolationResponse] = []
 
@@ -179,8 +179,8 @@ class TestAccessLink(BaseModel):
     student_id: int
     token: str
     is_active: bool
-    created_at: datetime
-    expires_at: datetime
+    created_at: Optional[datetime] = None
+    expires_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -206,8 +206,8 @@ class AccessTokenResponse(BaseModel):
     student_id: int
     is_active: bool
     is_used: bool
-    created_at: datetime
-    expires_at: datetime
+    created_at: Optional[datetime] = None
+    expires_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
