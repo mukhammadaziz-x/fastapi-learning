@@ -8,93 +8,98 @@
     <link rel="stylesheet" href="/static/css/common.css">
     <link rel="stylesheet" href="/static/css/dashboard.css">
 </head>
-<body>
+<body class="role-admin">
     <!-- Navbar -->
-    <nav class="navbar" id="navbar"></nav>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <span>EduPlatform</span>
+        </div>
+        <div class="navbar-right">
+            <div class="navbar-user">
+                <div class="navbar-avatar" id="user-avatar"></div>
+                <span class="navbar-username" id="user-name"></span>
+                <span class="role-badge" id="user-role-badge">admin</span>
+            </div>
+            <button type="button" class="btn-logout" onclick="logout()">Chiqish</button>
+        </div>
+    </nav>
 
-    <!-- Content -->
-    <div class="container dashboard-admin">
-        <div class="page-content">
-            <div class="page-header">
-                <h1 class="page-title">📊 Boshqaruv paneli</h1>
-                <p class="page-subtitle">Platformani to'liq boshqarish paneli</p>
+    <div class="dashboard-shell">
+        <!-- Sidebar -->
+        <aside class="sidebar sidebar-admin">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Menyu</div>
+                <a href="#overview" class="sidebar-link">📊 Umumiy ko'rinish</a>
+                <a href="#users" class="sidebar-link">👥 Foydalanuvchilar</a>
+                <a href="#subjects" class="sidebar-link">📖 Fanlar</a>
             </div>
 
-            <!-- Stats -->
-            <div class="stat-grid" style="margin-bottom: 2rem;">
-                <div class="stat-card">
-                    <div class="stat-icon">👥</div>
-                    <div class="stat-label">Jami foydalanuvchilar</div>
-                    <div class="stat-value" id="s-users">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">🎓</div>
-                    <div class="stat-label">O'qituvchilar</div>
-                    <div class="stat-value" id="s-teachers">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">📚</div>
-                    <div class="stat-label">Talabalar</div>
-                    <div class="stat-value" id="s-students">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">📖</div>
-                    <div class="stat-label">Fanlar</div>
-                    <div class="stat-value" id="s-subjects">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">📝</div>
-                    <div class="stat-label">Topshiriqlar</div>
-                    <div class="stat-value" id="s-assignments">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">📊</div>
-                    <div class="stat-label">Yechimlar</div>
-                    <div class="stat-value" id="s-submissions">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">⚡</div>
-                    <div class="stat-label">Faol topshiriqlar</div>
-                    <div class="stat-value" id="s-active">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">📈</div>
-                    <div class="stat-label">O'rtacha ball</div>
-                    <div class="stat-value" id="s-avg-score">—</div>
-                </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">Tezkor harakatlar</div>
+                <button type="button" class="btn btn-primary btn-block sidebar-btn" onclick="location.hash='#users'">
+                    👤 Yangi foydalanuvchi
+                </button>
+                <button type="button" class="btn btn-secondary btn-block sidebar-btn" onclick="location.hash='#subjects'">
+                    📖 Fanlarni boshqarish
+                </button>
             </div>
+        </aside>
 
-            <!-- Quick Actions -->
-            <div class="section">
-                <div class="section-header">
-                    <h2 class="section-title">⚡ Tezkor harakatlar</h2>
+        <!-- Content -->
+        <main class="dashboard-main container dashboard-admin">
+            <div class="page-content" id="overview">
+                <div class="page-header">
+                    <h1 class="page-title">📊 Boshqaruv paneli</h1>
+                    <p class="page-subtitle">Platformani to'liq boshqarish paneli</p>
                 </div>
-                <div class="actions-grid">
-                    <a class="action-card" href="/docs" target="_blank">
-                        <div class="action-icon">📡</div>
-                        <div class="action-name">API Docs</div>
-                        <div class="action-desc">Swagger UI orqali test qilish</div>
-                    </a>
-                    <a class="action-card" href="/docs#/Users" target="_blank">
-                        <div class="action-icon">👤</div>
-                        <div class="action-name">Foydalanuvchilar</div>
-                        <div class="action-desc">Foydalanuvchilarni boshqarish</div>
-                    </a>
-                    <a class="action-card" href="/docs#/Subjects" target="_blank">
-                        <div class="action-icon">📖</div>
-                        <div class="action-name">Fanlar</div>
-                        <div class="action-desc">Fan yaratish va tahrirlash</div>
-                    </a>
-                    <a class="action-card" href="/docs#/Leaderboard%20%26%20Analytics" target="_blank">
-                        <div class="action-icon">🏆</div>
-                        <div class="action-name">Reyting</div>
-                        <div class="action-desc">Reyting va analitika</div>
-                    </a>
+
+                <!-- Stats -->
+                <div class="stat-grid" style="margin-bottom: 2rem;">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-label">Jami foydalanuvchilar</div>
+                        <div class="stat-value" id="s-users">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎓</div>
+                        <div class="stat-label">O'qituvchilar</div>
+                        <div class="stat-value" id="s-teachers">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📚</div>
+                        <div class="stat-label">Talabalar</div>
+                        <div class="stat-value" id="s-students">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📖</div>
+                        <div class="stat-label">Fanlar</div>
+                        <div class="stat-value" id="s-subjects">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📝</div>
+                        <div class="stat-label">Topshiriqlar</div>
+                        <div class="stat-value" id="s-assignments">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-label">Yechimlar</div>
+                        <div class="stat-value" id="s-submissions">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⚡</div>
+                        <div class="stat-label">Faol topshiriqlar</div>
+                        <div class="stat-value" id="s-active">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-label">O'rtacha ball</div>
+                        <div class="stat-value" id="s-avg-score">—</div>
+                    </div>
                 </div>
             </div>
 
             <!-- Users Table -->
-            <div class="section">
+            <div class="section" id="users">
                 <div class="section-header">
                     <h2 class="section-title">👥 So'nggi foydalanuvchilar</h2>
                 </div>
@@ -116,7 +121,7 @@
                     </table>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <script src="/static/js/app.js"></script>
