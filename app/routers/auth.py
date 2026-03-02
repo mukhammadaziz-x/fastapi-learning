@@ -1,6 +1,7 @@
 """Authentication router - local + Google OAuth."""
+import json
 from fastapi import APIRouter, Depends, HTTPException, status, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
 from sqlalchemy.orm import Session
 from datetime import timedelta
 
@@ -182,9 +183,30 @@ async def google_callback(code: str, state: str = "student", db: Session = Depen
     access_token = create_access_token(data={"sub": str(user.id), "role": user.role})
     refresh_tok = create_refresh_token(data={"sub": str(user.id)})
 
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_tok,
-        "token_type": "bearer",
-        "user": UserResponse.model_validate(user).model_dump(),
-    }
+    user_data = UserResponse.model_validate(user).model_dump()
+
+    # Small HTML page that stores tokens in localStorage and redirects to dashboard
+    html = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Signing in...</title>
+    </head>
+    <body>
+        <script>
+            try {{
+                window.localStorage.setItem('token', {json.dumps(access_token)});
+                window.localStorage.setItem('user', {json.dumps(user_data)});
+                // refresh token hozircha frontendan foydalanilmaydi, lekin kerak bo'lsa saqlab qo'yish mumkin:
+                window.localStorage.setItem('refresh_token', {json.dumps(refresh_tok)});
+            }} catch (e) {{
+                console.error('Failed to store auth data', e);
+            }}
+            window.location.href = "/dashboard/{user.role}";
+        </script>
+    </body>
+    </html>
+    """
+
+    return HTMLResponse(content=html)

@@ -55,6 +55,12 @@
     margin-bottom: 2rem;
 }
 
+.login-logo .logo-img {
+    height: 48px;
+    object-fit: contain;
+    margin-bottom: 0.75rem;
+}
+
 .login-logo h1 {
     font-size: 2.25rem;
     font-weight: 900;
