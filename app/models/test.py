@@ -53,8 +53,8 @@ class Test(Base):
     max_fullscreen_violations = Column(Integer, default=3)  # Количество позволенных нарушений
 
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     teacher = relationship("Teacher", back_populates="tests")
     questions = relationship("Question", back_populates="test", cascade="all, delete-orphan")
@@ -79,7 +79,7 @@ class Question(Base):
     correct_answer = Column(String(1), nullable=True)  # A, B, C, D
 
     points = Column(Integer, default=1)
-    created_at = Column(DateTime, server_default=func.now())
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     test = relationship("Test", back_populates="questions")
     student_answers = relationship("StudentAnswer", back_populates="question", cascade="all, delete-orphan")
@@ -104,7 +104,7 @@ class TestResult(Base):
 
     started_at = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, server_default=func.now())
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     test = relationship("Test", back_populates="results")
     student = relationship("Student", back_populates="test_results")
