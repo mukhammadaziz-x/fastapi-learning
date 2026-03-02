@@ -1,11 +1,36 @@
+# Core
 fastapi
 uvicorn[standard]
+pydantic[email]
+python-dotenv
+
+# Database
 sqlalchemy
 psycopg2-binary
-pydantic[email]
-bcrypt
-python-dotenv
 alembic
+
+# Auth
+bcrypt
 python-jose[cryptography]
 PyJWT
+passlib[bcrypt]
+authlib
+httpx
+itsdangerous
+
+# Google OAuth
+google-auth
+google-auth-oauthlib
+
+# Templates & Static
 jinja2
+
+# Utils
+python-multipart
+aiofiles
+
+# Code execution (sandbox)
+RestrictedPython
+
+# APScheduler for background tasks
+apscheduler
