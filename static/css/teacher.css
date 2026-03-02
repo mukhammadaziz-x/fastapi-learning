@@ -1,0 +1,44 @@
+/* ===== TEACHER-SPECIFIC STYLES ===== */
+.navbar .role-badge {
+    background: linear-gradient(135deg, #2ed573, #1e90ff);
+}
+
+.stat-card .value {
+    background: linear-gradient(135deg, #2ed573, #1e90ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.action-btn:hover {
+    background: rgba(46,213,115,0.15);
+    border-color: rgba(46,213,115,0.3);
+}
+
+/* Grade badges */
+.grade {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.grade-DISTINCTION {
+    background: rgba(46,213,115,0.2);
+    color: #2ed573;
+}
+
+.grade-MERIT {
+    background: rgba(30,144,255,0.2);
+    color: #1e90ff;
+}
+
+.grade-PASS {
+    background: rgba(255,165,0,0.2);
+    color: #ffa502;
+}
+
+.grade-FAIL {
+    background: rgba(255,71,87,0.2);
+    color: #ff4757;
+}

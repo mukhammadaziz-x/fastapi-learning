@@ -1,0 +1,179 @@
+/* ===== LOGIN PAGE — EduPlatform ===== */
+.login-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f0e17 0%, #1a1a2e 50%, #16213e 100%);
+    padding: 20px;
+}
+
+.login-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+    backdrop-filter: blur(10px);
+}
+
+.login-card .logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-card .logo h1 {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 5px;
+}
+
+.login-card .logo p {
+    font-size: 13px;
+    color: #888;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 25px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    background: none;
+    border: none;
+    color: #888;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+
+.tab.active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+}
+
+/* Messages */
+.msg {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 15px;
+    display: none;
+}
+
+.msg.error-msg {
+    background: rgba(255,71,87,0.15);
+    border: 1px solid rgba(255,71,87,0.3);
+    color: #ff4757;
+}
+
+.msg.success-msg {
+    background: rgba(46,213,115,0.15);
+    border: 1px solid rgba(46,213,115,0.3);
+    color: #2ed573;
+}
+
+/* Form */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #aaa;
+    margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 10px;
+    background: rgba(15,14,23,0.8);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #fff;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #667eea;
+}
+
+.form-group input::placeholder {
+    color: #666;
+}
+
+.form-group select {
+    cursor: pointer;
+}
+
+.form-group select option {
+    background: #1a1a2e;
+    color: #fff;
+}
+
+/* Submit Button */
+.btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 5px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102,126,234,0.35);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Footer */
+.login-card .footer {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 12px;
+    color: #555;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .login-card {
+        padding: 25px;
+        border-radius: 14px;
+    }
+
+    .login-card .logo h1 {
+        font-size: 24px;
+    }
+}
