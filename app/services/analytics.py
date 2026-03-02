@@ -22,7 +22,7 @@ def get_student_analytics(db: Session, student_id: int) -> dict:
     # Total assignments available
     enrolled_subjects = db.query(Enrollment.subject_id).filter(
         Enrollment.student_id == student_id
-    ).subquery()
+    ).scalar_subquery()
     total_assignments = db.query(func.count(Assignment.id)).filter(
         Assignment.subject_id.in_(enrolled_subjects),
         Assignment.is_published == True,
@@ -192,7 +192,7 @@ def get_teacher_dashboard(db: Session, teacher_id: int) -> dict:
         Subject.teacher_id == teacher_id
     ).scalar() or 0
 
-    teacher_subjects = db.query(Subject.id).filter(Subject.teacher_id == teacher_id).subquery()
+    teacher_subjects = db.query(Subject.id).filter(Subject.teacher_id == teacher_id).scalar_subquery()
     total_students = db.query(func.count(func.distinct(Enrollment.student_id))).filter(
         Enrollment.subject_id.in_(teacher_subjects)
     ).scalar() or 0

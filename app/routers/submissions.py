@@ -217,13 +217,39 @@ def get_submission(
     student = user_crud.get_user(db, submission.student_id)
     assignment = assignment_crud.get_assignment(db, submission.assignment_id)
 
-    resp = SubmissionDetailResponse.model_validate(submission)
-    resp.student_name = student.full_name or student.username if student else None
-    resp.assignment_title = assignment.title if assignment else None
-    resp.violations = [
+    # Build violations list before model_validate to avoid ORM object coercion
+    violations_list = [
         {"type": v.violation_type, "details": v.details, "detected_at": str(v.detected_at)}
-        for v in submission.violations
-    ] if submission.violations else []
+        for v in (submission.violations or [])
+    ]
+
+    # Convert to dict first, then override violations
+    sub_dict = {
+        "id": submission.id,
+        "assignment_id": submission.assignment_id,
+        "student_id": submission.student_id,
+        "status": submission.status,
+        "attempt_number": submission.attempt_number,
+        "score": submission.score,
+        "max_score": submission.max_score,
+        "percentage": submission.percentage,
+        "grade": submission.grade,
+        "fullscreen_violations": submission.fullscreen_violations,
+        "was_failed_for_violation": submission.was_failed_for_violation,
+        "tab_switch_count": submission.tab_switch_count,
+        "ai_suspicion_score": submission.ai_suspicion_score,
+        "ai_flagged": submission.ai_flagged,
+        "started_at": submission.started_at,
+        "submitted_at": submission.submitted_at,
+        "time_spent_seconds": submission.time_spent_seconds,
+        "teacher_comment": submission.teacher_comment,
+        "created_at": submission.created_at,
+        "answers": [AnswerResponse.model_validate(a) for a in (submission.answers or [])],
+        "student_name": student.full_name or student.username if student else None,
+        "assignment_title": assignment.title if assignment else None,
+        "violations": violations_list,
+    }
+    resp = SubmissionDetailResponse(**sub_dict)
     return resp
 
 
