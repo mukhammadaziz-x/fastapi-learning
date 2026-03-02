@@ -1,179 +1,132 @@
-/* ===== LOGIN PAGE — EduPlatform ===== */
-.login-wrapper {
+/* ═══════════════════════════════════════════════════════════
+   EduPlatform — Login Page Styles
+   ═══════════════════════════════════════════════════════════ */
+
+.login-page {
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #0f0e17 0%, #1a1a2e 50%, #16213e 100%);
-    padding: 20px;
-}
-
-.login-card {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 20px;
-    padding: 40px;
-    width: 100%;
-    max-width: 420px;
-    backdrop-filter: blur(10px);
-}
-
-.login-card .logo {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.login-card .logo h1 {
-    font-size: 28px;
-    font-weight: 800;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 5px;
-}
-
-.login-card .logo p {
-    font-size: 13px;
-    color: #888;
-}
-
-/* Tabs */
-.tabs {
-    display: flex;
-    gap: 0;
-    margin-bottom: 25px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 10px;
+    padding: 2rem;
+    position: relative;
     overflow: hidden;
 }
 
-.tab {
+/* ── Animated Background ── */
+.login-page::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 40%, rgba(99,102,241,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 60%, rgba(139,92,246,0.06) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(245,158,11,0.04) 0%, transparent 50%);
+    animation: float 20s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.login-container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 440px;
+}
+
+/* ── Logo ── */
+.login-logo {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-logo h1 {
+    font-size: 2.2rem;
+    font-weight: 900;
+    margin-bottom: 0.4rem;
+}
+
+.login-logo h1 span {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.login-logo p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 400;
+}
+
+/* ── Login Card ── */
+.login-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 2rem;
+    backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-xl);
+}
+
+/* ── Tabs inside card ── */
+.login-card .tabs {
+    margin-bottom: 1.5rem;
+}
+
+/* ── Google Button ── */
+.btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem;
+    background: #fff;
+    color: #1f2937;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: var(--font-family);
+}
+
+.btn-google:hover {
+    background: #f3f4f6;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    transform: translateY(-1px);
+}
+
+.btn-google svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* ── Divider ── */
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
     flex: 1;
-    padding: 10px;
+    height: 1px;
+    background: var(--border);
+}
+
+/* ── Hidden class ── */
+.hidden { display: none !important; }
+
+/* ── Footer ── */
+.login-footer {
     text-align: center;
-    background: none;
-    border: none;
-    color: #888;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-size: 14px;
-}
-
-.tab.active {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: #fff;
-}
-
-/* Messages */
-.msg {
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    margin-bottom: 15px;
-    display: none;
-}
-
-.msg.error-msg {
-    background: rgba(255,71,87,0.15);
-    border: 1px solid rgba(255,71,87,0.3);
-    color: #ff4757;
-}
-
-.msg.success-msg {
-    background: rgba(46,213,115,0.15);
-    border: 1px solid rgba(46,213,115,0.3);
-    color: #2ed573;
-}
-
-/* Form */
-.form-group {
-    margin-bottom: 16px;
-}
-
-.form-group label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    color: #aaa;
-    margin-bottom: 6px;
-}
-
-.form-group input,
-.form-group select {
-    width: 100%;
-    padding: 11px 14px;
-    border-radius: 10px;
-    background: rgba(15,14,23,0.8);
-    border: 1px solid rgba(255,255,255,0.12);
-    color: #fff;
-    font-size: 14px;
-    font-family: inherit;
-    outline: none;
-    transition: border-color 0.3s;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-    border-color: #667eea;
-}
-
-.form-group input::placeholder {
-    color: #666;
-}
-
-.form-group select {
-    cursor: pointer;
-}
-
-.form-group select option {
-    background: #1a1a2e;
-    color: #fff;
-}
-
-/* Submit Button */
-.btn {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: #fff;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s;
-    margin-top: 5px;
-}
-
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102,126,234,0.35);
-}
-
-.btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* Footer */
-.login-card .footer {
-    text-align: center;
-    margin-top: 25px;
-    font-size: 12px;
-    color: #555;
-}
-
-/* Responsive */
-@media (max-width: 480px) {
-    .login-card {
-        padding: 25px;
-        border-radius: 14px;
-    }
-
-    .login-card .logo h1 {
-        font-size: 24px;
-    }
+    margin-top: 1.5rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
 }
