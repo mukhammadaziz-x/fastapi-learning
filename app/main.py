@@ -74,13 +74,26 @@ app.include_router(leaderboard.router)
 # ── Pages ─────────────────────────────────────────────────────────
 @app.get("/", tags=["Pages"])
 def serve_home():
+    """Login sahifasi."""
     index_path = os.path.join(static_dir, "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
-    return {
-        "status": "ok",
-        "message": "EduPlatform API is running. Visit /docs for Swagger UI.",
-    }
+    return {"status": "ok", "message": "EduPlatform API — /docs"}
+
+
+@app.get("/dashboard/admin", tags=["Pages"])
+def serve_admin_dashboard():
+    return FileResponse(os.path.join(static_dir, "admin.html"))
+
+
+@app.get("/dashboard/teacher", tags=["Pages"])
+def serve_teacher_dashboard():
+    return FileResponse(os.path.join(static_dir, "teacher.html"))
+
+
+@app.get("/dashboard/student", tags=["Pages"])
+def serve_student_dashboard():
+    return FileResponse(os.path.join(static_dir, "student.html"))
 
 
 @app.get("/health", tags=["Health"])
