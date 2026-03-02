@@ -16,9 +16,6 @@ from app.schemas.test import (
 router = APIRouter(prefix="/api/v1", tags=["tests"])
 
 
-router = APIRouter(prefix="/api/v1", tags=["tests"])
-
-
 # ============ TEACHER ENDPOINTS ============
 
 @router.post("/teachers/register", response_model=TeacherResponse, status_code=status.HTTP_201_CREATED, tags=["teachers"])
