@@ -195,6 +195,32 @@ def get_my_submissions(
     return [SubmissionResponse.model_validate(s) for s in submissions]
 
 
+@router.get("/pending-review")
+def get_pending_review(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role("admin", "teacher")),
+):
+    """Get submissions awaiting teacher review."""
+    submissions = submission_crud.get_pending_review_submissions(db, current_user.id)
+    results = []
+    for s in submissions:
+        student = user_crud.get_user(db, s.student_id)
+        assignment = assignment_crud.get_assignment(db, s.assignment_id)
+        results.append({
+            "id": s.id,
+            "assignment_id": s.assignment_id,
+            "student_id": s.student_id,
+            "assignment_title": assignment.title if assignment else None,
+            "student_name": student.full_name or student.username if student else None,
+            "percentage": s.percentage,
+            "grade": s.grade,
+            "status": s.status,
+            "submitted_at": s.submitted_at,
+            "ai_flagged": s.ai_flagged,
+        })
+    return results
+
+
 @router.get("/{submission_id}", response_model=SubmissionDetailResponse)
 def get_submission(
     submission_id: int,
