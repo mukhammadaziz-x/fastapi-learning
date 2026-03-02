@@ -16,11 +16,11 @@ time.sleep(3)
 # Test 1: Health
 try:
     resp = urllib.request.urlopen("http://127.0.0.1:3001/health")
-    print("HEALTH:", resp.read().decode())
+    print("[OK] HEALTH:", resp.read().decode())
 except Exception as e:
-    print("HEALTH ERROR:", e)
+    print("[FAIL] HEALTH:", e)
 
-# Test 2: Create test
+# Test 2: Create test with proper datetime
 data = {
     "title": "Math Test",
     "description": "Test description",
@@ -38,9 +38,26 @@ req = urllib.request.Request(
 )
 try:
     resp = urllib.request.urlopen(req)
-    print("CREATE TEST:", resp.status, resp.read().decode())
+    result = json.loads(resp.read().decode())
+    print(f"[OK] CREATE TEST: id={result['id']}, title={result['title']}, created_at={result['created_at']}, updated_at={result['updated_at']}")
 except urllib.error.HTTPError as e:
     body = e.read().decode()
-    print(f"CREATE TEST ERROR {e.code}: {body}")
+    print(f"[FAIL] CREATE TEST ({e.code}): {body}")
 except Exception as e:
-    print("CREATE TEST CONN ERROR:", e)
+    print(f"[FAIL] CREATE TEST: {e}")
+
+# Test 3: Login
+login_data = {"username": "admin", "password": "admin123"}
+req = urllib.request.Request(
+    "http://127.0.0.1:3001/api/v1/teachers/login",
+    data=json.dumps(login_data).encode(),
+    headers={"Content-Type": "application/json"},
+    method="POST"
+)
+try:
+    resp = urllib.request.urlopen(req)
+    print(f"[OK] LOGIN: {resp.read().decode()}")
+except urllib.error.HTTPError as e:
+    print(f"[FAIL] LOGIN ({e.code}): {e.read().decode()}")
+except Exception as e:
+    print(f"[FAIL] LOGIN: {e}")

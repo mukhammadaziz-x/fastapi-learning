@@ -472,25 +472,29 @@ async function viewTest(id) {
 }
 
 async function createTest() {
+    const title = document.getElementById('testTitle').value.trim();
+    const startVal = document.getElementById('testStart').value;
+    const endVal = document.getElementById('testEnd').value;
+
+    if (!title || !startVal || !endVal) { showToast('Please fill in title, start date and end date', 'error'); return; }
+
     const data = {
-        title: document.getElementById('testTitle').value,
+        title: title,
         description: document.getElementById('testDesc').value,
-        start_date: new Date(document.getElementById('testStart').value).toISOString(),
-        end_date: new Date(document.getElementById('testEnd').value).toISOString(),
-        time_limit_minutes: parseInt(document.getElementById('testTimeLimit').value),
-        max_fullscreen_violations: parseInt(document.getElementById('testMaxViolations').value),
+        start_date: new Date(startVal).toISOString(),
+        end_date: new Date(endVal).toISOString(),
+        time_limit_minutes: parseInt(document.getElementById('testTimeLimit').value) || 60,
+        max_fullscreen_violations: parseInt(document.getElementById('testMaxViolations').value) || 3,
         total_questions: 10
     };
-
-    if (!data.title || !data.start_date || !data.end_date) { showToast('Fill in all required fields', 'error'); return; }
 
     try {
         const res = await fetch(`${API}/api/v1/tests?teacher_id=${teacher.id}`, {
             method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
         });
-        if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
-        const test = await res.json();
-        currentTestId = test.id;
+        const responseData = await res.json().catch(() => null);
+        if (!res.ok) throw new Error(responseData?.detail || `Server error: ${res.status}`);
+        currentTestId = responseData.id;
         questionOrder = 0;
         document.getElementById('questionsPanel').style.display = 'block';
         showToast('Test created successfully!');

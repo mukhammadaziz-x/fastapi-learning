@@ -125,7 +125,7 @@ class StudentAnswer(Base):
     is_correct = Column(Boolean, default=False)
     points_earned = Column(Integer, default=0)
 
-    answered_at = Column(DateTime, server_default=func.now())
+    answered_at = Column(DateTime, default=datetime.utcnow)
 
     result = relationship("TestResult", back_populates="answers")
     question = relationship("Question", back_populates="student_answers")
@@ -140,7 +140,7 @@ class FullscreenViolation(Base):
     violation_type = Column(String(50), default="left_fullscreen")  # left_fullscreen, inactive, etc
     violation_count = Column(Integer, default=1)
 
-    detected_at = Column(DateTime, server_default=func.now())
+    detected_at = Column(DateTime, default=datetime.utcnow)
 
     result = relationship("TestResult", back_populates="violations")
 
@@ -157,7 +157,7 @@ class TestAccessToken(Base):
     is_active = Column(Boolean, default=True)
     is_used = Column(Boolean, default=False)
 
-    created_at = Column(DateTime, server_default=func.now())
+    created_at = Column(DateTime, default=datetime.utcnow)
     expires_at = Column(DateTime, nullable=False)
 
     test = relationship("Test", back_populates="access_tokens")
