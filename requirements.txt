@@ -2,6 +2,7 @@
 fastapi
 uvicorn[standard]
 pydantic[email]
+pydantic-settings
 python-dotenv
 
 # Database

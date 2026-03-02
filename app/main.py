@@ -1,32 +1,52 @@
+"""Educational Startup Platform — Main FastAPI Application."""
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from app.routers import users, tests
-from app.database import engine, Base
 import os
 
-# Import models so Base.metadata knows about them
-import app.models.user  # noqa: F401
-import app.models.test  # noqa: F401
+from app.database import engine, Base
+
+# Import ALL models so Base.metadata knows about them
+import app.models  # noqa: F401
+
+# Import routers
+from app.routers import (
+    auth,
+    users,
+    subjects,
+    groups,
+    enrollments,
+    assignments,
+    submissions,
+    leaderboard,
+)
 
 
 @asynccontextmanager
 async def lifespan(application: FastAPI):
+    """Create tables on startup, dispose engine on shutdown."""
     Base.metadata.create_all(bind=engine)
     yield
     engine.dispose()
 
 
 app = FastAPI(
-    title="Student Performance Checker",
-    description="Complete test management system with fullscreen monitoring and violation detection",
-    version="2.0.0",
-    lifespan=lifespan
+    title="EduPlatform — Educational Startup API",
+    description=(
+        "Comprehensive educational platform with role-based access (Admin, Teacher, Student), "
+        "subject-specific exam types (code editor, kahoot, essay, multiple choice), "
+        "leaderboard, ranking algorithm, violation monitoring, and analytics dashboards."
+    ),
+    version="3.0.0",
+    lifespan=lifespan,
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
-# Add CORS middleware
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -35,46 +55,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files
+# Static files
 static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
 if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
-# Include routers
+# ── Register all routers ──────────────────────────────────────────
+app.include_router(auth.router)
 app.include_router(users.router)
-app.include_router(tests.router)
+app.include_router(subjects.router)
+app.include_router(groups.router)
+app.include_router(enrollments.router)
+app.include_router(assignments.router)
+app.include_router(submissions.router)
+app.include_router(leaderboard.router)
 
 
-@app.get("/", tags=["pages"])
+# ── Pages ─────────────────────────────────────────────────────────
+@app.get("/", tags=["Pages"])
 def serve_home():
-    """Serve the main page."""
     index_path = os.path.join(static_dir, "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
-    return {"status": "ok", "message": "Student Performance Checker API is running"}
+    return {
+        "status": "ok",
+        "message": "EduPlatform API is running. Visit /docs for Swagger UI.",
+    }
 
 
-@app.get("/teacher", tags=["pages"])
-def serve_teacher_dashboard():
-    """Serve teacher dashboard."""
-    path = os.path.join(static_dir, "teacher.html")
-    return FileResponse(path)
-
-
-@app.get("/student/test/{token}", tags=["pages"])
-def serve_student_test(token: str):
-    """Serve student test page."""
-    path = os.path.join(static_dir, "exam.html")
-    return FileResponse(path)
-
-
-@app.get("/results/{result_id}", tags=["pages"])
-def serve_results_page(result_id: int):
-    """Serve results page."""
-    path = os.path.join(static_dir, "results.html")
-    return FileResponse(path)
-
-
-@app.get("/health", tags=["health"])
+@app.get("/health", tags=["Health"])
 def health_check():
-    return {"status": "ok", "message": "Student Performance Checker is running"}
+    return {"status": "ok", "version": "3.0.0", "platform": "EduPlatform"}
