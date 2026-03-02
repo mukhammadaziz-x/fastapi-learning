@@ -15,13 +15,13 @@ class TaskCreate(BaseModel):
     @classmethod
     def validate_due_date(cls, v):
         if v and v < date.today():
-            return {'message':"Date mustn't be previous!"}
+            raise ValueError("Date mustn't be in the past!")
         return v
 
     @model_validator(mode='after')
     def check_desc_or_tags(self):
         if not self.description and not self.tags:
-            return {'message':"At least enter 'description' or 'tags'"}
+            raise ValueError("At least enter 'description' or 'tags'")
         return self
 
 
@@ -37,7 +37,7 @@ class TaskUpdate(BaseModel):
     @classmethod
     def check_empty_body(cls, data: dict):
         if not data:
-            return {'message': "Body is empty!"}
+            raise ValueError("Body is empty!")
         return data
 
 class TaskOut(TaskCreate):

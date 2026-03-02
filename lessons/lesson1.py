@@ -19,7 +19,7 @@ async def get_user(user_id: int):
     return {'id': user_id}
 
 @app.get('/roles/{user_type}')
-async def get_user(user_type: UserType):
+async def get_role(user_type: UserType):
     if user_type == UserType.admin:
         return {'text': 'Hello, you have limited access!'}
     elif user_type is UserType.superuser:
