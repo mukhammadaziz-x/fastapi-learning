@@ -1,7 +1,9 @@
 """User schemas."""
-from pydantic import BaseModel, EmailStr, Field
+import re
 from typing import Optional
 from datetime import datetime
+
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 # ========== AUTH ==========
@@ -10,13 +12,22 @@ class RegisterRequest(BaseModel):
     username: str = Field(min_length=3, max_length=100)
     password: str = Field(
         min_length=8,
-        pattern=r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$",
         description="Kamida 8 ta belgi, 1 ta katta harf, 1 ta kichik harf, 1 ta raqam va 1 ta maxsus belgi bo'lishi kerak.",
     )
     full_name: Optional[str] = None
     # Public registration har doim student sifatida yaratiladi
     role: str = Field(default="student", pattern="^(student)$")
     student_id_number: Optional[str] = None
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        pattern = r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$"
+        if not re.fullmatch(pattern, v):
+            raise ValueError(
+                "Parol kamida 8 ta belgi, 1 ta katta harf, 1 ta kichik harf, 1 ta raqam va 1 ta maxsus belgi bo'lishi kerak."
+            )
+        return v
 
 
 class LoginRequest(BaseModel):
@@ -102,5 +113,15 @@ class PasswordChangeRequest(BaseModel):
     old_password: str
     new_password: str = Field(
         min_length=8,
-        pattern=r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$",
+        description="Kamida 8 ta belgi, 1 ta katta harf, 1 ta kichik harf, 1 ta raqam va 1 ta maxsus belgi bo'lishi kerak.",
     )
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, v: str) -> str:
+        pattern = r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$"
+        if not re.fullmatch(pattern, v):
+            raise ValueError(
+                "Parol kamida 8 ta belgi, 1 ta katta harf, 1 ta kichik harf, 1 ta raqam va 1 ta maxsus belgi bo'lishi kerak."
+            )
+        return v
