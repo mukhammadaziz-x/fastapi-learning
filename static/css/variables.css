@@ -1,97 +1,103 @@
 /* ═══════════════════════════════════════════════════════════
    EduPlatform — Design System Variables
+   Dark Navy Professional Theme
    ═══════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-    /* ── Brand Colors ── */
+    /* ── Brand ── */
     --primary: #6366f1;
     --primary-light: #818cf8;
     --primary-dark: #4f46e5;
-    --primary-glow: rgba(99, 102, 241, 0.25);
-
+    --primary-glow: rgba(99, 102, 241, 0.15);
     --secondary: #8b5cf6;
     --secondary-light: #a78bfa;
-
     --accent: #f59e0b;
     --accent-light: #fbbf24;
 
-    /* ── Status Colors ── */
+    /* ── Status ── */
     --success: #10b981;
     --success-light: #34d399;
-    --success-bg: rgba(16, 185, 129, 0.12);
-
+    --success-bg: rgba(16, 185, 129, 0.1);
     --warning: #f59e0b;
     --warning-light: #fbbf24;
-    --warning-bg: rgba(245, 158, 11, 0.12);
-
+    --warning-bg: rgba(245, 158, 11, 0.1);
     --danger: #ef4444;
     --danger-light: #f87171;
-    --danger-bg: rgba(239, 68, 68, 0.12);
-
+    --danger-bg: rgba(239, 68, 68, 0.1);
     --info: #3b82f6;
     --info-light: #60a5fa;
-    --info-bg: rgba(59, 130, 246, 0.12);
+    --info-bg: rgba(59, 130, 246, 0.1);
 
-    /* ── Grade Colors ── */
+    /* ── Grades ── */
     --grade-distinction: #10b981;
     --grade-merit: #3b82f6;
     --grade-pass: #f59e0b;
     --grade-fail: #ef4444;
 
-    /* ── Neutrals ── */
+    /* ── Backgrounds ── */
+    --bg-body: #0a0f1e;
     --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --bg-tertiary: #334155;
-    --bg-card: rgba(30, 41, 59, 0.8);
-    --bg-card-hover: rgba(51, 65, 85, 0.6);
-    --bg-input: rgba(15, 23, 42, 0.6);
+    --bg-secondary: #141c30;
+    --bg-card: rgba(20, 28, 48, 0.7);
+    --bg-card-solid: #141c30;
+    --bg-card-hover: rgba(30, 41, 64, 0.8);
+    --bg-input: rgba(15, 23, 42, 0.5);
+    --bg-elevated: rgba(25, 35, 60, 0.6);
 
-    --border: rgba(148, 163, 184, 0.12);
-    --border-light: rgba(148, 163, 184, 0.08);
+    /* ── Borders ── */
+    --border: rgba(99, 102, 241, 0.12);
+    --border-light: rgba(99, 102, 241, 0.06);
+    --border-hover: rgba(99, 102, 241, 0.25);
     --border-focus: rgba(99, 102, 241, 0.5);
 
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    /* ── Text ── */
+    --text-primary: #e8ecf4;
+    --text-secondary: #8b95a8;
+    --text-muted: #556178;
     --text-inverse: #0f172a;
+    --text-white: #ffffff;
 
     /* ── Gradients ── */
     --gradient-primary: linear-gradient(135deg, #6366f1, #8b5cf6);
     --gradient-accent: linear-gradient(135deg, #f59e0b, #ef4444);
-    --gradient-success: linear-gradient(135deg, #10b981, #3b82f6);
+    --gradient-success: linear-gradient(135deg, #10b981, #06b6d4);
+    --gradient-blue: linear-gradient(135deg, #3b82f6, #6366f1);
+    --gradient-admin: linear-gradient(135deg, #6366f1, #ec4899);
     --gradient-teacher: linear-gradient(135deg, #10b981, #06b6d4);
     --gradient-student: linear-gradient(135deg, #f59e0b, #ef4444);
-    --gradient-admin: linear-gradient(135deg, #6366f1, #ec4899);
-    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    --gradient-body: linear-gradient(160deg, #0a0f1e 0%, #0f1629 30%, #111827 60%, #0d1321 100%);
 
     /* ── Shadows ── */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
-    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.5);
-    --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.3);
-    --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.2);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.15);
+    --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(99, 102, 241, 0.05);
 
     /* ── Typography ── */
     --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
 
-    /* ── Spacing ── */
+    /* ── Radius ── */
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 16px;
-    --radius-xl: 24px;
+    --radius-xl: 20px;
+    --radius-2xl: 24px;
     --radius-full: 9999px;
 
     /* ── Transitions ── */
     --transition-fast: 0.15s ease;
-    --transition-base: 0.25s ease;
-    --transition-slow: 0.4s ease;
+    --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
     /* ── Z-index ── */
+    --z-navbar: 50;
     --z-dropdown: 100;
     --z-modal-backdrop: 200;
     --z-modal: 300;
     --z-toast: 400;
-    --z-tooltip: 500;
 }
