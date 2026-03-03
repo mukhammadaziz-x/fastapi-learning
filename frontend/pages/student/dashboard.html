@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Dashboard — PDP Education</title>
+    <link rel="stylesheet" href="../../assets/css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="../../assets/img/pdp-education.png" alt="PDP Education"
+                    style="max-width: 160px; background: white; padding: 8px 12px; border-radius: 8px;">
+                <div class="badge badge-primary mt-4">Student</div>
+            </div>
+            <nav class="sidebar-nav">
+                <a class="nav-item active" href="#">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    My Performance
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px">
+                    <div id="user-name" style="color:var(--text-primary);font-weight:600"></div>
+                    <div id="user-role"></div>
+                </div>
+                <button class="btn btn-secondary btn-full btn-sm" onclick="doLogout()">Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1>My Performance</h1>
+                <p>Your test history and topic mastery</p>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Tests Taken</div>
+                    <div class="stat-value" id="stat-total">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Average Pass Rate</div>
+                    <div class="stat-value"><span id="stat-pass-rate">—</span>%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Passed / Failed</div>
+                    <div class="stat-value" style="font-size:24px;margin-top:10px">
+                        <span class="text-success" id="stat-passed">—</span> / <span class="text-danger"
+                            id="stat-failed">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="grid-2 mb-8">
+                <div class="chart-container">
+                    <h3 style="font-size:16px;margin-bottom:16px">Scores Trend</h3>
+                    <canvas id="scoresChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 style="font-size:16px;margin-bottom:16px">Topic Mastery</h3>
+                    <canvas id="topicsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- History Table -->
+            <h3 style="font-size:18px;margin-bottom:16px">Test History</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Test</th>
+                            <th>Topic</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th>Date Taken</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Loading…</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { api } from '../../assets/js/api.js';
+        import { requireAuth, initUserDisplay, logout, formatDate } from '../../assets/js/utils.js';
+
+        const user = requireAuth('student');
+        if (!user) throw new Error('Not student');
+
+        initUserDisplay();
+        window.doLogout = logout;
+
+        // Chart instances
+        let scoresChart, topicsChart;
+
+        // Setup Chart.js defaults for dark theme
+        Chart.defaults.color = '#94A3B8';
+        Chart.defaults.font.family = 'Inter';
+
+        async function loadData() {
+            try {
+                const data = await api.myStats();
+
+                // Top stats
+                document.getElementById('stat-total').textContent = data.total_tests;
+                document.getElementById('stat-pass-rate').textContent = data.pass_rate;
+                document.getElementById('stat-passed').textContent = data.passed;
+                document.getElementById('stat-failed').textContent = data.failed;
+
+                // Table
+                const tbody = document.getElementById('history-tbody');
+                if (!data.sessions.length) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">You haven\'t taken any tests yet.</td></tr>';
+                } else {
+                    tbody.innerHTML = data.sessions.map(s => `
+          <tr>
+            <td>${s.test_title}</td>
+            <td>${s.topic ? `<span class="badge badge-primary">${s.topic}</span>` : '—'}</td>
+            <td><strong>${s.score ?? 0}%</strong></td>
+            <td><span class="badge ${s.status === 'passed' ? 'badge-success' : s.status === 'auto_failed' ? 'badge-danger' : 'badge-warning'}">${s.status.replace('_', ' ')}</span></td>
+            <td>${formatDate(s.submitted_at)}</td>
+          </tr>
+        `).join('');
+                }
+
+                // Charts data preparation
+                const sortedSessions = [...data.sessions].reverse(); // oldest to newest for trend
+                const labels = sortedSessions.map((_, i) => `Test ${i + 1}`);
+                const scores = sortedSessions.map(s => s.score ?? 0);
+
+                // Line Chart (Scores Trend)
+                const ctxScores = document.getElementById('scoresChart').getContext('2d');
+                scoresChart = new Chart(ctxScores, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Score (%)',
+                            data: scores,
+                            borderColor: '#6366F1',
+                            backgroundColor: 'rgba(99,102,241,0.2)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#06B6D4'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.05)' } },
+                            x: { grid: { display: false } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+                // Radar Chart (Topics)
+                const topicLabels = Object.keys(data.topic_averages);
+                const topicAverages = Object.values(data.topic_averages);
+
+                const ctxTopics = document.getElementById('topicsChart').getContext('2d');
+                if (topicLabels.length === 0) {
+                    // Show placeholder if no topics
+                    topicsChart = new Chart(ctxTopics, {
+                        type: 'radar',
+                        data: {
+                            labels: ['Math', 'Science', 'History', 'Languages'],
+                            datasets: [{ data: [0, 0, 0, 0], borderColor: 'rgba(99,102,241,0.2)' }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            scales: { r: { ticks: { display: false }, grid: { color: 'rgba(255,255,255,0.05)' }, angleLines: { color: 'rgba(255,255,255,0.05)' } } },
+                            plugins: { legend: { display: false }, title: { display: true, text: 'No topic data yet' } }
+                        }
+                    });
+                } else {
+                    topicsChart = new Chart(ctxTopics, {
+                        type: 'radar',
+                        data: {
+                            labels: topicLabels,
+                            datasets: [{
+                                label: 'Average Score (%)',
+                                data: topicAverages,
+                                borderColor: '#06B6D4',
+                                backgroundColor: 'rgba(6,182,212,0.2)',
+                                pointBackgroundColor: '#10B981',
+                                borderWidth: 2,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                r: {
+                                    beginAtZero: true, max: 100,
+                                    ticks: { backdropColor: 'transparent', color: '#94A3B8' },
+                                    grid: { color: 'rgba(255,255,255,0.1)' },
+                                    angleLines: { color: 'rgba(255,255,255,0.1)' }
+                                }
+                            },
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+
+            } catch (e) {
+                document.querySelector('.main-content').innerHTML = `
+        <div class="alert alert-danger" style="margin:40px">
+          <h2>Failed to load dashboard</h2>
+          <p>${e.message}</p>
+        </div>
+      `;
+            }
+        }
+
+        loadData();
+    </script>
+</body>
+
+</html>

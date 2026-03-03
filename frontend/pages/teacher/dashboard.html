@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teacher Dashboard — PDP Education</title>
+    <link rel="stylesheet" href="../../assets/css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="../../assets/img/pdp-education.png" alt="PDP Education"
+                    style="max-width: 160px; background: white; padding: 8px 12px; border-radius: 8px;">
+                <div class="badge badge-cyan mt-4">Teacher</div>
+            </div>
+            <nav class="sidebar-nav">
+                <a class="nav-item active" href="#" onclick="showSection('tests', this)">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    My Tests
+                </a>
+                <a class="nav-item" href="#" onclick="showSection('results', this)">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Student Results
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px">
+                    <div id="user-name" style="color:var(--text-primary);font-weight:600"></div>
+                    <div id="user-role"></div>
+                </div>
+                <button class="btn btn-secondary btn-full btn-sm" onclick="doLogout()">Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="main-content">
+
+            <!-- My Tests -->
+            <section id="section-tests">
+                <div class="page-header flex" style="justify-content:space-between;align-items:flex-start">
+                    <div>
+                        <h1>My Tests</h1>
+                        <p>Create and manage your test assignments</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('modal-create-test')">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        New Test
+                    </button>
+                </div>
+                <div id="tests-grid"
+                    style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px">
+                    <div class="card text-center text-muted">Loading tests…</div>
+                </div>
+            </section>
+
+            <!-- Results -->
+            <section id="section-results" class="hidden">
+                <div class="page-header">
+                    <h1>Student Results</h1>
+                    <p>Select a test to view submitted results</p>
+                </div>
+                <div class="form-group" style="max-width:360px">
+                    <label class="form-label">Select Test</label>
+                    <select id="results-test-select" class="form-select" onchange="loadResults(this.value)">
+                        <option value="">— Choose a test —</option>
+                    </select>
+                </div>
+                <div id="results-table-wrap" class="hidden">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Email</th>
+                                    <th>Score</th>
+                                    <th>Status</th>
+                                    <th>Violations</th>
+                                    <th>Submitted</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Create Test Modal -->
+    <div class="modal-overlay" id="modal-create-test">
+        <div class="modal" style="max-width:620px">
+            <button class="modal-close" onclick="closeModal('modal-create-test')">✕</button>
+            <div class="modal-title">Create New Test</div>
+            <div id="create-test-alert"></div>
+            <div class="form-group">
+                <label class="form-label">Test Title</label>
+                <input id="ct-title" type="text" class="form-input" placeholder="Python Basics Quiz" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Topic / Subject</label>
+                <input id="ct-topic" type="text" class="form-input" placeholder="Python, Data Structures…" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea id="ct-desc" class="form-textarea" placeholder="Optional description…"></textarea>
+            </div>
+
+            <div style="border-top:1px solid var(--border);margin:20px 0;padding-top:20px">
+                <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:12px">
+                    <strong style="font-size:14px">Questions</strong>
+                    <button class="btn btn-secondary btn-sm" onclick="addQuestionRow()">+ Add Question</button>
+                </div>
+                <div id="questions-container"></div>
+            </div>
+
+            <div class="grid-2">
+                <button class="btn btn-secondary" onclick="closeModal('modal-create-test')">Cancel</button>
+                <button class="btn btn-primary" id="btn-create-test" onclick="createTest()">Create Test</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generate Link Modal -->
+    <div class="modal-overlay" id="modal-gen-link">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('modal-gen-link')">✕</button>
+            <div class="modal-title">Generate Test Link</div>
+            <div id="gen-link-alert"></div>
+            <input type="hidden" id="link-test-id" />
+            <div class="form-group">
+                <label class="form-label">Available From</label>
+                <input id="link-start" type="datetime-local" class="form-input" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Available Until</label>
+                <input id="link-end" type="datetime-local" class="form-input" />
+            </div>
+            <div id="link-result" class="hidden">
+                <div class="alert alert-success" style="word-break:break-all" id="link-url"></div>
+                <button class="btn btn-secondary btn-sm btn-full" onclick="copyLink()">📋 Copy Link</button>
+            </div>
+            <div class="grid-2 mt-4">
+                <button class="btn btn-secondary" onclick="closeModal('modal-gen-link')">Close</button>
+                <button class="btn btn-primary" id="btn-gen-link" onclick="generateLink()">Generate</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { api } from '../../assets/js/api.js';
+        import { requireAuth, initUserDisplay, logout, showToast, openModal, closeModal, formatDate } from '../../assets/js/utils.js';
+
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+
+        const user = requireAuth('teacher');
+        if (!user) throw new Error('Not teacher');
+        initUserDisplay();
+        window.doLogout = logout;
+
+        // ── Section switcher ───────────────────────────────────────────────────────
+        window.showSection = function (name, el) {
+            document.querySelectorAll('section[id^="section-"]').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`section-${name}`)?.classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+        };
+
+        // ── Load tests ─────────────────────────────────────────────────────────────
+        let allTests = [];
+
+        async function loadTests() {
+            const grid = document.getElementById('tests-grid');
+            const sel = document.getElementById('results-test-select');
+            try {
+                allTests = await api.listTests();
+                sel.innerHTML = '<option value="">— Choose a test —</option>' +
+                    allTests.map(t => `<option value="${t.id}">${t.title}</option>`).join('');
+
+                if (!allTests.length) {
+                    grid.innerHTML = '<div class="card text-center text-muted">No tests yet. Create your first one!</div>';
+                    return;
+                }
+                grid.innerHTML = allTests.map(t => `
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+            <div>
+              <div style="font-family:Outfit,sans-serif;font-size:18px;font-weight:700">${t.title}</div>
+              ${t.topic ? `<span class="badge badge-cyan" style="margin-top:6px">${t.topic}</span>` : ''}
+            </div>
+          </div>
+          ${t.description ? `<p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">${t.description}</p>` : ''}
+          <div class="flex gap-2" style="flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" onclick="openLinkModal(${t.id})">
+              🔗 Generate Link
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="viewResults(${t.id})">
+              📊 Results
+            </button>
+          </div>
+        </div>
+      `).join('');
+            } catch (e) {
+                grid.innerHTML = `<div class="card text-danger">${e.message}</div>`;
+            }
+        }
+
+        // ── Question rows ──────────────────────────────────────────────────────────
+        let qCount = 0;
+        window.addQuestionRow = function () {
+            qCount++;
+            const n = qCount;
+            const div = document.createElement('div');
+            div.id = `q-row-${n}`;
+            div.style.cssText = 'background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px';
+            div.innerHTML = `
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--primary-light)">Question #${n}</div>
+      <div class="form-group">
+        <input class="form-input" id="q${n}-text" placeholder="Question text…" />
+      </div>
+      <div class="grid-2" style="margin-bottom:8px">
+        <input class="form-input" id="q${n}-a" placeholder="Option A" />
+        <input class="form-input" id="q${n}-b" placeholder="Option B" />
+        <input class="form-input" id="q${n}-c" placeholder="Option C" />
+        <input class="form-input" id="q${n}-d" placeholder="Option D" />
+      </div>
+      <div class="flex gap-2" style="align-items:center">
+        <label class="form-label" style="margin:0;white-space:nowrap">Correct:</label>
+        <select class="form-select" id="q${n}-ans" style="width:auto">
+          <option>A</option><option>B</option><option>C</option><option>D</option>
+        </select>
+        <button class="btn btn-danger btn-sm" onclick="document.getElementById('q-row-${n}').remove()">Remove</button>
+      </div>
+    `;
+            document.getElementById('questions-container').appendChild(div);
+        };
+
+        // ── Create test ────────────────────────────────────────────────────────────
+        window.createTest = async function () {
+            const alertEl = document.getElementById('create-test-alert');
+            alertEl.innerHTML = '';
+            const btn = document.getElementById('btn-create-test');
+
+            const title = document.getElementById('ct-title').value.trim();
+            const topic = document.getElementById('ct-topic').value.trim();
+            const desc = document.getElementById('ct-desc').value.trim();
+
+            if (!title) { alertEl.innerHTML = '<div class="alert alert-danger">Title is required.</div>'; return; }
+
+            const questions = [];
+            document.querySelectorAll('[id^="q-row-"]').forEach(row => {
+                const n = row.id.split('-')[2];
+                const text = document.getElementById(`q${n}-text`)?.value.trim();
+                const a = document.getElementById(`q${n}-a`)?.value.trim();
+                const b = document.getElementById(`q${n}-b`)?.value.trim();
+                const c = document.getElementById(`q${n}-c`)?.value.trim();
+                const d = document.getElementById(`q${n}-d`)?.value.trim();
+                const ans = document.getElementById(`q${n}-ans`)?.value;
+                if (text && a && b) {
+                    questions.push({ text, options: [a, b, c || '', d || ''], correct_answer: ans });
+                }
+            });
+
+            btn.disabled = true; btn.textContent = 'Creating…';
+            try {
+                await api.createTest({ title, topic: topic || null, description: desc || null, questions });
+                showToast('Test created successfully!', 'success');
+                closeModal('modal-create-test');
+                qCount = 0;
+                document.getElementById('questions-container').innerHTML = '';
+                ['ct-title', 'ct-topic', 'ct-desc'].forEach(id => document.getElementById(id).value = '');
+                loadTests();
+            } catch (e) {
+                alertEl.innerHTML = `<div class="alert alert-danger">${e.message}</div>`;
+            } finally {
+                btn.disabled = false; btn.textContent = 'Create Test';
+            }
+        };
+
+        // ── Generate link ──────────────────────────────────────────────────────────
+        window.openLinkModal = function (testId) {
+            document.getElementById('link-test-id').value = testId;
+            document.getElementById('link-result').classList.add('hidden');
+            document.getElementById('gen-link-alert').innerHTML = '';
+            // Set default times: now → +2 hours
+            const now = new Date();
+            const later = new Date(now.getTime() + 2 * 3600 * 1000);
+            document.getElementById('link-start').value = now.toISOString().slice(0, 16);
+            document.getElementById('link-end').value = later.toISOString().slice(0, 16);
+            openModal('modal-gen-link');
+        };
+
+        let generatedLink = '';
+        window.generateLink = async function () {
+            const testId = document.getElementById('link-test-id').value;
+            const start = document.getElementById('link-start').value;
+            const end = document.getElementById('link-end').value;
+            const alertEl = document.getElementById('gen-link-alert');
+            const btn = document.getElementById('btn-gen-link');
+            alertEl.innerHTML = '';
+
+            if (!start || !end) { alertEl.innerHTML = '<div class="alert alert-danger">Set both times.</div>'; return; }
+
+            btn.disabled = true; btn.textContent = 'Generating…';
+            try {
+                const data = await api.generateLink(testId, { start_time: new Date(start).toISOString(), end_time: new Date(end).toISOString() });
+                generatedLink = `${window.location.origin}/pages/test/take.html?token=${data.token}`;
+                document.getElementById('link-url').textContent = generatedLink;
+                document.getElementById('link-result').classList.remove('hidden');
+                showToast('Link generated!', 'success');
+            } catch (e) {
+                alertEl.innerHTML = `<div class="alert alert-danger">${e.message}</div>`;
+            } finally {
+                btn.disabled = false; btn.textContent = 'Generate';
+            }
+        };
+
+        window.copyLink = function () {
+            navigator.clipboard.writeText(generatedLink);
+            showToast('Link copied to clipboard!', 'success');
+        };
+
+        // ── View results ───────────────────────────────────────────────────────────
+        window.viewResults = function (testId) {
+            showSection('results', document.querySelectorAll('.nav-item')[1]);
+            document.getElementById('results-test-select').value = testId;
+            loadResults(testId);
+        };
+
+        window.loadResults = async function (testId) {
+            const wrap = document.getElementById('results-table-wrap');
+            const tbody = document.getElementById('results-tbody');
+            if (!testId) { wrap.classList.add('hidden'); return; }
+            wrap.classList.remove('hidden');
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Loading…</td></tr>';
+            try {
+                const results = await api.testResults(testId);
+                if (!results.length) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No submissions yet.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = results.map(r => `
+        <tr>
+          <td>${r.student_name}</td>
+          <td style="font-size:12px">${r.student_email}</td>
+          <td><strong>${r.score ?? '—'}%</strong></td>
+          <td><span class="badge ${r.status === 'passed' ? 'badge-success' : r.status === 'auto_failed' ? 'badge-danger' : 'badge-warning'}">${r.status}</span></td>
+          <td>${r.violations}</td>
+          <td style="font-size:12px">${formatDate(r.submitted_at)}</td>
+        </tr>
+      `).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-danger">${e.message}</td></tr>`;
+            }
+        };
+
+        // ── Close on overlay click ─────────────────────────────────────────────────
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(overlay.id); });
+        });
+
+        loadTests();
+    </script>
+</body>
+
+</html>

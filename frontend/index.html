@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDP Education — Learn Without Limits</title>
+  <meta name="description"
+    content="PDP Education — Student performance tracking, proctored tests, and analytics for teachers and students." />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: var(--bg-base);
+      overflow: hidden;
+    }
+
+    /* Ambient background */
+    .bg-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 700px 500px at 20% 50%, rgba(99, 102, 241, 0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 500px 400px at 80% 30%, rgba(6, 182, 212, 0.08) 0%, transparent 70%);
+    }
+
+    /* Auth box */
+    .auth-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 480px;
+      padding: 0 20px;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .brand-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .brand-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, var(--primary), var(--cyan));
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 30px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary-light), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .brand-tagline {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Tab system */
+    .auth-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+      box-shadow: var(--shadow-lg), var(--glow);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      margin-bottom: 28px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: none;
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* Validation indicators */
+    .password-rules {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+    }
+
+    .rule {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: var(--transition);
+    }
+
+    .rule.met {
+      color: var(--success);
+    }
+
+    .rule .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+
+    .admin-link {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .admin-link a {
+      color: var(--text-secondary);
+    }
+
+    .admin-link a:hover {
+      color: var(--primary-light);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-glow"></div>
+
+  <div class="auth-container">
+    <!-- Brand -->
+    <div class="brand">
+      <div class="brand-logo" style="display:flex; justify-content:center; align-items:center;">
+        <img src="assets/img/pdp-education.png" alt="PDP Education"
+          style="max-width:240px; background:white; padding:12px 20px; border-radius:12px;">
+      </div>
+      <p class="brand-tagline">Track performance. Master knowledge.</p>
+    </div>
+
+    <!-- Card -->
+    <div class="auth-card">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
+        <button class="tab-btn" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+
+      <!-- Login Panel -->
+      <div id="panel-login" class="tab-panel active">
+        <div id="login-alert"></div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input id="login-email" type="email" class="form-input" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input id="login-password" type="password" class="form-input" placeholder="••••••••"
+            autocomplete="current-password" />
+        </div>
+        <button id="btn-login" class="btn btn-primary btn-full btn-lg" onclick="doLogin()">
+          Sign In
+        </button>
+      </div>
+
+      <!-- Signup Panel -->
+      <div id="panel-signup" class="tab-panel">
+        <div id="signup-alert"></div>
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input id="signup-name" type="text" class="form-input" placeholder="Jasur Toshmatov" autocomplete="name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input id="signup-email" type="email" class="form-input" placeholder="you@example.com" autocomplete="email" />
+          <div id="email-error" class="form-error">Invalid email format</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input id="signup-password" type="password" class="form-input"
+            placeholder="Min. 8 chars with A-Z, a-z, 0-9, symbol" autocomplete="new-password"
+            oninput="checkPasswordRules(this.value)" />
+          <div class="password-rules">
+            <div class="rule" id="rule-upper"><span class="dot"></span>Uppercase letter</div>
+            <div class="rule" id="rule-lower"><span class="dot"></span>Lowercase letter</div>
+            <div class="rule" id="rule-digit"><span class="dot"></span>Digit (0-9)</div>
+            <div class="rule" id="rule-special"><span class="dot"></span>Special char</div>
+            <div class="rule" id="rule-length"><span class="dot"></span>8+ characters</div>
+          </div>
+        </div>
+        <button id="btn-signup" class="btn btn-primary btn-full btn-lg" onclick="doSignup()">
+          Create Account
+        </button>
+        <p class="text-muted text-center mt-4" style="font-size:12px">Students only. Teachers are created by admin.</p>
+      </div>
+    </div>
+
+    <div class="admin-link">
+      Admin? <a href="/pages/admin/login.html">Admin Panel →</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { api, setAuth } from './assets/js/api.js';
+    import { showToast } from './assets/js/utils.js';
+
+    window.switchTab = function (tab) {
+      document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', ['login', 'signup'][i] === tab));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById(`panel-${tab}`).classList.add('active');
+    };
+
+    const EMAIL_RE = /[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+/;
+    const PWD_RE = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*\-]).{8,}$/;
+
+    window.checkPasswordRules = function (v) {
+      const set = (id, ok) => document.getElementById(id)?.classList.toggle('met', ok);
+      set('rule-upper', /[A-Z]/.test(v));
+      set('rule-lower', /[a-z]/.test(v));
+      set('rule-digit', /[0-9]/.test(v));
+      set('rule-special', /[#?!@$ %^&*\-]/.test(v));
+      set('rule-length', v.length >= 8);
+    };
+
+    function setAlert(id, msg, type = 'danger') {
+      const el = document.getElementById(id);
+      el.innerHTML = msg ? `<div class="alert alert-${type}">${msg}</div>` : '';
+    }
+
+    function setBtnLoading(id, loading) {
+      const btn = document.getElementById(id);
+      btn.disabled = loading;
+      btn.innerHTML = loading
+        ? `<span class="spinner" style="width:20px;height:20px;border-width:2px"></span> Please wait…`
+        : (id === 'btn-login' ? 'Sign In' : 'Create Account');
+    }
+
+    window.doLogin = async function () {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      setAlert('login-alert', '');
+      if (!email || !password) return setAlert('login-alert', 'Please fill in all fields.');
+
+      setBtnLoading('btn-login', true);
+      try {
+        const data = await api.login({ email, password });
+        setAuth(data);
+        const redirects = {
+          admin: '/pages/admin/dashboard.html',
+          teacher: '/pages/teacher/dashboard.html',
+          student: '/pages/student/dashboard.html',
+        };
+        window.location.href = redirects[data.role] || '/';
+      } catch (e) {
+        setAlert('login-alert', e.message);
+      } finally {
+        setBtnLoading('btn-login', false);
+      }
+    };
+
+    window.doSignup = async function () {
+      const full_name = document.getElementById('signup-name').value.trim();
+      const email = document.getElementById('signup-email').value.trim();
+      const password = document.getElementById('signup-password').value;
+      setAlert('signup-alert', '');
+
+      if (!full_name || !email || !password) return setAlert('signup-alert', 'Please fill in all fields.');
+      if (!EMAIL_RE.test(email)) return setAlert('signup-alert', 'Invalid email format.');
+      if (!PWD_RE.test(password)) return setAlert('signup-alert', 'Password does not meet requirements. Check the rules above.');
+
+      setBtnLoading('btn-signup', true);
+      try {
+        await api.signup({ full_name, email, password });
+        setAlert('signup-alert', 'Account created! You can now sign in.', 'success');
+        setTimeout(() => window.switchTab('login'), 1500);
+      } catch (e) {
+        setAlert('signup-alert', e.message);
+      } finally {
+        setBtnLoading('btn-signup', false);
+      }
+    };
+
+    // Enter key support
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const activePanel = document.querySelector('.tab-panel.active');
+        if (activePanel.id === 'panel-login') window.doLogin();
+        else window.doSignup();
+      }
+    });
+  </script>
+</body>
+
+</html>
