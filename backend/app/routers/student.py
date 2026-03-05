@@ -1,3 +1,4 @@
+```python
 from datetime import datetime
 from typing import List, Optional
 
@@ -9,7 +10,7 @@ from pydantic import BaseModel
 from app.database import get_db
 from app.models import (
     User, Student, TestLink, Test, Question,
-    TestSession, Answer, TestStatus,
+    TestSession, Answer, TestStatus, Group, GroupStudent,
 )
 from app.auth import require_role, get_current_user
 
@@ -29,17 +30,22 @@ async def get_student_profile(user: User, db: AsyncSession) -> Student:
     return student
 
 
-async def get_valid_link(token: str, db: AsyncSession) -> TestLink:
-    result = await db.execute(select(TestLink).where(TestLink.token == token))
+async def get_valid_link(token: str, db: AsyncSession, student_id: int) -> TestLink:
+    result = await db.execute(select(TestLink).where(TestLink.token == token, TestLink.is_active == True))
     link = result.scalar_one_or_none()
-    if not link or not link.is_active:
-        raise HTTPException(status_code=404, detail="Test link not found or inactive")
 
-    now = datetime.utcnow()
-    if now < link.start_time:
-        raise HTTPException(status_code=403, detail="Test has not started yet")
-    if now > link.end_time:
-        raise HTTPException(status_code=403, detail="Test link has expired")
+    if not link:
+        raise HTTPException(status_code=404, detail="Invalid or inactive test link")
+
+    now_utc = datetime.utcnow()
+    if now_utc < link.start_time or now_utc > link.end_time:
+        raise HTTPException(status_code=400, detail="Test link expired")
+
+    # check group restriction
+    if link.group_id:
+        gres = await db.execute(select(GroupStudent).where(GroupStudent.group_id == link.group_id, GroupStudent.student_id == student_id))
+        if not gres.scalar_one_or_none():
+            raise HTTPException(status_code=403, detail="Test is restricted to members of a specific group.")
 
     return link
 
@@ -313,39 +319,37 @@ async def my_stats(
 
 @router.get("/leaderboard")
 async def leaderboard(
+    group_id: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(student_required),
 ):
-    """
-    Returns a ranked list of all students by their average score
-    across passed tests. The current user's own rank is also highlighted.
-    """
-    sessions_result = await db.execute(
-        select(TestSession, Student, User)
-        .join(Student, Student.id == TestSession.student_id)
-        .join(User, User.id == Student.user_id)
+    current_student = await get_student_profile(current_user, db)
+
+    # Base query for test sessions
+    q = select(TestSession, Student, User)\
+        .join(Student, Student.id == TestSession.student_id)\
+        .join(User, User.id == Student.user_id)\
         .where(
             TestSession.status == TestStatus.passed,
             TestSession.score.isnot(None),
         )
-    )
+
+    # Optional group filter
+    if group_id:
+        q = q.join(GroupStudent, GroupStudent.student_id == Student.id)\
+             .where(GroupStudent.group_id == group_id)
+
+    sessions_result = await db.execute(q)
     rows = sessions_result.all()
 
-    # Aggregate by student
     student_data: dict = {}
     for session, student, user in rows:
         sid = student.id
         if sid not in student_data:
-            student_data[sid] = {
-                "student_id": sid,
-                "full_name": user.full_name,
-                "scores": [],
-                "tests_passed": 0,
-            }
+            student_data[sid] = {"student_id": sid, "full_name": user.full_name, "scores": [], "tests_passed": 0}
         student_data[sid]["scores"].append(session.score)
         student_data[sid]["tests_passed"] += 1
 
-    # Build ranked list
     rankings = []
     for data in student_data.values():
         avg = round(sum(data["scores"]) / len(data["scores"]), 1)
@@ -357,17 +361,23 @@ async def leaderboard(
             "best_score": max(data["scores"]),
         })
 
-    # Sort: by avg_score desc, then tests_passed desc
     rankings.sort(key=lambda x: (-x["avg_score"], -x["tests_passed"]))
     for i, r in enumerate(rankings):
         r["rank"] = i + 1
 
-    # Find current student's rank
-    current_student = await get_student_profile(current_user, db)
     my_rank = next((r for r in rankings if r["student_id"] == current_student.id), None)
+
+    # fetch student's groups to show in the dropdown
+    g_res = await db.execute(
+        select(Group.id, Group.name)
+        .join(GroupStudent, GroupStudent.group_id == Group.id)
+        .where(GroupStudent.student_id == current_student.id)
+    )
+    my_groups = [{"id": r[0], "name": r[1]} for r in g_res.all()]
 
     return {
         "rankings": rankings,
         "my_rank": my_rank,
         "total_students": len(rankings),
+        "available_groups": my_groups
     }

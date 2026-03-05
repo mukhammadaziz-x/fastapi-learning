@@ -70,8 +70,13 @@ const api = {
     updateTest: (id, body) => apiFetch(`/teacher/tests/${id}`, { method: 'PUT', body }),
     deleteTest: (id) => apiFetch(`/teacher/tests/${id}`, { method: 'DELETE' }),
     addQuestion: (testId, body) => apiFetch(`/teacher/tests/${testId}/questions`, { method: 'POST', body }),
-    generateLink: (testId, body) => apiFetch(`/teacher/tests/${testId}/link`, { method: 'POST', body }),
+    generateLink: (testId, body) => apiFetch(`/teacher/tests/${testId}/links`, { method: 'POST', body }), // updated from /link to /links
     testResults: (testId) => apiFetch(`/teacher/tests/${testId}/results`),
+    gradeSession: (sessionId, body) => apiFetch(`/teacher/sessions/${sessionId}/grade`, { method: 'POST', body }),
+    studentStats: (studentId) => apiFetch(`/teacher/students/${studentId}/stats`),
+    createGroup: (body) => apiFetch('/teacher/groups', { method: 'POST', body }),
+    listGroups: () => apiFetch('/teacher/groups'),
+    addStudentsToGroup: (groupId, body) => apiFetch(`/teacher/groups/${groupId}/students`, { method: 'POST', body }),
     gradeSession: (sessionId, body) => apiFetch(`/teacher/sessions/${sessionId}/grade`, { method: 'POST', body }),
     studentStats: (studentId) => apiFetch(`/teacher/students/${studentId}/stats`),
 
@@ -80,7 +85,7 @@ const api = {
     reportViolation: (token) => apiFetch(`/student/tests/${token}/violation`, { method: 'POST', body: {} }),
     submitTest: (token, body) => apiFetch(`/student/tests/${token}/submit`, { method: 'POST', body }),
     myStats: () => apiFetch('/student/stats'),
-    leaderboard: () => apiFetch('/student/leaderboard'),
+    leaderboard: (groupId) => apiFetch(`/student/leaderboard${groupId ? `?group_id=${groupId}` : ''}`),
 };
 
 export { api, getToken, getUser, setAuth, clearAuth };

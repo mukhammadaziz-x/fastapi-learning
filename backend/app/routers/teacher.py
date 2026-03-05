@@ -8,7 +8,7 @@ from sqlalchemy import select
 from pydantic import BaseModel
 
 from app.database import get_db
-from app.models import User, Teacher, Test, Question, TestLink, TestSession, Student
+from app.models import User, Teacher, Test, Question, TestLink, TestSession, Student, Group, GroupStudent
 from app.auth import require_role, get_current_user
 
 router = APIRouter(prefix="/teacher", tags=["teacher"])
@@ -36,6 +36,13 @@ class TestCreate(BaseModel):
 class LinkCreate(BaseModel):
     start_time: datetime
     end_time: datetime
+    group_id: Optional[int] = None
+
+class GroupCreate(BaseModel):
+    name: str
+
+class StudentsAdd(BaseModel):
+    emails: List[str]
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -45,6 +52,82 @@ async def get_teacher_profile(user: User, db: AsyncSession) -> Teacher:
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher profile not found")
     return teacher
+
+
+# ── Groups ────────────────────────────────────────────────────────────────────
+@router.post("/groups", status_code=201)
+async def create_group(
+    body: GroupCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(teacher_required)
+):
+    teacher = await get_teacher_profile(current_user, db)
+    group = Group(name=body.name, teacher_id=teacher.id)
+    db.add(group)
+    await db.commit()
+    await db.refresh(group)
+    return {"message": "Group created successfully", "group_id": group.id}
+
+@router.get("/groups")
+async def list_groups(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(teacher_required)
+):
+    teacher = await get_teacher_profile(current_user, db)
+    res = await db.execute(select(Group).where(Group.teacher_id == teacher.id))
+    groups = res.scalars().all()
+    
+    out = []
+    for g in groups:
+        # count students
+        c_res = await db.execute(select(GroupStudent).where(GroupStudent.group_id == g.id))
+        count = len(c_res.scalars().all())
+        out.append({"id": g.id, "name": g.name, "students_count": count})
+    return {"groups": out}
+
+@router.post("/groups/{group_id}/students")
+async def add_students_to_group(
+    group_id: int,
+    body: StudentsAdd,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(teacher_required)
+):
+    teacher = await get_teacher_profile(current_user, db)
+    # verify group
+    res = await db.execute(select(Group).where(Group.id == group_id, Group.teacher_id == teacher.id))
+    group = res.scalar_one_or_none()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    added = 0
+    not_found = []
+    
+    for email in body.emails:
+        email = email.strip()
+        if not email: continue
+        # Find user
+        u_res = await db.execute(select(User).where(User.email == email, User.role == "student"))
+        u = u_res.scalar_one_or_none()
+        if not u:
+            not_found.append(email)
+            continue
+            
+        s_res = await db.execute(select(Student).where(Student.user_id == u.id))
+        student = s_res.scalar_one_or_none()
+        if not student:
+            not_found.append(email)
+            continue
+            
+        # check if already in group
+        gs_res = await db.execute(select(GroupStudent).where(GroupStudent.group_id == group.id, GroupStudent.student_id == student.id))
+        if gs_res.scalar_one_or_none():
+            continue # already in
+            
+        db.add(GroupStudent(group_id=group.id, student_id=student.id))
+        added += 1
+        
+    await db.commit()
+    return {"message": f"Added {added} students", "not_found": not_found}
 
 
 # ── Endpoints ──────────────────────────────────────────────────────────────────
