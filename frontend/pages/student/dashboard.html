@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Student Dashboard — PDP Education</title>
-    <link rel="stylesheet" href="../../assets/css/style.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 
@@ -15,19 +15,20 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-logo">
-                <img src="../../assets/img/pdp-education.png" alt="PDP Education"
+                <img src="/assets/img/pdp-education.png" alt="PDP Education"
                     style="max-width: 160px; background: white; padding: 8px 12px; border-radius: 8px;">
                 <div class="badge badge-primary mt-4">Student</div>
             </div>
             <nav class="sidebar-nav">
-                <a class="nav-item active" href="#perf" onclick="showSection('perf', this)">
+                <a id="nav-perf" class="nav-item active" href="/student/dashboard" onclick="showSection('perf', event)">
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     My Performance
                 </a>
-                <a class="nav-item" href="#leaderboard" onclick="showSection('leaderboard', this)">
+                <a id="nav-leaderboard" class="nav-item" href="/student/dashboard/leaderboard"
+                    onclick="showSection('leaderboard', event)">
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -113,9 +114,16 @@
 
         <!-- Leaderboard Section (hidden by default) -->
         <main class="main-content" id="section-leaderboard" style="display:none">
-            <div class="page-header">
-                <h1>🏆 Leaderboard</h1>
-                <p>Top students ranked by average score across all passed tests</p>
+            <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start">
+                <div>
+                    <h1>🏆 Leaderboard</h1>
+                    <p>Top students ranked by average score across all passed tests</p>
+                </div>
+                <div>
+                    <select id="leaderboard-group-filter" class="form-select" onchange="loadLeaderboard(this.value)">
+                        <option value="">All Students</option>
+                    </select>
+                </div>
             </div>
 
             <!-- My rank banner -->
@@ -157,8 +165,8 @@
     </div>
 
     <script type="module">
-        import { api } from '../../assets/js/api.js';
-        import { requireAuth, initUserDisplay, logout, formatDate } from '../../assets/js/utils.js';
+        import { api } from '/assets/js/api.js';
+        import { requireAuth, initUserDisplay, logout, formatDate } from '/assets/js/utils.js';
 
         const user = requireAuth('student');
         if (!user) throw new Error('Not student');
@@ -169,16 +177,27 @@
         // ── Section navigation ──────────────────────────────────────
         const SECTIONS = { perf: 'section-perf', leaderboard: 'section-leaderboard' };
 
-        window.showSection = function (name, linkEl) {
+        window.showSection = function (name, event) {
+            if (event) {
+                event.preventDefault();
+                const targetUrl = event.currentTarget.getAttribute('href');
+                window.history.pushState({}, '', targetUrl);
+            }
             // Toggle visibility
             document.getElementById('section-perf').style.display = name === 'perf' ? '' : 'none';
             document.getElementById('section-leaderboard').style.display = name === 'leaderboard' ? '' : 'none';
             // Active link
             document.querySelectorAll('.nav-item').forEach(a => a.classList.remove('active'));
-            if (linkEl) linkEl.classList.add('active');
+            document.getElementById(`nav-${name}`).classList.add('active');
             // Lazy load leaderboard
             if (name === 'leaderboard') loadLeaderboard();
         };
+
+        window.addEventListener('popstate', () => {
+            const loc = window.location.pathname;
+            if (loc.includes('/leaderboard')) showSection('leaderboard');
+            else showSection('perf');
+        });
 
         // Chart instances
         let scoresChart, topicsChart;
@@ -336,14 +355,27 @@
         loadData();
 
         // ── Leaderboard ──────────────────────────────────────────
-        let leaderboardLoaded = false;
+        let lastLeaderboardGroupId = null;
 
-        async function loadLeaderboard() {
-            if (leaderboardLoaded) return;
+        window.loadLeaderboard = async function (groupId = "") {
             const tbody = document.getElementById('leaderboard-tbody');
+            if (lastLeaderboardGroupId === groupId && tbody.innerHTML.indexOf('Loading') === -1) return; // already loaded
+            lastLeaderboardGroupId = groupId;
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Loading…</td></tr>';
+
             try {
-                const data = await api.leaderboard();
-                leaderboardLoaded = true;
+                const data = await api.leaderboard(groupId);
+
+                // Populate group filter dropdown if not populated yet
+                const groupFilter = document.getElementById('leaderboard-group-filter');
+                if (groupFilter.options.length === 1 && data.available_groups) {
+                    data.available_groups.forEach(g => {
+                        const opt = document.createElement('option');
+                        opt.value = g.id;
+                        opt.textContent = 'Group: ' + g.name;
+                        groupFilter.appendChild(opt);
+                    });
+                }
 
                 // My rank banner
                 if (data.my_rank) {
@@ -387,6 +419,13 @@
 
         // Wrap perf section reference
         document.querySelector('.main-content').id = 'section-perf';
+
+        // Init based on URL
+        if (window.location.pathname.includes('/leaderboard')) {
+            showSection('leaderboard');
+        } else {
+            showSection('perf');
+        }
 
     </script>
 </body>

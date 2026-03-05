@@ -1,4 +1,3 @@
-```python
 from datetime import datetime
 from typing import List, Optional
 
@@ -57,8 +56,8 @@ async def access_test(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(student_required),
 ):
-    link = await get_valid_link(token, db)
     student = await get_student_profile(current_user, db)
+    link = await get_valid_link(token, db, student.id)
 
     # Check for existing complete session
     existing_result = await db.execute(
@@ -133,8 +132,8 @@ async def report_violation(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(student_required),
 ):
-    link = await get_valid_link(token, db)
     student = await get_student_profile(current_user, db)
+    link = await get_valid_link(token, db, student.id)
 
     session_result = await db.execute(
         select(TestSession).where(
@@ -185,8 +184,8 @@ async def submit_test(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(student_required),
 ):
-    link = await get_valid_link(token, db)
     student = await get_student_profile(current_user, db)
+    link = await get_valid_link(token, db, student.id)
 
     session_result = await db.execute(
         select(TestSession).where(
