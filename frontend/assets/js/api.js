@@ -80,6 +80,7 @@ const api = {
     reportViolation: (token) => apiFetch(`/student/tests/${token}/violation`, { method: 'POST', body: {} }),
     submitTest: (token, body) => apiFetch(`/student/tests/${token}/submit`, { method: 'POST', body }),
     myStats: () => apiFetch('/student/stats'),
+    leaderboard: () => apiFetch('/student/leaderboard'),
 };
 
 export { api, getToken, getUser, setAuth, clearAuth };

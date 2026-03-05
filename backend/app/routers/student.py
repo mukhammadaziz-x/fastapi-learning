@@ -86,18 +86,28 @@ async def access_test(
     questions_result = await db.execute(select(Question).where(Question.test_id == test.id))
     questions = questions_result.scalars().all()
 
+    # Calculate effective timer end time
+    # If test has a time_limit_minutes, timer = session.started_at + limit (or link end if sooner)
+    timer_end = link.end_time
+    if test.time_limit_minutes:
+        from datetime import timedelta
+        limit_end = session.started_at + timedelta(minutes=test.time_limit_minutes)
+        timer_end = min(limit_end, link.end_time)
+
     return {
         "session_id": session.id,
         "test_title": test.title,
         "test_description": test.description,
         "topic": test.topic,
-        "end_time": link.end_time.isoformat(),
+        "end_time": timer_end.isoformat(),
+        "time_limit_minutes": test.time_limit_minutes,
         "violations_count": session.violations_count,
         "questions": [
             {
                 "id": q.id,
                 "text": q.text,
                 "options": q.options,
+                "question_type": q.question_type,
                 "points": q.points,
             }
             for q in questions
@@ -298,4 +308,66 @@ async def my_stats(
         "pass_rate": round((passed / total * 100), 1) if total > 0 else 0,
         "sessions": sessions_out,
         "topic_averages": topic_avg,
+    }
+
+
+@router.get("/leaderboard")
+async def leaderboard(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(student_required),
+):
+    """
+    Returns a ranked list of all students by their average score
+    across passed tests. The current user's own rank is also highlighted.
+    """
+    sessions_result = await db.execute(
+        select(TestSession, Student, User)
+        .join(Student, Student.id == TestSession.student_id)
+        .join(User, User.id == Student.user_id)
+        .where(
+            TestSession.status == TestStatus.passed,
+            TestSession.score.isnot(None),
+        )
+    )
+    rows = sessions_result.all()
+
+    # Aggregate by student
+    student_data: dict = {}
+    for session, student, user in rows:
+        sid = student.id
+        if sid not in student_data:
+            student_data[sid] = {
+                "student_id": sid,
+                "full_name": user.full_name,
+                "scores": [],
+                "tests_passed": 0,
+            }
+        student_data[sid]["scores"].append(session.score)
+        student_data[sid]["tests_passed"] += 1
+
+    # Build ranked list
+    rankings = []
+    for data in student_data.values():
+        avg = round(sum(data["scores"]) / len(data["scores"]), 1)
+        rankings.append({
+            "student_id": data["student_id"],
+            "full_name": data["full_name"],
+            "avg_score": avg,
+            "tests_passed": data["tests_passed"],
+            "best_score": max(data["scores"]),
+        })
+
+    # Sort: by avg_score desc, then tests_passed desc
+    rankings.sort(key=lambda x: (-x["avg_score"], -x["tests_passed"]))
+    for i, r in enumerate(rankings):
+        r["rank"] = i + 1
+
+    # Find current student's rank
+    current_student = await get_student_profile(current_user, db)
+    my_rank = next((r for r in rankings if r["student_id"] == current_student.id), None)
+
+    return {
+        "rankings": rankings,
+        "my_rank": my_rank,
+        "total_students": len(rankings),
     }
