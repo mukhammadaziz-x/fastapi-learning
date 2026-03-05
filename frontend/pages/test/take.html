@@ -160,6 +160,24 @@
         </button>
     </div>
 
+    <!-- Confirm Submit Modal -->
+    <div id="overlay-confirm" class="violation-warning hidden" style="background: rgba(15, 23, 42, 0.95);">
+        <h2 style="font-size:28px;font-family:Outfit;margin-bottom:12px">Submit Test</h2>
+        <p style="font-size:18px;opacity:0.9;max-width:500px;margin-bottom:32px">
+            Are you ready to submit your answers? Please make sure you have answered all the questions you wanted to.
+        </p>
+        <div style="display:flex;gap:16px;">
+            <button class="btn" style="background:rgba(255,255,255,0.1);color:white;font-size:16px;padding:12px 32px"
+                onclick="document.getElementById('overlay-confirm').classList.add('hidden')">
+                Cancel
+            </button>
+            <button class="btn btn-primary" style="font-size:16px;padding:12px 32px"
+                onclick="submitTest(false)">
+                Confirm & Submit
+            </button>
+        </div>
+    </div>
+
     <div id="test-content" class="hidden">
         <div class="test-header">
             <div>
@@ -228,20 +246,35 @@
             const container = document.getElementById('questions-container');
             container.innerHTML = questions.map((q, i) => {
                 const opts = ['A', 'B', 'C', 'D'];
+                let inputHtml = "";
+
+                if (q.question_type === 'open_ended') {
+                    inputHtml = `<textarea name="q_${q.id}" class="form-textarea" rows="4" placeholder="Write your answer here..." style="width:100%;background:var(--bg-elevated);color:var(--text-primary);padding:16px;border:1px solid var(--border);border-radius:var(--radius-md)"></textarea>`;
+                } else if (q.question_type === 'true_false') {
+                    inputHtml = ['True', 'False'].map(optText => `
+                        <label class="option-label tf-label" onclick="selectOption(this, ${q.id})">
+                          <input type="radio" name="q_${q.id}" value="${optText}">
+                          <strong>${optText}</strong>
+                        </label>
+                    `).join('');
+                } else {
+                    inputHtml = q.options.filter(o => o).map((optText, arrIdx) => {
+                        const letter = opts[arrIdx];
+                        return `
+                        <label class="option-label" onclick="selectOption(this, ${q.id})">
+                          <input type="radio" name="q_${q.id}" value="${letter}">
+                          <strong style="margin-right:8px">${letter}.</strong> ${optText}
+                        </label>
+                      `;
+                    }).join('');
+                }
+
                 return `
         <div class="question-card" id="q_card_${q.id}">
           <div class="badge badge-cyan mb-4">Question ${i + 1}</div>
           <div class="q-text">${q.text.replace(/\n/g, '<br/>')}</div>
           <div class="options">
-            ${q.options.filter(o => o).map((optText, arrIdx) => {
-                    const letter = opts[arrIdx];
-                    return `
-                <label class="option-label" onclick="selectOption(this, ${q.id})">
-                  <input type="radio" name="q_${q.id}" value="${letter}">
-                  <strong style="margin-right:8px">${letter}.</strong> ${optText}
-                </label>
-              `;
-                }).join('')}
+            ${inputHtml}
           </div>
         </div>
       `;
@@ -343,8 +376,7 @@
 
         // Submit test
         window.submitTestManual = function () {
-            if (!confirm("Are you sure you want to submit? You cannot return to the test.")) return;
-            submitTest(false);
+            document.getElementById('overlay-confirm').classList.remove('hidden');
         }
 
         async function submitTest(forceFail) {
@@ -358,10 +390,17 @@
             const answers = [];
             if (testInfo) {
                 testInfo.questions.forEach(q => {
-                    const selected = document.querySelector(`input[name="q_${q.id}"]:checked`);
+                    let val = null;
+                    if (q.question_type === 'open_ended') {
+                        const ta = document.querySelector(`textarea[name="q_${q.id}"]`);
+                        if (ta) val = ta.value.trim();
+                    } else {
+                        const selected = document.querySelector(`input[name="q_${q.id}"]:checked`);
+                        if (selected) val = selected.value;
+                    }
                     answers.push({
                         question_id: q.id,
-                        chosen_answer: selected ? selected.value : null
+                        chosen_answer: val || null
                     });
                 });
             }
