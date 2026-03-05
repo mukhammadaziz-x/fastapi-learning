@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,7 +8,9 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 import httpx
 
-load_dotenv()
+# .env is at project root: routers/ -> app/ -> backend/ -> project root
+_env_path = Path(__file__).resolve().parent.parent.parent.parent / ".env"
+load_dotenv(dotenv_path=_env_path, override=True)
 
 from app.database import get_db
 from app.models import User, Student, Teacher, UserRole
