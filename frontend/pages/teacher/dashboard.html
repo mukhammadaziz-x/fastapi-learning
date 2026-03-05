@@ -119,6 +119,15 @@
                         <label class="form-label">Description</label>
                         <textarea id="et-desc" class="form-textarea"></textarea>
                     </div>
+                    <div style="border-top:1px solid var(--border);margin:20px 0;padding-top:20px">
+                        <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:12px">
+                            <strong style="font-size:14px">Questions</strong>
+                            <button class="btn btn-secondary btn-sm"
+                                onclick="addQuestionRow('et-questions-container')">+ Add Question</button>
+                        </div>
+                        <div id="et-questions-container"></div>
+                    </div>
+
                     <div class="grid-2">
                         <button class="btn btn-secondary" onclick="closeModal('modal-edit-test')">Cancel</button>
                         <button class="btn btn-primary" id="btn-edit-test" onclick="saveEditTest()">Save
@@ -149,7 +158,8 @@
                     <div style="border-top:1px solid var(--border);margin:20px 0;padding-top:20px">
                         <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:12px">
                             <strong style="font-size:14px">Questions</strong>
-                            <button class="btn btn-secondary btn-sm" onclick="addQuestionRow()">+ Add Question</button>
+                            <button class="btn btn-secondary btn-sm" onclick="addQuestionRow('questions-container')">+
+                                Add Question</button>
                         </div>
                         <div id="questions-container"></div>
                     </div>
@@ -223,14 +233,6 @@
                             return;
                         }
                         grid.innerHTML = allTests.map(t => `
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
-            <div>
-              <div style="font-family:Outfit,sans-serif;font-size:18px;font-weight:700">${t.title}</div>
-              ${t.topic ? `<span class="badge badge-cyan" style="margin-top:6px">${t.topic}</span>` : ''}
-            </div>
-          </div>
-          ${t.description ? `<p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">${t.description}</p>` : ''}
           <div class="flex gap-2" style="flex-wrap:wrap">
             <button class="btn btn-primary btn-sm" onclick="openLinkModal(${t.id})">
               🔗 Generate Link
@@ -238,10 +240,8 @@
             <button class="btn btn-secondary btn-sm" onclick="viewResults(${t.id})">
               📊 Results
             </button>
-            <button class="btn btn-secondary btn-sm" onclick="openEditTestModal(${t.id})">
-              ✏️ Options
-            </button>
           </div>
+          <button style="position:absolute; top:16px; right:16px; background:transparent; border:none; cursor:pointer; font-size:16px;" onclick="openEditTestModal(${t.id})" title="Edit Test">✏️</button>
         </div>
       `).join('');
                     } catch (e) {
@@ -251,48 +251,97 @@
 
                 // ── Question rows ──────────────────────────────────────────────────────────
                 let qCount = 0;
-                window.addQuestionRow = function () {
+                window.addQuestionRow = function (containerId = 'questions-container', existingData = null) {
                     qCount++;
                     const n = qCount;
                     const div = document.createElement('div');
                     div.id = `q-row-${n}`;
                     div.style.cssText = 'background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px';
+
+                    const qType = existingData ? existingData.question_type : 'multiple_choice';
+                    const qText = existingData ? existingData.text : '';
+                    const qAns = existingData ? existingData.correct_answer : '';
+
+                    // safely handle matching options object
+                    const leftVals = (existingData && existingData.options && existingData.options.left) ? existingData.options.left.join('\\n') : '';
+                    const rightVals = (existingData && existingData.options && existingData.options.right) ? existingData.options.right.join('\\n') : '';
+
                     div.innerHTML = `
       <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--primary-light)">Question #${n}</div>
       <div class="form-group">
         <label class="form-label text-sm mb-1">Type:</label>
         <select class="form-select mb-2" id="q${n}-type" onchange="toggleQuestionType(${n})">
-            <option value="multiple_choice">Multiple Choice</option>
-            <option value="open_ended">Open Ended</option>
-            <option value="true_false">True / False</option>
+            <option value="multiple_choice" ${qType === 'multiple_choice' ? 'selected' : ''}>Multiple Choice</option>
+            <option value="open_ended" ${qType === 'open_ended' ? 'selected' : ''}>Open Ended</option>
+            <option value="true_false" ${qType === 'true_false' ? 'selected' : ''}>True / False</option>
+            <option value="matching" ${qType === 'matching' ? 'selected' : ''}>Matching (IELTS style)</option>
         </select>
-        <input class="form-input" id="q${n}-text" placeholder="Question text…" />
+        <input class="form-input" id="q${n}-text" placeholder="Question text…" value="${qText.replace(/"/g, '&quot;')}" />
       </div>
-      <div class="grid-2" style="margin-bottom:8px" id="q${n}-options-grid">
-        <input class="form-input" id="q${n}-a" placeholder="Option A" />
-        <input class="form-input" id="q${n}-b" placeholder="Option B" />
-        <input class="form-input" id="q${n}-c" placeholder="Option C" />
-        <input class="form-input" id="q${n}-d" placeholder="Option D" />
+      <div class="grid-2" style="margin-bottom:8px; display:${qType === 'multiple_choice' ? 'grid' : 'none'}" id="q${n}-options-grid">
+        <input class="form-input" id="q${n}-a" placeholder="Option A" value="${existingData && qType === 'multiple_choice' && existingData.options ? (existingData.options[0] || '').replace(/"/g, '&quot;') : ''}" />
+        <input class="form-input" id="q${n}-b" placeholder="Option B" value="${existingData && qType === 'multiple_choice' && existingData.options ? (existingData.options[1] || '').replace(/"/g, '&quot;') : ''}" />
+        <input class="form-input" id="q${n}-c" placeholder="Option C" value="${existingData && qType === 'multiple_choice' && existingData.options ? (existingData.options[2] || '').replace(/"/g, '&quot;') : ''}" />
+        <input class="form-input" id="q${n}-d" placeholder="Option D" value="${existingData && qType === 'multiple_choice' && existingData.options ? (existingData.options[3] || '').replace(/"/g, '&quot;') : ''}" />
+      </div>
+      <div class="grid-2" style="margin-bottom:8px; display:${qType === 'matching' ? 'grid' : 'none'}" id="q${n}-match-grid">
+         <textarea class="form-textarea" id="q${n}-match-left" placeholder="Left items (one per line)">${leftVals}</textarea>
+         <textarea class="form-textarea" id="q${n}-match-right" placeholder="Right items (one per line, incl distractions)">${rightVals}</textarea>
+         <div style="grid-column: 1 / -1; font-size:12px; color:var(--text-muted)">
+            Correct Answer format: {"Left 1":"Right Match", "Left 2":"Right Match"}
+         </div>
       </div>
       <div class="flex gap-2" style="align-items:center">
         <label class="form-label" style="margin:0;white-space:nowrap">Correct Answer:</label>
-        <!-- we use a text input so it works for all types -->
-        <input type="text" class="form-input" id="q${n}-ans" placeholder="A, True, or full answer..." style="width: auto;"/>
+        <input type="text" class="form-input" id="q${n}-ans" placeholder="A, True, or full answer..." style="width: auto;" value="${qAns.replace(/"/g, '&quot;')}" />
         <button class="btn btn-danger btn-sm" onclick="document.getElementById('q-row-${n}').remove()">Remove</button>
       </div>
     `;
-                    document.getElementById('questions-container').appendChild(div);
+                    document.getElementById(containerId).appendChild(div);
                 };
 
                 window.toggleQuestionType = function (n) {
                     const type = document.getElementById(`q${n}-type`).value;
                     const grid = document.getElementById(`q${n}-options-grid`);
+                    const matchGrid = document.getElementById(`q${n}-match-grid`);
                     if (type === 'multiple_choice') {
                         grid.style.display = 'grid';
+                        if (matchGrid) matchGrid.style.display = 'none';
+                    } else if (type === 'matching') {
+                        grid.style.display = 'none';
+                        if (matchGrid) matchGrid.style.display = 'grid';
                     } else {
                         grid.style.display = 'none';
+                        if (matchGrid) matchGrid.style.display = 'none';
                     }
                 };
+
+                function extractQuestionsFromContainer(containerId) {
+                    const questions = [];
+                    document.querySelectorAll(`#${containerId} [id^="q-row-"]`).forEach(row => {
+                        const n = row.id.split('-')[2];
+                        const type = document.getElementById(`q${n}-type`).value;
+                        const text = document.getElementById(`q${n}-text`)?.value.trim();
+                        const ans = document.getElementById(`q${n}-ans`)?.value.trim();
+
+                        if (text && ans) {
+                            if (type === 'multiple_choice') {
+                                const a = document.getElementById(`q${n}-a`)?.value.trim();
+                                const b = document.getElementById(`q${n}-b`)?.value.trim();
+                                const c = document.getElementById(`q${n}-c`)?.value.trim();
+                                const d = document.getElementById(`q${n}-d`)?.value.trim();
+                                questions.push({ text, options: [a, b, c || '', d || ''], correct_answer: ans, question_type: type });
+                            } else if (type === 'matching') {
+                                const matchLeft = document.getElementById(`q${n}-match-left`)?.value.split('\\n').filter(Boolean) || [];
+                                const matchRight = document.getElementById(`q${n}-match-right`)?.value.split('\\n').filter(Boolean) || [];
+                                questions.push({ text, options: { left: matchLeft, right: matchRight }, correct_answer: ans, question_type: type });
+                            } else {
+                                questions.push({ text, options: null, correct_answer: ans, question_type: type });
+                            }
+                        }
+                    });
+                    return questions;
+                }
 
                 // ── Create test ────────────────────────────────────────────────────────────
                 window.createTest = async function () {
@@ -306,22 +355,7 @@
 
                     if (!title) { alertEl.innerHTML = '<div class="alert alert-danger">Title is required.</div>'; return; }
 
-                    const questions = [];
-                    document.querySelectorAll('[id^="q-row-"]').forEach(row => {
-                        const n = row.id.split('-')[2];
-                        const type = document.getElementById(`q${n}-type`).value;
-                        const text = document.getElementById(`q${n}-text`)?.value.trim();
-                        const a = document.getElementById(`q${n}-a`)?.value.trim();
-                        const b = document.getElementById(`q${n}-b`)?.value.trim();
-                        const c = document.getElementById(`q${n}-c`)?.value.trim();
-                        const d = document.getElementById(`q${n}-d`)?.value.trim();
-                        const ans = document.getElementById(`q${n}-ans`)?.value.trim();
-
-                        if (text && ans) {
-                            const options = type === 'multiple_choice' ? [a, b, c || '', d || ''] : [];
-                            questions.push({ text, options: options, correct_answer: ans, question_type: type });
-                        }
-                    });
+                    const questions = extractQuestionsFromContainer('questions-container');
 
                     btn.disabled = true; btn.textContent = 'Creating…';
                     try {
@@ -441,7 +475,8 @@
                 };
 
                 // ── Edit Tests ─────────────────────────────────────────────────────────────
-                window.openEditTestModal = function (testId) {
+                window.openEditTestModal = async function (testId) {
+                    qCount = 0; // Reset question counter for editing
                     const test = allTests.find(t => t.id === testId);
                     if (!test) return;
                     document.getElementById('edit-test-id').value = test.id;
@@ -450,13 +485,26 @@
                     document.getElementById('et-desc').value = test.description || '';
                     document.getElementById('edit-test-alert').innerHTML = '';
 
-                    // Allow them to delete the test
                     const alertBox = document.getElementById('edit-test-alert');
                     alertBox.innerHTML = `
                 <button class="btn btn-danger btn-sm" style="margin-bottom:12px;" onclick="if(confirm('Delete this test?')) deleteTest(${test.id})">🗑 Delete Test</button>
             `;
 
+                    const qContainer = document.getElementById('et-questions-container');
+                    qContainer.innerHTML = '<div class="text-muted text-center" style="padding: 20px;">Loading questions...</div>';
                     openModal('modal-edit-test');
+
+                    try {
+                        const testData = await api.getTest(test.id);
+                        qContainer.innerHTML = '';
+                        if (testData.questions && testData.questions.length > 0) {
+                            testData.questions.forEach(q => addQuestionRow('et-questions-container', q));
+                        } else {
+                            qContainer.innerHTML = '<div class="text-muted text-center">No questions in this test yet.</div>';
+                        }
+                    } catch (e) {
+                        alertBox.innerHTML += `<div class="alert alert-danger">Failed to load test questions.</div>`;
+                    }
                 };
 
                 window.saveEditTest = async function () {
@@ -469,9 +517,11 @@
 
                     if (!title) { alertEl.innerHTML = '<div class="alert alert-danger">Title is required.</div>'; return; }
 
+                    const questions = extractQuestionsFromContainer('et-questions-container');
+
                     btn.disabled = true; btn.textContent = 'Saving…';
                     try {
-                        await api.updateTest(id, { title, topic: topic || null, description: description || null });
+                        await api.updateTest(id, { title, topic: topic || null, description: description || null, questions });
                         showToast('Test updated successfully!', 'success');
                         closeModal('modal-edit-test');
                         loadTests();

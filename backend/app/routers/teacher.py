@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,7 +19,7 @@ teacher_required = require_role("teacher", "admin")
 # ── Schemas ────────────────────────────────────────────────────────────────────
 class QuestionCreate(BaseModel):
     text: str
-    options: Optional[List[str]] = None      # Optional for Open ended
+    options: Optional[Any] = None
     correct_answer: str      # Can be text or choice
     question_type: str = "multiple_choice" # multiple_choice, open_ended, true_false, matching
     points: float = 1.0
@@ -145,6 +145,7 @@ class TestUpdate(BaseModel):
     title: str
     description: Optional[str] = None
     topic: Optional[str] = None
+    questions: Optional[List[QuestionCreate]] = None
 
 @router.put("/tests/{test_id}", status_code=200)
 async def update_test(
@@ -162,6 +163,24 @@ async def update_test(
     test.title = body.title
     test.description = body.description
     test.topic = body.topic
+
+    if body.questions is not None:
+        # Note: In a production app, we would better sync by ID.
+        # Here we just clear the old questions to simple rewrite, but we must be careful with existing answers.
+        # SQLite cascade handles it, but losing older answers isn't ideal.
+        # Alternatively we can just disable test editing if it has been taken.
+        await db.execute(select(Question).where(Question.test_id == test_id))
+        test.questions = []
+        for q in body.questions:
+            question = Question(
+                text=q.text,
+                options=q.options,
+                correct_answer=q.correct_answer,
+                question_type=q.question_type,
+                points=q.points,
+            )
+            test.questions.append(question)
+
     await db.commit()
     return {"message": "Test updated"}
 

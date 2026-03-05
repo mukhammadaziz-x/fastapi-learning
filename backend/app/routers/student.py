@@ -187,13 +187,14 @@ async def submit_test(
     questions_result = await db.execute(select(Question).where(Question.test_id == link.test_id))
     questions = {q.id: q for q in questions_result.scalars().all()}
 
-    if body.force_fail or session.violations_count > MAX_VIOLATIONS:
+    # Score calculation unconditionally
+    total_points = sum(q.points for q in questions.values())
+    session.total_questions = len(questions)
+
+    if body.force_fail or session.violations_count >= MAX_VIOLATIONS:
         session.score = 0.0
         session.status = TestStatus.auto_failed
     else:
-        # Score calculation
-        total_points = sum(q.points for q in questions.values())
-        session.total_questions = len(questions)
         earned_points = 0.0
         correct_answers = 0
 
@@ -208,8 +209,24 @@ async def submit_test(
             )
             db.add(answer_record)
             
-            # Simple match logic (case insensitive string match for matching or exact answers)
-            if answer_item.chosen_answer and str(answer_item.chosen_answer).strip().upper() == str(q.correct_answer).strip().upper():
+            answer_val = str(answer_item.chosen_answer).strip().upper() if answer_item.chosen_answer else ""
+            correct_val = str(q.correct_answer).strip().upper()
+            is_correct = False
+            
+            import json
+            if q.question_type == "matching":
+                try:
+                    user_dict = json.loads(answer_item.chosen_answer)
+                    correct_dict = json.loads(q.correct_answer)
+                    # strict dictionary match
+                    if user_dict == correct_dict:
+                        is_correct = True
+                except:
+                    pass
+            elif answer_item.chosen_answer and answer_val == correct_val:
+                is_correct = True
+                
+            if is_correct:
                 earned_points += q.points
                 correct_answers += 1
                 
