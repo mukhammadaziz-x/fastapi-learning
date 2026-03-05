@@ -112,6 +112,72 @@
                 </div>
             </section>
 
+            <!-- GROUPS SECTION -->
+            <section id="section-groups" class="hidden">
+                <div class="page-header flex" style="justify-content:space-between;align-items:flex-start">
+                    <div>
+                        <h1>My Groups</h1>
+                        <p>Manage your student groups</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('modal-create-group')">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        New Group
+                    </button>
+                </div>
+                <div id="groups-grid"
+                    style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px">
+                    <div class="card text-center text-muted">Loading groups…</div>
+                </div>
+            </section>
+
+            <!-- GROUP DETAILS SECTION -->
+            <section id="section-group-details" class="hidden">
+                <div class="mb-4">
+                    <button class="btn btn-secondary btn-sm"
+                        onclick="showSection('groups', {preventDefault:()=>{}, currentTarget:{getAttribute:()=>'/teacher/dashboard/groups'}})">
+                        &larr; Back to Groups
+                    </button>
+                </div>
+                <div class="page-header flex"
+                    style="justify-content:space-between;align-items:flex-start; margin-bottom: 24px;">
+                    <div>
+                        <h1 id="gd-title">Group Details</h1>
+                        <p style="color:var(--text-muted)">Manage students and assign tests specifically to this group
+                        </p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openAddStudentsModal(window.currentGroupId)">
+                        + Add Students
+                    </button>
+                </div>
+
+                <div class="grid-2">
+                    <!-- Students Column -->
+                    <div class="card" style="padding:0; overflow:hidden">
+                        <div
+                            style="padding:16px; border-bottom:1px solid var(--border); background:var(--bg-elevated);">
+                            <strong>Enrolled Students</strong>
+                        </div>
+                        <div id="gd-students-list" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Students go here -->
+                        </div>
+                    </div>
+
+                    <!-- Tests/Assignments Column -->
+                    <div class="card" style="padding:0; overflow:hidden">
+                        <div
+                            style="padding:16px; border-bottom:1px solid var(--border); background:var(--bg-elevated);">
+                            <strong>Generate Test Link for this Group</strong>
+                        </div>
+                        <div id="gd-tests-list" style="max-height: 400px; overflow-y: auto; padding:16px;">
+                            <!-- Tests go here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Edit Test Modal -->
             <div class="modal-overlay" id="modal-edit-test">
                 <div class="modal" style="max-width:620px">
