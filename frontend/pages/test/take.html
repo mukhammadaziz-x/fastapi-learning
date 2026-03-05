@@ -273,7 +273,8 @@
                     });
                     inputHtml += `</div>`;
                 } else {
-                    inputHtml = q.options.filter(o => o).map((optText, arrIdx) => {
+                    const optionsArr = Array.isArray(q.options) ? q.options : [];
+                    inputHtml = optionsArr.filter(o => o).map((optText, arrIdx) => {
                         const letter = opts[arrIdx];
                         return `
                         <label class="option-label" onclick="selectOption(this, ${q.id})">

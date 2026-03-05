@@ -468,7 +468,8 @@
           <td>${r.violations}</td>
           <td style="font-size:12px">${formatDate(r.submitted_at)}</td>
           <td>
-             ${!r.is_graded ? `
+             ${(r.status === 'failed' || r.status === 'auto_failed') ? '<span class="text-muted">Failed (No Grade)</span>' :
+                            !r.is_graded ? `
                 <select id="grade-sel-${r.session_id}" class="form-select" style="min-width:110px; margin-bottom:4px; font-size:12px; padding:4px;">
                     <option value="Pass">Pass</option>
                     <option value="Merit">Merit</option>
