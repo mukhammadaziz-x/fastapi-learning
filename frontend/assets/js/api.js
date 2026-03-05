@@ -73,12 +73,10 @@ const api = {
     generateLink: (testId, body) => apiFetch(`/teacher/tests/${testId}/links`, { method: 'POST', body }), // updated from /link to /links
     testResults: (testId) => apiFetch(`/teacher/tests/${testId}/results`),
     gradeSession: (sessionId, body) => apiFetch(`/teacher/sessions/${sessionId}/grade`, { method: 'POST', body }),
-    studentStats: (studentId) => apiFetch(`/teacher/students/${studentId}/stats`),
     createGroup: (body) => apiFetch('/teacher/groups', { method: 'POST', body }),
     listGroups: () => apiFetch('/teacher/groups'),
+    getGroup: (groupId) => apiFetch(`/teacher/groups/${groupId}`),
     addStudentsToGroup: (groupId, body) => apiFetch(`/teacher/groups/${groupId}/students`, { method: 'POST', body }),
-    gradeSession: (sessionId, body) => apiFetch(`/teacher/sessions/${sessionId}/grade`, { method: 'POST', body }),
-    studentStats: (studentId) => apiFetch(`/teacher/students/${studentId}/stats`),
 
     // Student
     accessTest: (token) => apiFetch(`/student/tests/${token}`),

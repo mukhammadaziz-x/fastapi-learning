@@ -126,8 +126,38 @@ async def add_students_to_group(
         db.add(GroupStudent(group_id=group.id, student_id=student.id))
         added += 1
         
+        
     await db.commit()
     return {"message": f"Added {added} students", "not_found": not_found}
+
+
+@router.get("/groups/{group_id}")
+async def get_group_details(
+    group_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(teacher_required)
+):
+    teacher = await get_teacher_profile(current_user, db)
+    # verify group
+    res = await db.execute(select(Group).where(Group.id == group_id, Group.teacher_id == teacher.id))
+    group = res.scalar_one_or_none()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    # get students
+    s_res = await db.execute(
+        select(User.full_name, User.email)
+        .join(Student, Student.user_id == User.id)
+        .join(GroupStudent, GroupStudent.student_id == Student.id)
+        .where(GroupStudent.group_id == group.id)
+    )
+    students = s_res.all()
+    
+    return {
+        "id": group.id,
+        "name": group.name,
+        "students": [{"full_name": s[0], "email": s[1]} for s in students]
+    }
 
 
 # ── Endpoints ──────────────────────────────────────────────────────────────────
