@@ -304,8 +304,10 @@
             labelEl.querySelector('input').checked = true;
         }
 
-        // Timer logic
+        // Timer logic — color shifts green→orange→red
         function startTimer() {
+            const totalDuration = testEndTime - new Date().getTime();
+
             function update() {
                 if (isSubmitting) return;
                 const now = new Date().getTime();
@@ -313,21 +315,80 @@
 
                 if (distance <= 0) {
                     clearInterval(timerInterval);
-                    document.getElementById('timer-display').textContent = '00:00:00';
+                    document.getElementById('timer-display').textContent = '00:00';
                     showToast('Time is up! Auto-submitting…', 'warning');
                     submitTest(false);
                     return;
                 }
 
-                const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((distance % (1000 * 60)) / 1000);
+                const totalSecs = Math.floor(distance / 1000);
+                const m = Math.floor(totalSecs / 60);
+                const s = totalSecs % 60;
+                const h = Math.floor(m / 60);
+                const displayM = m % 60;
 
-                document.getElementById('timer-display').textContent =
-                    `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                const timerEl = document.getElementById('timer-display');
+                if (h > 0) {
+                    timerEl.textContent = `${h.toString().padStart(2, '0')}:${displayM.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                } else {
+                    timerEl.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                }
+
+                // Color: green (>50%) → orange (20–50%) → red (<20%) → blinking (<5%)
+                const pct = distance / totalDuration;
+                if (pct > 0.5) {
+                    timerEl.style.color = '#10B981';
+                    timerEl.style.borderColor = 'rgba(16,185,129,0.4)';
+                    timerEl.style.background = 'rgba(16,185,129,0.1)';
+                } else if (pct > 0.2) {
+                    timerEl.style.color = '#F59E0B';
+                    timerEl.style.borderColor = 'rgba(245,158,11,0.4)';
+                    timerEl.style.background = 'rgba(245,158,11,0.1)';
+                } else {
+                    timerEl.style.color = 'var(--danger-light)';
+                    timerEl.style.borderColor = 'rgba(239,68,68,0.4)';
+                    timerEl.style.background = 'rgba(239,68,68,0.15)';
+                    // Blink when under 5%
+                    if (pct < 0.05) timerEl.style.opacity = timerEl.style.opacity === '0.4' ? '1' : '0.4';
+                }
             }
             update();
             timerInterval = setInterval(update, 1000);
+        }
+
+        // ── Anti-cheat keyboard blocking ──────────────────────────────────────
+        function blockCheats(e) {
+            const banned = [
+                // Copy / Paste / Cut
+                (e.ctrlKey || e.metaKey) && ['c', 'v', 'x', 'a', 's', 'p', 'u', 'f', 'j'].includes(e.key.toLowerCase()),
+                // Alt+Tab, Alt+F4, Alt+Space
+                e.altKey && ['Tab', 'F4', ' '].includes(e.key),
+                // Win key (Meta)
+                e.key === 'Meta',
+                // F keys that open browser panels
+                ['F1', 'F3', 'F5', 'F6', 'F10', 'F11', 'F12'].includes(e.key),
+                // Ctrl+W (close tab), Ctrl+T (new tab), Ctrl+N (new window)
+                (e.ctrlKey || e.metaKey) && ['w', 't', 'n', 'r'].includes(e.key.toLowerCase()),
+                // PrintScreen
+                e.key === 'PrintScreen',
+                // Escape (would exit fullscreen — handled by fullscreen change)
+                // We DON'T block Escape so browser retains control, but we handle fullscreenchange
+            ];
+            if (banned.some(Boolean)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }
+
+        function startAntiCheat() {
+            document.addEventListener('keydown', blockCheats, true);
+            // Block right-click context menu
+            document.addEventListener('contextmenu', e => e.preventDefault(), true);
+        }
+
+        function stopAntiCheat() {
+            document.removeEventListener('keydown', blockCheats, true);
         }
 
         // Fullscreen flow
@@ -346,6 +407,7 @@
                 document.getElementById('overlay-start').classList.add('hidden');
                 document.getElementById('test-content').classList.remove('hidden');
                 document.addEventListener('fullscreenchange', handleFullscreenChange);
+                startAntiCheat();
                 startTimer();
             } catch (e) {
                 document.getElementById('start-error').textContent = "Browser denied fullscreen request: " + e.message;
