@@ -69,6 +69,7 @@ class Test(Base):
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     topic = Column(String(255), nullable=True)
+    time_limit_minutes = Column(Integer, nullable=True)  # None = no limit, uses link end_time
     teacher_id = Column(Integer, ForeignKey("teachers.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     is_active = Column(Boolean, default=True)

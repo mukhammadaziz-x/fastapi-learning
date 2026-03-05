@@ -29,6 +29,7 @@ class TestCreate(BaseModel):
     title: str
     description: Optional[str] = None
     topic: Optional[str] = None
+    time_limit_minutes: Optional[int] = None
     questions: Optional[List[QuestionCreate]] = None
 
 
@@ -58,6 +59,7 @@ async def create_test(
         title=body.title,
         description=body.description,
         topic=body.topic,
+        time_limit_minutes=body.time_limit_minutes,
         teacher_id=teacher.id,
     )
     db.add(test)
@@ -94,6 +96,7 @@ async def list_my_tests(
             "title": t.title,
             "description": t.description,
             "topic": t.topic,
+            "time_limit_minutes": t.time_limit_minutes,
             "created_at": t.created_at.isoformat(),
         }
         for t in tests
