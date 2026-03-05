@@ -59,6 +59,32 @@ class Student(Base):
 
     user = relationship("User", back_populates="student_profile")
     sessions = relationship("TestSession", back_populates="student")
+    groups = relationship("GroupStudent", back_populates="student")
+
+
+# ─── Groups ───────────────────────────────────────────────────────────────────
+class Group(Base):
+    __tablename__ = "groups"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False)
+    teacher_id = Column(Integer, ForeignKey("teachers.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    teacher = relationship("Teacher")
+    students = relationship("GroupStudent", back_populates="group", cascade="all, delete-orphan")
+
+
+class GroupStudent(Base):
+    __tablename__ = "group_students"
+
+    id = Column(Integer, primary_key=True, index=True)
+    group_id = Column(Integer, ForeignKey("groups.id"), nullable=False)
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
+    joined_at = Column(DateTime, default=datetime.utcnow)
+
+    group = relationship("Group", back_populates="students")
+    student = relationship("Student", back_populates="groups")
 
 
 # ─── Test & Questions ─────────────────────────────────────────────────────────
@@ -100,6 +126,7 @@ class TestLink(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     test_id = Column(Integer, ForeignKey("tests.id"), nullable=False)
+    group_id = Column(Integer, ForeignKey("groups.id"), nullable=True)
     token = Column(String(36), unique=True, default=lambda: str(uuid.uuid4()), index=True)
     start_time = Column(DateTime, nullable=False)
     end_time = Column(DateTime, nullable=False)
@@ -107,6 +134,7 @@ class TestLink(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     test = relationship("Test", back_populates="links")
+    group = relationship("Group")
     sessions = relationship("TestSession", back_populates="test_link")
 
 
