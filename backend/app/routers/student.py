@@ -133,7 +133,7 @@ async def report_violation(
 
     session.violations_count += 1
 
-    if session.violations_count > MAX_VIOLATIONS:
+    if session.violations_count >= MAX_VIOLATIONS:
         session.status = TestStatus.auto_failed
         session.score = 0.0
         session.submitted_at = datetime.utcnow()
