@@ -67,9 +67,12 @@ const api = {
     createTest: (body) => apiFetch('/teacher/tests', { method: 'POST', body }),
     listTests: () => apiFetch('/teacher/tests'),
     getTest: (id) => apiFetch(`/teacher/tests/${id}`),
+    updateTest: (id, body) => apiFetch(`/teacher/tests/${id}`, { method: 'PUT', body }),
+    deleteTest: (id) => apiFetch(`/teacher/tests/${id}`, { method: 'DELETE' }),
     addQuestion: (testId, body) => apiFetch(`/teacher/tests/${testId}/questions`, { method: 'POST', body }),
     generateLink: (testId, body) => apiFetch(`/teacher/tests/${testId}/link`, { method: 'POST', body }),
     testResults: (testId) => apiFetch(`/teacher/tests/${testId}/results`),
+    gradeSession: (sessionId, body) => apiFetch(`/teacher/sessions/${sessionId}/grade`, { method: 'POST', body }),
     studentStats: (studentId) => apiFetch(`/teacher/students/${studentId}/stats`),
 
     // Student

@@ -125,6 +125,46 @@ async def add_question(
     return {"message": "Question added", "question_id": question.id}
 
 
+@router.delete("/tests/{test_id}", status_code=204)
+async def delete_test(
+    test_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(teacher_required),
+):
+    teacher = await get_teacher_profile(current_user, db)
+    result = await db.execute(select(Test).where(Test.id == test_id, Test.teacher_id == teacher.id))
+    test = result.scalar_one_or_none()
+    if not test:
+        raise HTTPException(status_code=404, detail="Test not found")
+
+    await db.delete(test)
+    await db.commit()
+    return None
+
+class TestUpdate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    topic: Optional[str] = None
+
+@router.put("/tests/{test_id}", status_code=200)
+async def update_test(
+    test_id: int,
+    body: TestUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(teacher_required),
+):
+    teacher = await get_teacher_profile(current_user, db)
+    result = await db.execute(select(Test).where(Test.id == test_id, Test.teacher_id == teacher.id))
+    test = result.scalar_one_or_none()
+    if not test:
+        raise HTTPException(status_code=404, detail="Test not found")
+
+    test.title = body.title
+    test.description = body.description
+    test.topic = body.topic
+    await db.commit()
+    return {"message": "Test updated"}
+
 @router.get("/tests/{test_id}")
 async def get_test_detail(
     test_id: int,
