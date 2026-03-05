@@ -316,6 +316,9 @@ async def grade_session(
         raise HTTPException(status_code=404, detail="Test session not found or access denied")
         
     session = row[0]
+    if session.status.value in ["failed", "auto_failed"]:
+        raise HTTPException(status_code=400, detail="Cannot grade a failed test")
+
     session.teacher_grade = body.grade
     session.is_graded = True
     await db.commit()
