@@ -66,7 +66,13 @@
             <!-- Charts -->
             <div class="grid-2 mb-8">
                 <div class="chart-container">
-                    <h3 style="font-size:16px;margin-bottom:16px">Scores Trend</h3>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px">
+                        <h3 style="font-size:16px;">Scores Trend</h3>
+                        <select id="trend-topic-filter" class="form-select"
+                            style="width:140px; padding:4px 8px; font-size:13px" onchange="filterTrendChart()">
+                            <option value="all">All Topics</option>
+                        </select>
+                    </div>
                     <canvas id="scoresChart"></canvas>
                 </div>
                 <div class="chart-container">
@@ -83,8 +89,9 @@
                         <tr>
                             <th>Test</th>
                             <th>Topic</th>
+                            <th>Result</th>
                             <th>Score</th>
-                            <th>Status</th>
+                            <th>Status/Grade</th>
                             <th>Date Taken</th>
                         </tr>
                     </thead>
@@ -110,6 +117,7 @@
 
         // Chart instances
         let scoresChart, topicsChart;
+        let globalSessions = [];
 
         // Setup Chart.js defaults for dark theme
         Chart.defaults.color = '#94A3B8';
@@ -128,51 +136,34 @@
                 // Table
                 const tbody = document.getElementById('history-tbody');
                 if (!data.sessions.length) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">You haven\'t taken any tests yet.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">You haven\'t taken any tests yet.</td></tr>';
                 } else {
                     tbody.innerHTML = data.sessions.map(s => `
           <tr>
             <td>${s.test_title}</td>
             <td>${s.topic ? `<span class="badge badge-primary">${s.topic}</span>` : '—'}</td>
+            <td><strong>${(s.correct_answers ?? 0)} / ${(s.total_questions ?? 0)}</strong> (${s.total_questions ? Math.round(((s.correct_answers ?? 0) / s.total_questions) * 100) : 0}%)</td>
             <td><strong>${s.score ?? 0}%</strong></td>
-            <td><span class="badge ${s.status === 'passed' ? 'badge-success' : s.status === 'auto_failed' ? 'badge-danger' : 'badge-warning'}">${s.status.replace('_', ' ')}</span></td>
+            <td>
+                <span class="badge ${s.status === 'passed' ? 'badge-success' : s.status === 'auto_failed' ? 'badge-danger' : 'badge-warning'}">${s.status.replace('_', ' ')}</span>
+                ${s.is_graded && s.teacher_grade ? `<span class="badge badge-cyan" style="margin-top:4px; display:inline-block">${s.teacher_grade}</span>` : ''}
+            </td>
             <td>${formatDate(s.submitted_at)}</td>
           </tr>
         `).join('');
                 }
 
-                // Charts data preparation
-                const sortedSessions = [...data.sessions].reverse(); // oldest to newest for trend
-                const labels = sortedSessions.map((_, i) => `Test ${i + 1}`);
-                const scores = sortedSessions.map(s => s.score ?? 0);
-
-                // Line Chart (Scores Trend)
-                const ctxScores = document.getElementById('scoresChart').getContext('2d');
-                scoresChart = new Chart(ctxScores, {
-                    type: 'line',
-                    data: {
-                        labels,
-                        datasets: [{
-                            label: 'Score (%)',
-                            data: scores,
-                            borderColor: '#6366F1',
-                            backgroundColor: 'rgba(99,102,241,0.2)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4,
-                            pointBackgroundColor: '#06B6D4'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.05)' } },
-                            x: { grid: { display: false } }
-                        },
-                        plugins: { legend: { display: false } }
-                    }
+                // Setup Topic Filter combo box
+                globalSessions = data.sessions;
+                const topicFilter = document.getElementById('trend-topic-filter');
+                Object.keys(data.topic_averages).forEach(topic => {
+                    const opt = document.createElement('option');
+                    opt.value = topic;
+                    opt.textContent = topic;
+                    topicFilter.appendChild(opt);
                 });
+
+                renderTrendChart('all');
 
                 // Radar Chart (Topics)
                 const topicLabels = Object.keys(data.topic_averages);
@@ -231,6 +222,50 @@
         </div>
       `;
             }
+        }
+
+        window.filterTrendChart = function () {
+            const topic = document.getElementById('trend-topic-filter').value;
+            renderTrendChart(topic);
+        };
+
+        function renderTrendChart(topicFilter) {
+            let filtered = topicFilter === 'all'
+                ? globalSessions
+                : globalSessions.filter(s => s.topic === topicFilter);
+
+            const sortedSessions = [...filtered].reverse(); // oldest to newest for trend
+            const labels = sortedSessions.map((s, i) => `${s.test_title.substring(0, 10)}...`);
+            const scores = sortedSessions.map(s => s.score ?? 0);
+
+            if (scoresChart) scoresChart.destroy();
+
+            const ctxScores = document.getElementById('scoresChart').getContext('2d');
+            scoresChart = new Chart(ctxScores, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Score (%)',
+                        data: scores,
+                        borderColor: '#6366F1',
+                        backgroundColor: 'rgba(99,102,241,0.2)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#06B6D4'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
         }
 
         loadData();
