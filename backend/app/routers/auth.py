@@ -4,7 +4,10 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel
+from dotenv import load_dotenv
 import httpx
+
+load_dotenv()
 
 from app.database import get_db
 from app.models import User, Student, Teacher, UserRole
