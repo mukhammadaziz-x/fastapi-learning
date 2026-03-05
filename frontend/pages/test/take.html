@@ -171,8 +171,7 @@
                 onclick="document.getElementById('overlay-confirm').classList.add('hidden')">
                 Cancel
             </button>
-            <button class="btn btn-primary" style="font-size:16px;padding:12px 32px"
-                onclick="submitTest(false)">
+            <button class="btn btn-primary" style="font-size:16px;padding:12px 32px" onclick="submitTest(false)">
                 Confirm & Submit
             </button>
         </div>
@@ -257,6 +256,22 @@
                           <strong>${optText}</strong>
                         </label>
                     `).join('');
+                } else if (q.question_type === 'matching' && q.options) {
+                    const leftArr = q.options.left || [];
+                    const rightArr = q.options.right || [];
+                    inputHtml = `<div class="matching-container">`;
+                    leftArr.forEach((leftItem, idx) => {
+                        inputHtml += `
+                           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding:12px; background:rgba(255,255,255,0.05); border-radius:8px; flex-wrap:wrap; gap:12px;">
+                               <div style="flex:1; min-width:200px;">${leftItem}</div>
+                               <select name="q_${q.id}_match_${idx}" data-left="${leftItem.replace(/"/g, '&quot;')}" class="form-select" style="max-width:250px; flex:1;">
+                                  <option value="">-- Choose Match --</option>
+                                  ${rightArr.map(r => `<option value="${r.replace(/"/g, '&quot;')}">${r}</option>`).join('')}
+                               </select>
+                           </div>
+                        `;
+                    });
+                    inputHtml += `</div>`;
                 } else {
                     inputHtml = q.options.filter(o => o).map((optText, arrIdx) => {
                         const letter = opts[arrIdx];
@@ -394,6 +409,18 @@
                     if (q.question_type === 'open_ended') {
                         const ta = document.querySelector(`textarea[name="q_${q.id}"]`);
                         if (ta) val = ta.value.trim();
+                    } else if (q.question_type === 'matching') {
+                        const selects = document.querySelectorAll(`select[name^="q_${q.id}_match_"]`);
+                        const matchAnswers = {};
+                        selects.forEach(sel => {
+                            const leftItem = sel.getAttribute('data-left');
+                            if (sel.value) {
+                                matchAnswers[leftItem] = sel.value;
+                            }
+                        });
+                        if (Object.keys(matchAnswers).length > 0) {
+                            val = JSON.stringify(matchAnswers);
+                        }
                     } else {
                         const selected = document.querySelector(`input[name="q_${q.id}"]:checked`);
                         if (selected) val = selected.value;
