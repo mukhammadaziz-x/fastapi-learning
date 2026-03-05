@@ -271,12 +271,25 @@
                 window.doLogout = logout;
 
                 // ── Section switcher ───────────────────────────────────────────────────────
-                window.showSection = function (name, el) {
+                window.showSection = function (name, event) {
+                    if (event) {
+                        event.preventDefault();
+                        const targetUrl = event.currentTarget.getAttribute('href');
+                        window.history.pushState({}, '', targetUrl);
+                    }
                     document.querySelectorAll('section[id^="section-"]').forEach(s => s.classList.add('hidden'));
                     document.getElementById(`section-${name}`)?.classList.remove('hidden');
                     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                    el.classList.add('active');
+                    document.getElementById(`nav-${name}`)?.classList.add('active');
+                    if (name === 'groups') loadGroups();
                 };
+
+                window.addEventListener('popstate', () => {
+                    const loc = window.location.pathname;
+                    if (loc.includes('/groups')) showSection('groups');
+                    else if (loc.includes('/results')) showSection('results');
+                    else showSection('tests');
+                });
 
                 // ── Load tests ─────────────────────────────────────────────────────────────
                 let allTests = [];
@@ -462,6 +475,7 @@
                 let generatedLink = '';
                 window.generateLink = async function () {
                     const testId = document.getElementById('link-test-id').value;
+                    const groupId = document.getElementById('link-group').value;
                     const start = document.getElementById('link-start').value;
                     const end = document.getElementById('link-end').value;
                     const alertEl = document.getElementById('gen-link-alert');
@@ -472,8 +486,10 @@
 
                     btn.disabled = true; btn.textContent = 'Generating…';
                     try {
-                        const data = await api.generateLink(testId, { start_time: new Date(start).toISOString(), end_time: new Date(end).toISOString() });
-                        generatedLink = `${window.location.origin}/pages/test/take.html?token=${data.token}`;
+                        const payload = { start_time: new Date(start).toISOString(), end_time: new Date(end).toISOString() };
+                        if (groupId) payload.group_id = parseInt(groupId, 10);
+                        const data = await api.generateLink(testId, payload);
+                        generatedLink = `${window.location.origin}${data.url || ('/pages/test/take.html?token=' + data.token)}`;
                         document.getElementById('link-url').textContent = generatedLink;
                         document.getElementById('link-result').classList.remove('hidden');
                         showToast('Link generated!', 'success');
@@ -634,12 +650,108 @@
                     }
                 };
 
+                // ── Groups Management ───────────────────────────────────────────────────────
+                let allGroups = [];
+                window.loadGroups = async function () {
+                    const grid = document.getElementById('groups-grid');
+                    try {
+                        const data = await api.listGroups();
+                        allGroups = data.groups || [];
+
+                        // Populate group dropdown in link modal
+                        const groupSelect = document.getElementById('link-group');
+                        groupSelect.innerHTML = '<option value="">-- All Students (Public Link) --</option>' +
+                            allGroups.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+
+                        if (!allGroups.length) {
+                            grid.innerHTML = '<div class="card text-center text-muted">No groups yet. Create your first group!</div>';
+                            return;
+                        }
+
+                        grid.innerHTML = allGroups.map(g => `
+                            <div class="card">
+                                <h3 style="margin-bottom:8px;font-family:Outfit;font-size:20px">${g.name}</h3>
+                                <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px">${g.students_count} student(s)</p>
+                                <button class="btn btn-secondary btn-sm" onclick="openAddStudentsModal(${g.id})">
+                                    + Add Students
+                                </button>
+                            </div>
+                        `).join('');
+
+                    } catch (e) {
+                        grid.innerHTML = `<div class="card text-danger">${e.message}</div>`;
+                    }
+                };
+
+                window.createGroup = async function () {
+                    const name = document.getElementById('cg-name').value.trim();
+                    const alertEl = document.getElementById('create-group-alert');
+                    const btn = document.getElementById('btn-create-group');
+                    alertEl.innerHTML = '';
+
+                    if (!name) { alertEl.innerHTML = '<div class="alert alert-danger">Group name is required.</div>'; return; }
+
+                    btn.disabled = true; btn.textContent = 'Creating...';
+                    try {
+                        await api.createGroup({ name });
+                        showToast('Group created successfully!', 'success');
+                        closeModal('modal-create-group');
+                        document.getElementById('cg-name').value = '';
+                        loadGroups();
+                    } catch (e) {
+                        alertEl.innerHTML = `<div class="alert alert-danger">${e.message}</div>`;
+                    } finally {
+                        btn.disabled = false; btn.textContent = 'Create';
+                    }
+                };
+
+                window.openAddStudentsModal = function (groupId) {
+                    document.getElementById('add-students-group-id').value = groupId;
+                    document.getElementById('as-emails').value = '';
+                    document.getElementById('add-students-alert').innerHTML = '';
+                    openModal('modal-add-students');
+                };
+
+                window.addStudentsToGroup = async function () {
+                    const groupId = document.getElementById('add-students-group-id').value;
+                    const emailsRaw = document.getElementById('as-emails').value;
+                    const emails = emailsRaw.split('\\n').map(e => e.trim()).filter(e => e);
+                    const alertEl = document.getElementById('add-students-alert');
+                    const btn = document.getElementById('btn-add-students');
+                    alertEl.innerHTML = '';
+
+                    if (!emails.length) { alertEl.innerHTML = '<div class="alert alert-danger">Provide at least one email.</div>'; return; }
+
+                    btn.disabled = true; btn.textContent = 'Adding...';
+                    try {
+                        const data = await api.addStudentsToGroup(groupId, { emails });
+                        showToast(data.message, 'success');
+                        if (data.not_found && data.not_found.length > 0) {
+                            alertEl.innerHTML = `<div class="alert alert-warning">Warning: Could not find these student emails:<br/>${data.not_found.join('<br/>')}</div>`;
+                        } else {
+                            closeModal('modal-add-students');
+                        }
+                        loadGroups();
+                    } catch (e) {
+                        alertEl.innerHTML = `<div class="alert alert-danger">${e.message}</div>`;
+                    } finally {
+                        btn.disabled = false; btn.textContent = 'Add Students';
+                    }
+                };
+
                 // ── Close on overlay click ─────────────────────────────────────────────────
                 document.querySelectorAll('.modal-overlay').forEach(overlay => {
                     overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(overlay.id); });
                 });
 
                 loadTests();
+                loadGroups();
+
+                // Check initial URL
+                const initLoc = window.location.pathname;
+                if (initLoc.includes('/groups')) showSection('groups');
+                else if (initLoc.includes('/results')) showSection('results');
+                else showSection('tests');
             </script>
 </body>
 
