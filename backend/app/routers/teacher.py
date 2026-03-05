@@ -19,8 +19,9 @@ teacher_required = require_role("teacher", "admin")
 # ── Schemas ────────────────────────────────────────────────────────────────────
 class QuestionCreate(BaseModel):
     text: str
-    options: List[str]       # ["Option A", "Option B", "Option C", "Option D"]
-    correct_answer: str      # "A", "B", "C", or "D"
+    options: Optional[List[str]] = None      # Optional for Open ended
+    correct_answer: str      # Can be text or choice
+    question_type: str = "multiple_choice" # multiple_choice, open_ended, true_false, matching
     points: float = 1.0
 
 
@@ -68,7 +69,8 @@ async def create_test(
                 test_id=test.id,
                 text=q.text,
                 options=q.options,
-                correct_answer=q.correct_answer.upper(),
+                correct_answer=q.correct_answer,
+                question_type=q.question_type,
                 points=q.points,
             )
             db.add(question)
@@ -150,6 +152,7 @@ async def get_test_detail(
                 "id": q.id,
                 "text": q.text,
                 "options": q.options,
+                "question_type": q.question_type or "multiple_choice",
                 "correct_answer": q.correct_answer,
                 "points": q.points,
             }
@@ -220,11 +223,46 @@ async def test_results(
             "student_email": u.email,
             "score": s.score,
             "status": s.status.value,
+            "total_questions": s.total_questions,
+            "correct_answers": s.correct_answers,
             "violations": s.violations_count,
+            "is_graded": s.is_graded,
+            "teacher_grade": s.teacher_grade,
             "submitted_at": s.submitted_at.isoformat() if s.submitted_at else None,
         }
         for s, st, u in rows
     ]
+
+class GradeRequest(BaseModel):
+    grade: str # Pass, Merit, Distinction
+
+@router.post("/sessions/{session_id}/grade")
+async def grade_session(
+    session_id: int,
+    body: GradeRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(teacher_required),
+):
+    teacher = await get_teacher_profile(current_user, db)
+    
+    # Needs to verify this session belongs to a test created by this teacher
+    result = await db.execute(
+        select(TestSession, Test)
+        .join(TestLink, TestLink.id == TestSession.test_link_id)
+        .join(Test, Test.id == TestLink.test_id)
+        .where(TestSession.id == session_id, Test.teacher_id == teacher.id)
+    )
+    row = result.first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Test session not found or access denied")
+        
+    session = row[0]
+    session.teacher_grade = body.grade
+    session.is_graded = True
+    await db.commit()
+    
+    return {"message": "Grade saved successfully"}
+
 
 
 @router.get("/students/{student_id}/stats")

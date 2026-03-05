@@ -193,7 +193,9 @@ async def submit_test(
     else:
         # Score calculation
         total_points = sum(q.points for q in questions.values())
+        session.total_questions = len(questions)
         earned_points = 0.0
+        correct_answers = 0
 
         for answer_item in body.answers:
             q = questions.get(answer_item.question_id)
@@ -205,8 +207,13 @@ async def submit_test(
                 chosen_answer=answer_item.chosen_answer,
             )
             db.add(answer_record)
-            if answer_item.chosen_answer and answer_item.chosen_answer.upper() == q.correct_answer:
+            
+            # Simple match logic (case insensitive string match for matching or exact answers)
+            if answer_item.chosen_answer and str(answer_item.chosen_answer).strip().upper() == str(q.correct_answer).strip().upper():
                 earned_points += q.points
+                correct_answers += 1
+                
+        session.correct_answers = correct_answers
 
         session.score = round((earned_points / total_points) * 100, 1) if total_points > 0 else 0.0
         session.status = TestStatus.passed if session.score >= 60 else TestStatus.failed
@@ -249,6 +256,10 @@ async def my_stats(
             "score": s.score,
             "status": s.status.value,
             "violations": s.violations_count,
+            "total_questions": s.total_questions,
+            "correct_answers": s.correct_answers,
+            "is_graded": s.is_graded,
+            "teacher_grade": s.teacher_grade,
             "submitted_at": s.submitted_at.isoformat() if s.submitted_at else None,
         })
         if t.topic and s.score is not None:
