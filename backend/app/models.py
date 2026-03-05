@@ -84,8 +84,9 @@ class Question(Base):
     id = Column(Integer, primary_key=True, index=True)
     test_id = Column(Integer, ForeignKey("tests.id"), nullable=False)
     text = Column(Text, nullable=False)
-    options = Column(JSON, nullable=False)   # ["A. ...", "B. ...", "C. ...", "D. ..."]
-    correct_answer = Column(String(10), nullable=False)  # "A", "B", "C", or "D"
+    options = Column(JSON, nullable=True)   # ["A. ...", "B. ...", "C. ...", "D. ..."]
+    correct_answer = Column(Text, nullable=False)  # "A", "B", "C", or "D" or full text
+    question_type = Column(String(50), default="multiple_choice") # multiple_choice, open_ended, true_false, matching
     points = Column(Float, default=1.0)
 
     test = relationship("Test", back_populates="questions")
@@ -120,6 +121,11 @@ class TestSession(Base):
     score = Column(Float, nullable=True)        # percentage 0-100
     violations_count = Column(Integer, default=0)
     status = Column(SAEnum(TestStatus), default=TestStatus.in_progress)
+    
+    total_questions = Column(Integer, default=0)
+    correct_answers = Column(Integer, default=0)
+    teacher_grade = Column(String(50), nullable=True) # Pass, Merit, Distinction
+    is_graded = Column(Boolean, default=False)
 
     student = relationship("Student", back_populates="sessions")
     test_link = relationship("TestLink", back_populates="sessions")
@@ -132,7 +138,7 @@ class Answer(Base):
     id = Column(Integer, primary_key=True, index=True)
     session_id = Column(Integer, ForeignKey("test_sessions.id"), nullable=False)
     question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
-    chosen_answer = Column(String(10), nullable=True)  # "A","B","C","D" or null if skipped
+    chosen_answer = Column(Text, nullable=True)  # "A","B","C","D" or full text
 
     session = relationship("TestSession", back_populates="answers")
     question = relationship("Question", back_populates="answers")
