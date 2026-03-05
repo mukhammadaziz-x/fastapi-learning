@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Teacher Dashboard — PDP Education</title>
-    <link rel="stylesheet" href="../../assets/css/style.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 
@@ -15,19 +15,29 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-logo">
-                <img src="../../assets/img/pdp-education.png" alt="PDP Education"
+                <img src="/assets/img/pdp-education.png" alt="PDP Education"
                     style="max-width: 160px; background: white; padding: 8px 12px; border-radius: 8px;">
                 <div class="badge badge-cyan mt-4">Teacher</div>
             </div>
             <nav class="sidebar-nav">
-                <a class="nav-item active" href="#" onclick="showSection('tests', this)">
+                <a id="nav-tests" class="nav-item active" href="/teacher/dashboard"
+                    onclick="showSection('tests', event)">
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round"
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                     My Tests
                 </a>
-                <a class="nav-item" href="#" onclick="showSection('results', this)">
+                <a id="nav-groups" class="nav-item" href="/teacher/dashboard/groups"
+                    onclick="showSection('groups', event)">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    My Groups
+                </a>
+                <a id="nav-results" class="nav-item" href="/teacher/dashboard/results"
+                    onclick="showSection('results', event)">
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round"
                             d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -187,6 +197,12 @@
                     <div id="gen-link-alert"></div>
                     <input type="hidden" id="link-test-id" />
                     <div class="form-group">
+                        <label class="form-label">Assign to Group (Optional)</label>
+                        <select id="link-group" class="form-select">
+                            <option value="">-- All Students (Public Link) --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label class="form-label">Available From</label>
                         <input id="link-start" type="datetime-local" class="form-input" />
                     </div>
@@ -201,6 +217,43 @@
                     <div class="grid-2 mt-4">
                         <button class="btn btn-secondary" onclick="closeModal('modal-gen-link')">Close</button>
                         <button class="btn btn-primary" id="btn-gen-link" onclick="generateLink()">Generate</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Group Modal -->
+            <div class="modal-overlay" id="modal-create-group">
+                <div class="modal">
+                    <button class="modal-close" onclick="closeModal('modal-create-group')">✕</button>
+                    <div class="modal-title">Create New Group</div>
+                    <div id="create-group-alert"></div>
+                    <div class="form-group">
+                        <label class="form-label">Group Name</label>
+                        <input id="cg-name" type="text" class="form-input" placeholder="e.g. Python Beginners 101" />
+                    </div>
+                    <div class="grid-2 mt-4">
+                        <button class="btn btn-secondary" onclick="closeModal('modal-create-group')">Cancel</button>
+                        <button class="btn btn-primary" id="btn-create-group" onclick="createGroup()">Create</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Students Modal -->
+            <div class="modal-overlay" id="modal-add-students">
+                <div class="modal">
+                    <button class="modal-close" onclick="closeModal('modal-add-students')">✕</button>
+                    <div class="modal-title">Add Students to Group</div>
+                    <div id="add-students-alert"></div>
+                    <input type="hidden" id="add-students-group-id" />
+                    <div class="form-group">
+                        <label class="form-label">Student Emails (one per line)</label>
+                        <textarea id="as-emails" class="form-textarea"
+                            placeholder="student1@example.com&#10;student2@example.com"></textarea>
+                    </div>
+                    <div class="grid-2 mt-4">
+                        <button class="btn btn-secondary" onclick="closeModal('modal-add-students')">Cancel</button>
+                        <button class="btn btn-primary" id="btn-add-students" onclick="addStudentsToGroup()">Add
+                            Students</button>
                     </div>
                 </div>
             </div>
