@@ -12,81 +12,12 @@ from app.models import (
     TestSession, Answer, TestStatus, Group, GroupStudent, Timetable
 )
 
-class ProfileUpdate(BaseModel):
-    full_name: Optional[str] = None
-    phone: Optional[str] = None
-    address: Optional[str] = None
-    avatar_url: Optional[str] = None
-    gender: Optional[str] = None
-    birth_date: Optional[datetime] = None
-    nationality: Optional[str] = None
-    passport_id: Optional[str] = None
-
-@router.get("/profile")
-async def get_student_profile_data(current_user: User = Depends(student_required)):
-    return {
-        "full_name": current_user.full_name,
-        "email": current_user.email,
-        "phone": current_user.phone,
-        "address": current_user.address,
-        "avatar_url": current_user.avatar_url,
-        "gender": current_user.gender,
-        "birth_date": current_user.birth_date.isoformat() if current_user.birth_date else None,
-        "nationality": current_user.nationality,
-        "passport_id": current_user.passport_id,
-    }
-
-@router.put("/profile")
-async def update_student_profile(
-    body: ProfileUpdate,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(student_required),
-):
-    if body.full_name is not None: current_user.full_name = body.full_name
-    if body.phone is not None: current_user.phone = body.phone
-    if body.address is not None: current_user.address = body.address
-    if body.avatar_url is not None: current_user.avatar_url = body.avatar_url
-    if body.gender is not None: current_user.gender = body.gender
-    if body.birth_date is not None: current_user.birth_date = body.birth_date
-    if body.nationality is not None: current_user.nationality = body.nationality
-    if body.passport_id is not None: current_user.passport_id = body.passport_id
-    
-    await db.commit()
-    return {"message": "Profile updated successfully"}
-
-@router.get("/timetable")
-async def get_student_timetable(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(student_required),
-):
-    student = await get_student_profile(current_user, db)
-    # Get groups this student is in
-    result = await db.execute(
-        select(Timetable, Group)
-        .join(Group, Group.id == Timetable.group_id)
-        .join(GroupStudent, GroupStudent.group_id == Group.id)
-        .where(GroupStudent.student_id == student.id)
-        .order_by(Timetable.day_of_week, Timetable.lesson_number)
-    )
-    rows = result.all()
-    return [
-        {
-            "day_of_week": t.day_of_week,
-            "lesson_number": t.lesson_number,
-            "start_time": t.start_time,
-            "end_time": t.end_time,
-            "room": t.room,
-            "subject": t.subject,
-            "group_name": g.name
-        }
-        for t, g in rows
-    ]
-
 from app.auth import require_role, get_current_user
 
 router = APIRouter(prefix="/student", tags=["student"])
-
 student_required = require_role("student")
+
+class ProfileUpdate(BaseModel):
 
 MAX_VIOLATIONS = 3
 
