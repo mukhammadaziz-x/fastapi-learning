@@ -87,8 +87,8 @@
             </div>
         </aside>
 
-        <!-- Main -->
-        <main class="main-content">
+        <!-- Main Section: Performance -->
+        <main class="main-content" id="section-perf">
             <div class="page-header">
                 <h1>My Performance</h1>
                 <p>Your test history and topic mastery</p>
@@ -147,19 +147,19 @@
                     </thead>
                     <tbody id="history-tbody">
                         <tr>
-                            <td colspan="5" class="text-center text-muted">Loading…</td>
+                            <td colspan="7" class="text-center text-muted">Loading…</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </main>
 
-        <!-- Leaderboard Section (hidden by default) -->
-        <main class="main-content" id="section-leaderboard" style="display:none">
+        <!-- Leaderboard Section -->
+        <main class="main-content hidden" id="section-leaderboard">
             <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start">
                 <div>
                     <h1>🏆 Leaderboard</h1>
-                    <p>Top students ranked by average score across all passed tests</p>
+                    <p>Top students ranked by average score</p>
                 </div>
                 <div>
                     <select id="leaderboard-group-filter" class="form-select" onchange="loadLeaderboard(this.value)">
@@ -167,11 +167,9 @@
                     </select>
                 </div>
             </div>
-
-            <!-- My rank banner -->
             <div id="my-rank-banner" class="card"
                 style="margin-bottom:24px; border:1px solid var(--border); display:none">
-                <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap">
+                <div style="display:flex; align-items:center; gap:20px;">
                     <div style="font-size:48px; font-family:Outfit; font-weight:800; color:var(--primary-light)"
                         id="my-rank-num">#—</div>
                     <div>
@@ -179,12 +177,10 @@
                         <div style="font-size:13px; color:var(--text-muted)">Your current ranking</div>
                     </div>
                     <div style="margin-left:auto; text-align:right">
-                        <div style="font-size:28px; font-weight:800; color:var(--success)" id="my-rank-avg"></div>
-                        <div style="font-size:12px; color:var(--text-muted)">avg score</div>
+                        <div style="font-size:20px; font-weight:800; color:var(--success)" id="my-rank-avg"></div>
                     </div>
                 </div>
             </div>
-
             <div class="table-wrap">
                 <table>
                     <thead>
@@ -196,280 +192,297 @@
                             <th>Tests Passed</th>
                         </tr>
                     </thead>
-                    <tbody id="leaderboard-tbody">
-                        <tr>
-                            <td colspan="5" class="text-center text-muted">Loading…</td>
-                        </tr>
-                    </tbody>
+                    <tbody id="leaderboard-tbody"></tbody>
                 </table>
+            </div>
+        </main>
+
+        <!-- Timetable Section -->
+        <main class="main-content hidden" id="section-timetable">
+            <div class="page-header">
+                <h1>Time Table</h1>
+                <p>Your class schedule</p>
+            </div>
+            <div class="card" style="padding:0; overflow:hidden">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>#</th>
+                            <th>Time</th>
+                            <th>Room</th>
+                            <th>Subject</th>
+                            <th>Group</th>
+                        </tr>
+                    </thead>
+                    <tbody id="timetable-tbody"></tbody>
+                </table>
+            </div>
+        </main>
+
+        <!-- Settings / Profile Section -->
+        <main class="main-content hidden" id="section-settings">
+            <div class="page-header">
+                <h1>My Profile</h1>
+                <p>Manage your account and profile picture</p>
+            </div>
+            <div class="grid-2">
+                <div class="card">
+                    <div class="flex-center" style="flex-direction: column; margin-bottom: 24px;">
+                        <div style="position: relative;">
+                            <img id="settings-avatar"
+                                src="https://ui-avatars.com/api/?name=Student&background=6366F1&color=fff"
+                                style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary);">
+                            <button class="btn btn-secondary btn-sm"
+                                style="position: absolute; bottom: 0; right: 0; padding: 6px; border-radius: 50%;"
+                                onclick="document.getElementById('avatar-upload').click()">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </button>
+                            <input type="file" id="avatar-upload" class="hidden" accept="image/*"
+                                onchange="handleAvatarUpload(event)">
+                        </div>
+                        <h2 id="settings-full-name" style="margin-top: 16px;">Student Name</h2>
+                        <p id="settings-email" class="text-muted">student@pdp.uz</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" id="prof-full-name" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone</label>
+                        <input type="text" id="prof-phone" class="form-input">
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="saveProfile()">Update Profile</button>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom: 16px;">Identity & Academic Details</h3>
+                    <div class="form-group">
+                        <label class="form-label">Nationality</label>
+                        <input type="text" id="prof-nation" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Passport ID</label>
+                        <input type="text" id="prof-passport" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Gender</label>
+                        <select id="prof-gender" class="form-select">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
 
     <script type="module">
         import { api } from '/assets/js/api.js';
-        import { requireAuth, initUserDisplay, logout, formatDate } from '/assets/js/utils.js';
+        import { requireAuth, initUserDisplay, logout, formatDate, toggleTheme } from '/assets/js/utils.js';
 
         const user = requireAuth('student');
         if (!user) throw new Error('Not student');
-
         initUserDisplay();
         window.doLogout = logout;
 
-        // ── Section navigation ──────────────────────────────────────
-        const SECTIONS = { perf: 'section-perf', leaderboard: 'section-leaderboard' };
-
+        // ── Section switcher ──────────────────────────────────────
         window.showSection = function (name, event) {
             if (event) {
                 event.preventDefault();
                 const targetUrl = event.currentTarget.getAttribute('href');
                 window.history.pushState({}, '', targetUrl);
             }
-            // Toggle visibility
-            document.getElementById('section-perf').style.display = name === 'perf' ? '' : 'none';
-            document.getElementById('section-leaderboard').style.display = name === 'leaderboard' ? '' : 'none';
-            // Active link
-            document.querySelectorAll('.nav-item').forEach(a => a.classList.remove('active'));
-            document.getElementById(`nav-${name}`).classList.add('active');
-            // Lazy load leaderboard
+            document.querySelectorAll('main.main-content').forEach(s => s.classList.add('hidden'));
+            const section = document.getElementById(`section-${name}`);
+            if (section) section.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(`nav-${name}`)?.classList.add('active');
+
+            if (name === 'perf') loadData();
             if (name === 'leaderboard') loadLeaderboard();
+            if (name === 'timetable') loadTimetable();
+            if (name === 'settings') loadProfile();
         };
 
         window.addEventListener('popstate', () => {
             const loc = window.location.pathname;
             if (loc.includes('/leaderboard')) showSection('leaderboard');
+            else if (loc.includes('/timetable')) showSection('timetable');
+            else if (loc.includes('/settings')) showSection('settings');
             else showSection('perf');
         });
+
+        // ── Theme Toggle ──────────────────────────────────────────
+        window.handleThemeToggle = function () {
+            const newTheme = toggleTheme();
+            updateThemeUI(newTheme);
+        };
+        function updateThemeUI(theme) {
+            const text = document.getElementById('theme-text');
+            const sun = document.getElementById('theme-icon-sun');
+            const moon = document.getElementById('theme-icon-moon');
+            if (theme === 'dark') {
+                text.textContent = 'Light Mode';
+                sun?.classList.remove('hidden');
+                moon?.classList.add('hidden');
+            } else {
+                text.textContent = 'Dark Mode';
+                sun?.classList.add('hidden');
+                moon?.classList.remove('hidden');
+            }
+        }
+        updateThemeUI(localStorage.getItem('pdp_theme') || 'light');
 
         // Chart instances
         let scoresChart, topicsChart;
         let globalSessions = [];
 
-        // Setup Chart.js defaults for dark theme
+        // Setup Chart.js defaults
         Chart.defaults.color = '#94A3B8';
         Chart.defaults.font.family = 'Inter';
 
         async function loadData() {
             try {
                 const data = await api.myStats();
-
-                // Top stats
                 document.getElementById('stat-total').textContent = data.total_tests;
                 document.getElementById('stat-pass-rate').textContent = data.pass_rate;
                 document.getElementById('stat-passed').textContent = data.passed;
                 document.getElementById('stat-failed').textContent = data.failed;
 
-                // Table
                 const tbody = document.getElementById('history-tbody');
                 if (!data.sessions.length) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">You haven\'t taken any tests yet.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No tests taken yet.</td></tr>';
                 } else {
                     tbody.innerHTML = data.sessions.map(s => `
-          <tr>
-            <td>${s.test_title}</td>
-            <td>${s.topic ? `<span class="badge badge-primary">${s.topic}</span>` : '—'}</td>
-            <td><strong>${(s.correct_answers ?? 0)} / ${(s.total_questions ?? 0)}</strong> (${s.total_questions ? Math.round(((s.correct_answers ?? 0) / s.total_questions) * 100) : 0}%)</td>
-            <td><strong>${s.score ?? 0}%</strong></td>
-            <td>
-                <span class="badge ${s.status === 'passed' ? 'badge-success' : s.status === 'auto_failed' ? 'badge-danger' : 'badge-warning'}">${s.status.replace('_', ' ')}</span>
-                ${s.is_graded && s.teacher_grade ? `<span class="badge badge-cyan" style="margin-top:4px; display:inline-block">${s.teacher_grade}</span>` : ''}
-            </td>
-            <td>${formatDate(s.submitted_at)}</td>
-          </tr>
-        `).join('');
+                        <tr>
+                            <td>${s.test_title}</td>
+                            <td>${s.topic ? `<span class="badge badge-primary">${s.topic}</span>` : '—'}</td>
+                            <td><strong>${s.correct_answers || 0} / ${s.total_questions || 0}</strong></td>
+                            <td><strong>${s.score || 0}%</strong></td>
+                            <td>
+                                <span class="badge ${s.status === 'passed' ? 'badge-success' : 'badge-danger'}">${s.status}</span>
+                                ${s.teacher_grade ? `<span class="badge badge-cyan" style="display:block;margin-top:4px">${s.teacher_grade}</span>` : ''}
+                            </td>
+                            <td>${formatDate(s.submitted_at)}</td>
+                        </tr>
+                    `).join('');
                 }
-
-                // Setup Topic Filter combo box
                 globalSessions = data.sessions;
-                const topicFilter = document.getElementById('trend-topic-filter');
-                Object.keys(data.topic_averages).forEach(topic => {
-                    const opt = document.createElement('option');
-                    opt.value = topic;
-                    opt.textContent = topic;
-                    topicFilter.appendChild(opt);
-                });
-
                 renderTrendChart('all');
-
-                // Radar Chart (Topics)
-                const topicLabels = Object.keys(data.topic_averages);
-                const topicAverages = Object.values(data.topic_averages);
-
-                const ctxTopics = document.getElementById('topicsChart').getContext('2d');
-                if (topicLabels.length === 0) {
-                    // Show placeholder if no topics
-                    topicsChart = new Chart(ctxTopics, {
-                        type: 'radar',
-                        data: {
-                            labels: ['Math', 'Science', 'History', 'Languages'],
-                            datasets: [{ data: [0, 0, 0, 0], borderColor: 'rgba(99,102,241,0.2)' }]
-                        },
-                        options: {
-                            responsive: true, maintainAspectRatio: false,
-                            scales: { r: { ticks: { display: false }, grid: { color: 'rgba(255,255,255,0.05)' }, angleLines: { color: 'rgba(255,255,255,0.05)' } } },
-                            plugins: { legend: { display: false }, title: { display: true, text: 'No topic data yet' } }
-                        }
-                    });
-                } else {
-                    topicsChart = new Chart(ctxTopics, {
-                        type: 'radar',
-                        data: {
-                            labels: topicLabels,
-                            datasets: [{
-                                label: 'Average Score (%)',
-                                data: topicAverages,
-                                borderColor: '#06B6D4',
-                                backgroundColor: 'rgba(6,182,212,0.2)',
-                                pointBackgroundColor: '#10B981',
-                                borderWidth: 2,
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: {
-                                r: {
-                                    beginAtZero: true, max: 100,
-                                    ticks: { backdropColor: 'transparent', color: '#94A3B8' },
-                                    grid: { color: 'rgba(255,255,255,0.1)' },
-                                    angleLines: { color: 'rgba(255,255,255,0.1)' }
-                                }
-                            },
-                            plugins: { legend: { display: false } }
-                        }
-                    });
-                }
-
-            } catch (e) {
-                document.querySelector('.main-content').innerHTML = `
-        <div class="alert alert-danger" style="margin:40px">
-          <h2>Failed to load dashboard</h2>
-          <p>${e.message}</p>
-        </div>
-      `;
-            }
+            } catch (e) { showToast(e.message, 'error'); }
         }
 
-        window.filterTrendChart = function () {
-            const topic = document.getElementById('trend-topic-filter').value;
-            renderTrendChart(topic);
-        };
-
         function renderTrendChart(topicFilter) {
-            let filtered = topicFilter === 'all'
-                ? globalSessions
-                : globalSessions.filter(s => s.topic === topicFilter);
-
-            const sortedSessions = [...filtered].reverse(); // oldest to newest for trend
-            const labels = sortedSessions.map((s, i) => `${s.test_title.substring(0, 10)}...`);
-            const scores = sortedSessions.map(s => s.score ?? 0);
-
+            const filtered = topicFilter === 'all' ? globalSessions : globalSessions.filter(s => s.topic === topicFilter);
+            const sorted = [...filtered].reverse();
+            const ctx = document.getElementById('scoresChart').getContext('2d');
             if (scoresChart) scoresChart.destroy();
-
-            const ctxScores = document.getElementById('scoresChart').getContext('2d');
-            scoresChart = new Chart(ctxScores, {
+            scoresChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Score (%)',
-                        data: scores,
-                        borderColor: '#6366F1',
-                        backgroundColor: 'rgba(99,102,241,0.2)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#06B6D4'
-                    }]
+                    labels: sorted.map(s => s.test_title.substring(0, 8)),
+                    datasets: [{ label: 'Score %', data: sorted.map(s => s.score), borderColor: '#6366F1', tension: 0.4 }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        x: { grid: { display: false } }
-                    },
-                    plugins: { legend: { display: false } }
-                }
+                options: { responsive: true, maintainAspectRatio: false }
             });
         }
 
-        loadData();
-
-        // ── Leaderboard ──────────────────────────────────────────
-        let lastLeaderboardGroupId = null;
-
-        window.loadLeaderboard = async function (groupId = "") {
+        async function loadLeaderboard(groupId = "") {
             const tbody = document.getElementById('leaderboard-tbody');
-            if (lastLeaderboardGroupId === groupId && tbody.innerHTML.indexOf('Loading') === -1) return; // already loaded
-            lastLeaderboardGroupId = groupId;
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Loading…</td></tr>';
-
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Loading leaderboard...</td></tr>';
             try {
                 const data = await api.leaderboard(groupId);
-
-                // Populate group filter dropdown if not populated yet
-                const groupFilter = document.getElementById('leaderboard-group-filter');
-                if (groupFilter.options.length === 1 && data.available_groups) {
-                    data.available_groups.forEach(g => {
-                        const opt = document.createElement('option');
-                        opt.value = g.id;
-                        opt.textContent = 'Group: ' + g.name;
-                        groupFilter.appendChild(opt);
-                    });
-                }
-
-                // My rank banner
-                if (data.my_rank) {
-                    const banner = document.getElementById('my-rank-banner');
-                    banner.style.display = '';
-                    document.getElementById('my-rank-num').textContent = '#' + data.my_rank.rank;
-                    document.getElementById('my-rank-name').textContent = data.my_rank.full_name;
-                    document.getElementById('my-rank-avg').textContent = data.my_rank.avg_score + '%';
-                }
-
-                if (!data.rankings.length) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No data yet. Take some tests to appear here!</td></tr>';
-                    return;
-                }
-
-                const medals = ['🥇', '🥈', '🥉'];
-                const myId = data.my_rank?.student_id;
-
-                tbody.innerHTML = data.rankings.map(r => {
-                    const isMe = r.student_id === myId;
-                    const medal = medals[r.rank - 1] || '';
-                    const rankCell = medal
-                        ? `<td style="font-size:20px;text-align:center">${medal}</td>`
-                        : `<td style="text-align:center;color:var(--text-muted);font-weight:600">#${r.rank}</td>`;
-                    const rowStyle = isMe ? 'background:rgba(99,102,241,0.08); outline:1px solid rgba(99,102,241,0.3);' : '';
-                    const nameBadge = isMe ? ' <span class="badge badge-primary" style="font-size:10px">You</span>' : '';
-                    const scoreColor = r.avg_score >= 80 ? 'var(--success)' : r.avg_score >= 60 ? 'var(--warning)' : 'var(--danger)';
-                    return `
-                        <tr style="${rowStyle}">
-                            ${rankCell}
-                            <td><strong>${r.full_name}</strong>${nameBadge}</td>
-                            <td><strong style="color:${scoreColor}">${r.avg_score}%</strong></td>
-                            <td>${r.best_score}%</td>
-                            <td><span class="badge badge-success">${r.tests_passed} passed</span></td>
-                        </tr>`;
-                }).join('');
-            } catch (e) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">${e.message}</td></tr>`;
-            }
+                tbody.innerHTML = data.rankings.map(r => `
+                    <tr>
+                        <td>#${r.rank}</td>
+                        <td><strong>${r.full_name}</strong></td>
+                        <td>${r.avg_score}%</td>
+                        <td>${r.best_score}%</td>
+                        <td>${r.tests_passed}</td>
+                    </tr>
+                `).join('');
+            } catch (e) { showToast(e.message, 'error'); }
         }
 
-        // Wrap perf section reference
-        document.querySelector('.main-content').id = 'section-perf';
-
-        // Init based on URL
-        if (window.location.pathname.includes('/leaderboard')) {
-            showSection('leaderboard');
-        } else {
-            showSection('perf');
+        async function loadTimetable() {
+            const tbody = document.getElementById('timetable-tbody');
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Loading schedule...</td></tr>';
+            try {
+                const data = await api.getStudentTimetable();
+                const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+                tbody.innerHTML = data.map(t => `
+                    <tr>
+                        <td><strong>${days[t.day_of_week]}</strong></td>
+                        <td>${t.lesson_number}</td>
+                        <td>${t.start_time} - ${t.end_time}</td>
+                        <td>${t.room}</td>
+                        <td>${t.subject}</td>
+                        <td><span class="badge badge-primary">${t.group_name}</span></td>
+                    </tr>
+                `).join('') || '<tr><td colspan="6" class="text-center text-muted">No schedule found.</td></tr>';
+            } catch (e) { showToast(e.message, 'error'); }
         }
 
+        async function loadProfile() {
+            try {
+                const p = await api.getStudentProfile();
+                document.getElementById('prof-full-name').value = p.full_name || '';
+                document.getElementById('prof-phone').value = p.phone || '';
+                document.getElementById('prof-gender').value = p.gender || 'Male';
+                document.getElementById('prof-nation').value = p.nationality || '';
+                document.getElementById('prof-passport').value = p.passport_id || '';
+                document.getElementById('settings-full-name').textContent = p.full_name;
+                document.getElementById('settings-email').textContent = p.email;
+                if (p.avatar_url) document.getElementById('settings-avatar').src = p.avatar_url;
+            } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        window.saveProfile = async function () {
+            const payload = {
+                full_name: document.getElementById('prof-full-name').value,
+                phone: document.getElementById('prof-phone').value,
+                gender: document.getElementById('prof-gender').value,
+                nationality: document.getElementById('prof-nation').value,
+                passport_id: document.getElementById('prof-passport').value,
+            };
+            try {
+                await api.updateStudentProfile(payload);
+                showToast('Profile updated!', 'success');
+                initUserDisplay();
+            } catch (e) { showToast(e.message, 'error'); }
+        };
+
+        window.handleAvatarUpload = async function (event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64 = e.target.result;
+                document.getElementById('settings-avatar').src = base64;
+                try {
+                    await api.updateStudentProfile({ avatar_url: base64 });
+                    showToast('Avatar updated!', 'success');
+                    initUserDisplay();
+                } catch (err) { showToast(err.message, 'error'); }
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // Initialize based on URL
+        const loc = window.location.pathname;
+        if (loc.includes('/leaderboard')) showSection('leaderboard');
+        else if (loc.includes('/timetable')) showSection('timetable');
+        else if (loc.includes('/settings')) showSection('settings');
+        else showSection('perf');
     </script>
+</body>
+
+</html>
 </body>
 
 </html>
