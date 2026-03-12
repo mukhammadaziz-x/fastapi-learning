@@ -381,10 +381,56 @@
             }
         }
 
+        async function triggerViolation() {
+            if (isSubmitting || isManualExit) return;
+            const overlay = document.getElementById('overlay-violation');
+            if (!overlay.classList.contains('hidden')) return; // already showing
+
+            document.getElementById('test-content').classList.add('hidden');
+            overlay.classList.remove('hidden');
+
+            try {
+                const res = await api.reportViolation(token);
+                if (res.auto_submitted) {
+                    isSubmitting = true;
+                    document.getElementById('violation-msg').innerHTML = "<b>Violations exceeded limit.</b><br/>Test has been automatically submitted with a score of zero.";
+                    overlay.querySelector('button').textContent = "View Results";
+                    overlay.querySelector('button').onclick = () => window.location.href = `/pages/test/result.html?token=${token}`;
+                } else {
+                    document.getElementById('violation-msg').textContent = res.message;
+                }
+            } catch (e) {
+                console.error(e);
+                document.getElementById('violation-msg').textContent = "Error recording violation. You must stay in fullscreen.";
+            }
+        }
+
         function startAntiCheat() {
             document.addEventListener('keydown', blockCheats, true);
             // Block right-click context menu
             document.addEventListener('contextmenu', e => e.preventDefault(), true);
+
+            // Block explicit copy, cut, paste
+            document.addEventListener('copy', e => {
+                e.preventDefault();
+                if (e.clipboardData) e.clipboardData.setData('text/plain', 'Cheating is not allowed.');
+            });
+            document.addEventListener('cut', e => e.preventDefault());
+            document.addEventListener('paste', e => e.preventDefault());
+
+            // Catch Alt-Tab or switching away from the window
+            window.addEventListener('blur', () => {
+                if (isSubmitting || isManualExit || document.getElementById('test-content').classList.contains('hidden')) return;
+                triggerViolation();
+            });
+
+            // Catch minimizing the window or tab switching
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') {
+                    if (isSubmitting || isManualExit || document.getElementById('test-content').classList.contains('hidden')) return;
+                    triggerViolation();
+                }
+            });
         }
 
         function stopAntiCheat() {
@@ -419,25 +465,7 @@
 
             const isFS = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
             if (!isFS) {
-                // Exited fullscreen!
-                document.getElementById('test-content').classList.add('hidden');
-                const overlay = document.getElementById('overlay-violation');
-                overlay.classList.remove('hidden');
-
-                try {
-                    const res = await api.reportViolation(token);
-                    if (res.auto_submitted) {
-                        isSubmitting = true;
-                        document.getElementById('violation-msg').innerHTML = "<b>Violations exceeded limit.</b><br/>Test has been automatically submitted with a score of zero.";
-                        overlay.querySelector('button').textContent = "View Results";
-                        overlay.querySelector('button').onclick = () => window.location.href = `/pages/test/result.html?token=${token}`;
-                    } else {
-                        document.getElementById('violation-msg').textContent = res.message;
-                    }
-                } catch (e) {
-                    console.error(e);
-                    document.getElementById('violation-msg').textContent = "Error recording violation. You must stay in fullscreen.";
-                }
+                triggerViolation();
             }
         }
 
