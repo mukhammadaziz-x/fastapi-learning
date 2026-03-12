@@ -336,7 +336,7 @@ async def get_test_detail(
     }
 
 
-@router.post("/tests/{test_id}/link", status_code=201)
+@router.post("/tests/{test_id}/links", status_code=201)
 async def generate_link(
     test_id: int,
     body: LinkCreate,
@@ -355,6 +355,7 @@ async def generate_link(
     token = str(uuid.uuid4())
     link = TestLink(
         test_id=test_id,
+        group_id=body.group_id,
         token=token,
         start_time=body.start_time,
         end_time=body.end_time,
