@@ -6,16 +6,57 @@
 
 /* ─── Design Tokens ──────────────────────────────────────────────────────────*/
 :root {
-  /* Colors */
+  /* Common Colors */
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --danger-light: #FCA5A5;
+
+  /* Theme: Light (PDP University Style) */
+  --primary: #10B981;
+  --primary-light: #34D399;
+  --primary-dark: #059669;
+  --cyan: #06B6D4;
+  --cyan-light: #67E8F9;
+
+  /* Backgrounds */
+  --bg-base: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #F1F5F9;
+  --bg-card: rgba(255, 255, 255, 0.95);
+
+  /* Text */
+  --text-primary: #1E293B;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+
+  /* Borders */
+  --border: rgba(16, 185, 129, 0.15);
+  --border-hover: rgba(16, 185, 129, 0.4);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+  --glow: 0 0 16px rgba(16, 185, 129, 0.1);
+
+  /* Spacing */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  /* Transitions */
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] {
+  /* Theme: Dark (Original Style) */
   --primary: #6366F1;
   --primary-light: #818CF8;
   --primary-dark: #4F46E5;
   --cyan: #06B6D4;
   --cyan-light: #67E8F9;
-  --success: #10B981;
-  --warning: #F59E0B;
-  --danger: #EF4444;
-  --danger-light: #FCA5A5;
 
   /* Backgrounds */
   --bg-base: #0F172A;
@@ -37,15 +78,6 @@
   --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.6);
   --glow: 0 0 24px rgba(99, 102, 241, 0.25);
-
-  /* Spacing */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
-
-  /* Transitions */
-  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ─── Reset & Base ───────────────────────────────────────────────────────────*/
