@@ -95,16 +95,22 @@ async def access_test(
     # If test has a time_limit_minutes, timer = session.started_at + limit (or link end if sooner)
     timer_end = link.end_time
     if test.time_limit_minutes:
-        from datetime import timedelta
+        from datetime import timedelta, timezone
         limit_end = session.started_at + timedelta(minutes=test.time_limit_minutes)
         timer_end = min(limit_end, link.end_time)
+    
+    from datetime import timezone
+    if timer_end.tzinfo is None:
+        timer_end_str = timer_end.replace(tzinfo=timezone.utc).isoformat()
+    else:
+        timer_end_str = timer_end.isoformat()
 
     return {
         "session_id": session.id,
         "test_title": test.title,
         "test_description": test.description,
         "topic": test.topic,
-        "end_time": timer_end.isoformat(),
+        "end_time": timer_end_str,
         "time_limit_minutes": test.time_limit_minutes,
         "violations_count": session.violations_count,
         "questions": [
