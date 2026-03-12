@@ -60,8 +60,29 @@ export function requireAuth(allowedRole) {
     return user;
 }
 
+// ── Theme management ──────────────────────────────────────────────────────────
+export function initTheme() {
+    const saved = localStorage.getItem('pdp_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+
+    // Also toggle the active icon in any theme toggler if present
+    const toggleBtn = document.getElementById('theme-toggle');
+    if (toggleBtn) {
+        // We'll update toggle button icon in the dashboard specific scripts
+    }
+}
+
+export function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
+    const next = current === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('pdp_theme', next);
+    return next;
+}
+
 // ── Set user name in sidebar ──────────────────────────────────────────────────
 export function initUserDisplay() {
+    initTheme();
     const user = JSON.parse(localStorage.getItem('pdp_user') || 'null');
     const el = document.getElementById('user-name');
     if (el && user) el.textContent = user.full_name;
@@ -70,6 +91,11 @@ export function initUserDisplay() {
     if (roleEl && user) {
         const labels = { admin: 'Administrator', teacher: 'Teacher', student: 'Student' };
         roleEl.textContent = labels[user.role] || user.role;
+    }
+
+    const avatarEl = document.getElementById('user-avatar');
+    if (avatarEl && user && user.avatar_url) {
+        avatarEl.src = user.avatar_url;
     }
 }
 

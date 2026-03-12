@@ -33,6 +33,15 @@ class User(Base):
     full_name = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Profile fields
+    phone = Column(String(50), nullable=True)
+    address = Column(Text, nullable=True)
+    avatar_url = Column(String(500), nullable=True)
+    gender = Column(String(10), nullable=True) # Male, Female
+    birth_date = Column(DateTime, nullable=True)
+    nationality = Column(String(100), nullable=True)
+    passport_id = Column(String(50), nullable=True)
 
     # relationships
     teacher_profile = relationship("Teacher", back_populates="user", uselist=False)
@@ -48,6 +57,7 @@ class Teacher(Base):
 
     user = relationship("User", back_populates="teacher_profile")
     tests = relationship("Test", back_populates="teacher")
+    timetable = relationship("Timetable", back_populates="teacher")
 
 
 class Student(Base):
@@ -62,7 +72,7 @@ class Student(Base):
     groups = relationship("GroupStudent", back_populates="student")
 
 
-# ─── Groups ───────────────────────────────────────────────────────────────────
+# ─── Groups & Timetable ───────────────────────────────────────────────────────
 class Group(Base):
     __tablename__ = "groups"
 
@@ -73,6 +83,7 @@ class Group(Base):
 
     teacher = relationship("Teacher")
     students = relationship("GroupStudent", back_populates="group", cascade="all, delete-orphan")
+    timetable = relationship("Timetable", back_populates="group")
 
 
 class GroupStudent(Base):
@@ -85,6 +96,23 @@ class GroupStudent(Base):
 
     group = relationship("Group", back_populates="students")
     student = relationship("Student", back_populates="groups")
+
+
+class Timetable(Base):
+    __tablename__ = "timetable"
+
+    id = Column(Integer, primary_key=True, index=True)
+    teacher_id = Column(Integer, ForeignKey("teachers.id"), nullable=False)
+    group_id = Column(Integer, ForeignKey("groups.id"), nullable=False)
+    day_of_week = Column(String(20), nullable=False)  # Mo, Tu, We, Th, Fr, Sa, Su
+    lesson_number = Column(Integer, nullable=False)  # 1-7
+    start_time = Column(String(10), nullable=False)  # "09:00"
+    end_time = Column(String(10), nullable=False)    # "10:20"
+    room = Column(String(50), nullable=False)
+    subject = Column(String(255), nullable=False)
+
+    teacher = relationship("Teacher", back_populates="timetable")
+    group = relationship("Group", back_populates="timetable")
 
 
 # ─── Test & Questions ─────────────────────────────────────────────────────────
