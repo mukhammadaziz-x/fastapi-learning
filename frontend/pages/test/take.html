@@ -417,7 +417,8 @@
         async function handleFullscreenChange() {
             if (isSubmitting || isManualExit) return;
 
-            if (!document.fullscreenElement) {
+            const isFS = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+            if (!isFS) {
                 // Exited fullscreen!
                 document.getElementById('test-content').classList.add('hidden');
                 const overlay = document.getElementById('overlay-violation');
@@ -444,7 +445,13 @@
             if (isSubmitting) return; // If auto-failed, button redirects anyway
 
             try {
-                await document.documentElement.requestFullscreen();
+                const docEl = document.documentElement;
+                if (docEl.requestFullscreen) {
+                    await docEl.requestFullscreen();
+                } else if (docEl.webkitRequestFullscreen) {
+                    await docEl.webkitRequestFullscreen();
+                }
+
                 document.getElementById('overlay-violation').classList.add('hidden');
                 document.getElementById('test-content').classList.remove('hidden');
             } catch (e) {
