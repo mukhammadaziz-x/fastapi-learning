@@ -530,11 +530,14 @@
                     document.getElementById('link-test-id').value = testId;
                     document.getElementById('link-result').classList.add('hidden');
                     document.getElementById('gen-link-alert').innerHTML = '';
-                    // Set default times: now → +2 hours
+                    
                     const now = new Date();
-                    const later = new Date(now.getTime() + 2 * 3600 * 1000);
-                    document.getElementById('link-start').value = now.toISOString().slice(0, 16);
-                    document.getElementById('link-end').value = later.toISOString().slice(0, 16);
+                    const tzOffset = now.getTimezoneOffset() * 60000;
+                    const localNow = new Date(now.getTime() - tzOffset);
+                    const localLater = new Date(localNow.getTime() + 2 * 3600 * 1000);
+                    
+                    document.getElementById('link-start').value = localNow.toISOString().slice(0, 16);
+                    document.getElementById('link-end').value = localLater.toISOString().slice(0, 16);
                     openModal('modal-gen-link');
                 };
 
