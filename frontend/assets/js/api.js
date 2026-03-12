@@ -70,7 +70,7 @@ const api = {
     updateTest: (id, body) => apiFetch(`/teacher/tests/${id}`, { method: 'PUT', body }),
     deleteTest: (id) => apiFetch(`/teacher/tests/${id}`, { method: 'DELETE' }),
     addQuestion: (testId, body) => apiFetch(`/teacher/tests/${testId}/questions`, { method: 'POST', body }),
-    generateLink: (testId, body) => apiFetch(`/teacher/tests/${testId}/links`, { method: 'POST', body }), // updated from /link to /links
+    generateLink: (testId, body) => apiFetch(`/teacher/tests/${testId}/links`, { method: 'POST', body }),
     testResults: (testId) => apiFetch(`/teacher/tests/${testId}/results`),
     duplicateTest: (testId) => apiFetch(`/teacher/tests/${testId}/duplicate`, { method: 'POST' }),
     gradeSession: (sessionId, body) => apiFetch(`/teacher/sessions/${sessionId}/grade`, { method: 'POST', body }),
@@ -78,6 +78,11 @@ const api = {
     listGroups: () => apiFetch('/teacher/groups'),
     getGroup: (groupId) => apiFetch(`/teacher/groups/${groupId}`),
     addStudentsToGroup: (groupId, body) => apiFetch(`/teacher/groups/${groupId}/students`, { method: 'POST', body }),
+    getTeacherAttendance: () => apiFetch('/teacher/attendance'),
+    getTeacherTimetable: () => apiFetch('/teacher/timetable'),
+    getTeacherProfile: () => apiFetch('/teacher/profile'),
+    updateTeacherProfile: (body) => apiFetch('/teacher/profile', { method: 'PUT', body }),
+    getUngradedSessions: () => apiFetch('/teacher/ungraded-sessions'),
 
     // Student
     accessTest: (token) => apiFetch(`/student/tests/${token}`),
@@ -85,6 +90,9 @@ const api = {
     submitTest: (token, body) => apiFetch(`/student/tests/${token}/submit`, { method: 'POST', body }),
     myStats: () => apiFetch('/student/stats'),
     leaderboard: (groupId) => apiFetch(`/student/leaderboard${groupId ? `?group_id=${groupId}` : ''}`),
+    getStudentTimetable: () => apiFetch('/student/timetable'),
+    getStudentProfile: () => apiFetch('/student/profile'),
+    updateStudentProfile: (body) => apiFetch('/student/profile', { method: 'PUT', body }),
 };
 
 export { api, getToken, getUser, setAuth, clearAuth };

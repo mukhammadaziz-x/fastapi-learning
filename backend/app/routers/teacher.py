@@ -8,7 +8,10 @@ from sqlalchemy import select
 from pydantic import BaseModel
 
 from app.database import get_db
-from app.models import User, Teacher, Test, Question, TestLink, TestSession, Student, Group, GroupStudent
+from app.models import (
+    User, Teacher, Test, Question, TestLink, TestSession, Student,
+    Group, GroupStudent, Timetable
+)
 from app.auth import require_role, get_current_user
 
 router = APIRouter(prefix="/teacher", tags=["teacher"])
@@ -409,6 +412,137 @@ async def generate_link(
         "start_time": body.start_time.isoformat(),
         "end_time": body.end_time.isoformat(),
     }
+
+
+@router.get("/timetable")
+async def get_teacher_timetable(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(teacher_required),
+):
+    teacher = await get_teacher_profile(current_user, db)
+    result = await db.execute(
+        select(Timetable, Group)
+        .join(Group, Group.id == Timetable.group_id)
+        .where(Timetable.teacher_id == teacher.id)
+        .order_by(Timetable.day_of_week, Timetable.lesson_number)
+    )
+    rows = result.all()
+    return [
+        {
+            "id": t.id,
+            "day_of_week": t.day_of_week,
+            "lesson_number": t.lesson_number,
+            "start_time": t.start_time,
+            "end_time": t.end_time,
+            "room": t.room,
+            "subject": t.subject,
+            "group_name": g.name
+        }
+        for t, g in rows
+    ]
+
+@router.get("/attendance")
+async def get_daily_attendance(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(teacher_required),
+):
+    teacher = await get_teacher_profile(current_user, db)
+    # Students in groups managed by this teacher
+    today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    result = await db.execute(
+        select(User, Student, Group)
+        .join(Student, Student.user_id == User.id)
+        .join(GroupStudent, GroupStudent.student_id == Student.id)
+        .join(Group, Group.id == GroupStudent.group_id)
+        .where(Group.teacher_id == teacher.id)
+    )
+    students = result.all()
+    
+    output = []
+    for u, s, g in students:
+        # Check if student had any session today
+        sess_res = await db.execute(
+            select(TestSession)
+            .where(TestSession.student_id == s.id, TestSession.started_at >= today)
+        )
+        has_taken = sess_res.scalar_one_or_none() is not None
+        output.append({
+            "id": s.id,
+            "full_name": u.full_name,
+            "email": u.email,
+            "group_name": g.name,
+            "taken_today": has_taken
+        })
+    return output
+
+@router.get("/profile")
+async def get_profile(current_user: User = Depends(teacher_required)):
+    return {
+        "full_name": current_user.full_name,
+        "email": current_user.email,
+        "phone": current_user.phone,
+        "address": current_user.address,
+        "avatar_url": current_user.avatar_url,
+        "gender": current_user.gender,
+        "birth_date": current_user.birth_date.isoformat() if current_user.birth_date else None,
+        "nationality": current_user.nationality,
+        "passport_id": current_user.passport_id,
+    }
+
+class ProfileUpdate(BaseModel):
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    avatar_url: Optional[str] = None
+    gender: Optional[str] = None
+    birth_date: Optional[datetime] = None
+    nationality: Optional[str] = None
+    passport_id: Optional[str] = None
+
+@router.put("/profile")
+async def update_profile(
+    body: ProfileUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(teacher_required),
+):
+    if body.full_name is not None: current_user.full_name = body.full_name
+    if body.phone is not None: current_user.phone = body.phone
+    if body.address is not None: current_user.address = body.address
+    if body.avatar_url is not None: current_user.avatar_url = body.avatar_url
+    if body.gender is not None: current_user.gender = body.gender
+    if body.birth_date is not None: current_user.birth_date = body.birth_date
+    if body.nationality is not None: current_user.nationality = body.nationality
+    if body.passport_id is not None: current_user.passport_id = body.passport_id
+    
+    await db.commit()
+    return {"message": "Profile updated successfully"}
+
+@router.get("/ungraded-sessions")
+async def get_ungraded_sessions(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(teacher_required),
+):
+    teacher = await get_teacher_profile(current_user, db)
+    result = await db.execute(
+        select(TestSession, Test, User)
+        .join(TestLink, TestLink.id == TestSession.test_link_id)
+        .join(Test, Test.id == TestLink.test_id)
+        .join(Student, Student.id == TestSession.student_id)
+        .join(User, User.id == Student.user_id)
+        .where(Test.teacher_id == teacher.id, TestSession.is_graded == False, TestSession.status == "passed")
+    )
+    rows = result.all()
+    return [
+        {
+            "session_id": s.id,
+            "test_title": t.title,
+            "student_name": u.full_name,
+            "score": s.score,
+            "submitted_at": s.submitted_at.isoformat() if s.submitted_at else None,
+        }
+        for s, t, u in rows
+    ]
 
 
 @router.get("/tests/{test_id}/results")

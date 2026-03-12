@@ -170,6 +170,129 @@
                 </div>
             </section>
 
+            <!-- DAILY STATUS SECTION -->
+            <section id="section-daily" class="hidden">
+                <div class="page-header">
+                    <h1>Daily Status</h1>
+                    <p>Track student test activity for today</p>
+                </div>
+                <div class="card" style="padding:0; overflow:hidden">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Email</th>
+                                <th>Group</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="daily-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TIMETABLE SECTION -->
+            <section id="section-timetable" class="hidden">
+                <div class="page-header">
+                    <h1>Time Table</h1>
+                    <p>Your weekly teaching schedule</p>
+                </div>
+                <div class="card" style="padding:0; overflow:hidden">
+                    <table class="data-table timetable-table">
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>#</th>
+                                <th>Time</th>
+                                <th>Room</th>
+                                <th>Subject</th>
+                                <th>Group</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timetable-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- GRADING SECTION -->
+            <section id="section-grading" class="hidden">
+                <div class="page-header">
+                    <h1>Manual Grading</h1>
+                    <p>Grade subjective answers and review performance</p>
+                </div>
+                <div id="ungraded-list" class="grid-2">
+                    <div class="card text-center text-muted">Loading ungraded submissions...</div>
+                </div>
+            </section>
+
+            <!-- SETTINGS / PROFILE SECTION -->
+            <section id="section-settings" class="hidden">
+                <div class="page-header">
+                    <h1>My Profile</h1>
+                    <p>Update your personal information and profile picture</p>
+                </div>
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="flex-center" style="flex-direction: column; margin-bottom: 24px;">
+                            <div style="position: relative;">
+                                <img id="settings-avatar"
+                                    src="https://ui-avatars.com/api/?name=Teacher&background=10B981&color=fff"
+                                    style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary);">
+                                <button class="btn btn-secondary btn-sm"
+                                    style="position: absolute; bottom: 0; right: 0; padding: 6px; border-radius: 50%;"
+                                    onclick="document.getElementById('avatar-upload').click()">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                        <path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </button>
+                                <input type="file" id="avatar-upload" class="hidden" accept="image/*"
+                                    onchange="handleAvatarUpload(event)">
+                            </div>
+                            <h2 id="settings-full-name" style="margin-top: 16px;">Full Name</h2>
+                            <p id="settings-email" class="text-muted">teacher@pdp.uz</p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" id="prof-full-name" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="text" id="prof-phone" class="form-input" placeholder="+998 -- --- -- --">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Address</label>
+                            <textarea id="prof-address" class="form-textarea"></textarea>
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="saveProfile()">Save Profile</button>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom: 16px;">Personal Details</h3>
+                        <div class="form-group">
+                            <label class="form-label">Gender</label>
+                            <select id="prof-gender" class="form-select">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Birth Date</label>
+                            <input type="date" id="prof-birth" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nationality</label>
+                            <input type="text" id="prof-nation" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Passport ID</label>
+                            <input type="text" id="prof-passport" class="form-input">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- GROUPS SECTION -->
             <section id="section-groups" class="hidden">
                 <div class="page-header flex" style="justify-content:space-between;align-items:flex-start">
@@ -402,18 +525,183 @@
                         window.history.pushState({}, '', targetUrl);
                     }
                     document.querySelectorAll('section[id^="section-"]').forEach(s => s.classList.add('hidden'));
-                    document.getElementById(`section-${name}`)?.classList.remove('hidden');
+                    const section = document.getElementById(`section-${name}`);
+                    if (section) section.classList.remove('hidden');
+
                     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
                     document.getElementById(`nav-${name}`)?.classList.add('active');
+
                     if (name === 'groups') loadGroups();
+                    if (name === 'results') loadTests(); // To populate dropdown
+                    if (name === 'daily') loadDailyStatus();
+                    if (name === 'timetable') loadTimetable();
+                    if (name === 'grading') loadUngraded();
+                    if (name === 'settings') loadProfile();
                 };
 
                 window.addEventListener('popstate', () => {
                     const loc = window.location.pathname;
                     if (loc.includes('/groups')) showSection('groups');
                     else if (loc.includes('/results')) showSection('results');
+                    else if (loc.includes('/daily')) showSection('daily');
+                    else if (loc.includes('/timetable')) showSection('timetable');
+                    else if (loc.includes('/grading')) showSection('grading');
+                    else if (loc.includes('/settings')) showSection('settings');
                     else showSection('tests');
                 });
+
+                // ── Theme Toggle ──────────────────────────────────────────────────────────
+                import { toggleTheme, initTheme } from '../../assets/js/utils.js';
+
+                window.handleThemeToggle = function () {
+                    const newTheme = toggleTheme();
+                    updateThemeUI(newTheme);
+                };
+
+                function updateThemeUI(theme) {
+                    const text = document.getElementById('theme-text');
+                    const sun = document.getElementById('theme-icon-sun');
+                    const moon = document.getElementById('theme-icon-moon');
+                    if (!text || !sun || !moon) return;
+
+                    if (theme === 'dark') {
+                        text.textContent = 'Light Mode';
+                        sun.classList.remove('hidden');
+                        moon.classList.add('hidden');
+                    } else {
+                        text.textContent = 'Dark Mode';
+                        sun.classList.add('hidden');
+                        moon.classList.remove('hidden');
+                    }
+                }
+
+                // Init theme on load
+                const currentTheme = localStorage.getItem('pdp_theme') || 'light';
+                updateThemeUI(currentTheme);
+
+                // ── New Section Loaders ─────────────────────────────────────────────────────
+                async function loadDailyStatus() {
+                    const tbody = document.getElementById('daily-tbody');
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Loading...</td></tr>';
+                    try {
+                        const data = await api.getTeacherAttendance();
+                        tbody.innerHTML = data.map(s => `
+                            <tr>
+                                <td><strong>${s.full_name}</strong></td>
+                                <td>${s.email}</td>
+                                <td>${s.group_name}</td>
+                                <td>
+                                    <span class="badge ${s.taken_today ? 'badge-success' : 'badge-danger'}">
+                                        ${s.taken_today ? 'Completed' : 'No Activity Today'}
+                                    </span>
+                                </td>
+                            </tr>
+                        `).join('');
+                    } catch (e) {
+                        tbody.innerHTML = `<tr><td colspan="4" class="text-danger">${e.message}</td></tr>`;
+                    }
+                }
+
+                async function loadTimetable() {
+                    const tbody = document.getElementById('timetable-tbody');
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>';
+                    try {
+                        const data = await api.getTeacherTimetable();
+                        const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+                        tbody.innerHTML = data.map(t => `
+                            <tr>
+                                <td><strong>${days[t.day_of_week]}</strong></td>
+                                <td>${t.lesson_number}</td>
+                                <td>${t.start_time} - ${t.end_time}</td>
+                                <td>${t.room}</td>
+                                <td>${t.subject}</td>
+                                <td><span class="badge badge-primary">${t.group_name}</span></td>
+                            </tr>
+                        `).join('') || '<tr><td colspan="6" class="text-center text-muted">No schedule found.</td></tr>';
+                    } catch (e) {
+                        tbody.innerHTML = `<tr><td colspan="6" class="text-danger">${e.message}</td></tr>`;
+                    }
+                }
+
+                async function loadUngraded() {
+                    const list = document.getElementById('ungraded-list');
+                    list.innerHTML = '<div class="card text-center text-muted">Loading...</div>';
+                    try {
+                        const data = await api.getUngradedSessions();
+                        if (!data.length) {
+                            list.innerHTML = '<div class="card text-center text-muted" style="grid-column: 1/-1">All caught up! No ungraded submissions.</div>';
+                            return;
+                        }
+                        list.innerHTML = data.map(s => `
+                            <div class="card">
+                                <h3 style="margin-bottom:8px">${s.student_name}</h3>
+                                <p class="text-muted" style="font-size:14px; margin-bottom:12px">${s.test_title}</p>
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <strong>Score: ${s.score}%</strong>
+                                    <button class="btn btn-primary btn-sm" onclick="viewResults(${s.test_id})">Grade Now</button>
+                                </div>
+                            </div>
+                        `).join('');
+                    } catch (e) {
+                        list.innerHTML = `<div class="card text-danger">${e.message}</div>`;
+                    }
+                }
+
+                async function loadProfile() {
+                    try {
+                        const p = await api.getTeacherProfile();
+                        document.getElementById('prof-full-name').value = p.full_name || '';
+                        document.getElementById('prof-phone').value = p.phone || '';
+                        document.getElementById('prof-address').value = p.address || '';
+                        document.getElementById('prof-gender').value = p.gender || 'Male';
+                        document.getElementById('prof-birth').value = p.birth_date ? p.birth_date.split('T')[0] : '';
+                        document.getElementById('prof-nation').value = p.nationality || '';
+                        document.getElementById('prof-passport').value = p.passport_id || '';
+
+                        document.getElementById('settings-full-name').textContent = p.full_name;
+                        document.getElementById('settings-email').textContent = p.email;
+                        if (p.avatar_url) document.getElementById('settings-avatar').src = p.avatar_url;
+                    } catch (e) {
+                        showToast(e.message, 'error');
+                    }
+                }
+
+                window.saveProfile = async function () {
+                    const payload = {
+                        full_name: document.getElementById('prof-full-name').value,
+                        phone: document.getElementById('prof-phone').value,
+                        address: document.getElementById('prof-address').value,
+                        gender: document.getElementById('prof-gender').value,
+                        birth_date: document.getElementById('prof-birth').value || null,
+                        nationality: document.getElementById('prof-nation').value,
+                        passport_id: document.getElementById('prof-passport').value,
+                    };
+                    try {
+                        await api.updateTeacherProfile(payload);
+                        showToast('Profile updated!', 'success');
+                        initUserDisplay(); // Refresh sidebar
+                    } catch (e) {
+                        showToast(e.message, 'error');
+                    }
+                };
+
+                window.handleAvatarUpload = async function (event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    // Simulating upload for now, ideally you'd POST to an upload endpoint
+                    // For this demo, we'll use a FileReader to show it works visually
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const base64 = e.target.result;
+                        document.getElementById('settings-avatar').src = base64;
+                        try {
+                            await api.updateTeacherProfile({ avatar_url: base64 });
+                            showToast('Avatar updated!', 'success');
+                            initUserDisplay();
+                        } catch (err) { showToast(err.message, 'error'); }
+                    };
+                    reader.readAsDataURL(file);
+                };
 
                 // ── Load tests ─────────────────────────────────────────────────────────────
                 let allTests = [];
