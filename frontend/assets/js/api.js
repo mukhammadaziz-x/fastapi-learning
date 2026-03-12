@@ -72,6 +72,7 @@ const api = {
     addQuestion: (testId, body) => apiFetch(`/teacher/tests/${testId}/questions`, { method: 'POST', body }),
     generateLink: (testId, body) => apiFetch(`/teacher/tests/${testId}/links`, { method: 'POST', body }), // updated from /link to /links
     testResults: (testId) => apiFetch(`/teacher/tests/${testId}/results`),
+    duplicateTest: (testId) => apiFetch(`/teacher/tests/${testId}/duplicate`, { method: 'POST' }),
     gradeSession: (sessionId, body) => apiFetch(`/teacher/sessions/${sessionId}/grade`, { method: 'POST', body }),
     createGroup: (body) => apiFetch('/teacher/groups', { method: 'POST', body }),
     listGroups: () => apiFetch('/teacher/groups'),

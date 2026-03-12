@@ -388,6 +388,9 @@
             <button class="btn btn-primary btn-sm" onclick="openLinkModal(${t.id})">
               🔗 Generate Link
             </button>
+            <button class="btn btn-secondary btn-sm" onclick="duplicateTest(${t.id})">
+              📋 Duplicate
+            </button>
             <button class="btn btn-secondary btn-sm" onclick="viewResults(${t.id})">
               📊 Results
             </button>
@@ -398,6 +401,17 @@
                         grid.innerHTML = `<div class="card text-danger">${e.message}</div>`;
                     }
                 }
+
+                window.duplicateTest = async function (testId) {
+                    if (!confirm("Duplicating this test will create a new copy. Continue?")) return;
+                    try {
+                        await api.duplicateTest(testId);
+                        showToast('Test duplicated!', 'success');
+                        loadTests();
+                    } catch (e) {
+                        showToast(e.message, 'error');
+                    }
+                };
 
                 // ── Question rows ──────────────────────────────────────────────────────────
                 let qCount = 0;
@@ -417,7 +431,12 @@
                     const rightVals = (existingData && existingData.options && existingData.options.right) ? existingData.options.right.join('\\n') : '';
 
                     div.innerHTML = `
-      <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--primary-light)">Question #${n}</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:600;color:var(--primary-light)">Question #${n}</div>
+        <button class="btn btn-secondary btn-sm" style="padding:4px 8px; font-size:11px;" onclick="duplicateQuestionRow(${n}, '${containerId}')">
+           + Duplicate
+        </button>
+      </div>
       <div class="form-group">
         <label class="form-label text-sm mb-1">Type:</label>
         <select class="form-select mb-2" id="q${n}-type" onchange="toggleQuestionType(${n})">
@@ -448,6 +467,30 @@
       </div>
     `;
                     document.getElementById(containerId).appendChild(div);
+                };
+
+                window.duplicateQuestionRow = function (n, containerId) {
+                    const type = document.getElementById(`q${n}-type`).value;
+                    const text = document.getElementById(`q${n}-text`).value;
+                    const ans = document.getElementById(`q${n}-ans`).value;
+                    let options = null;
+
+                    if (type === 'multiple_choice') {
+                        options = [
+                            document.getElementById(`q${n}-a`).value,
+                            document.getElementById(`q${n}-b`).value,
+                            document.getElementById(`q${n}-c`).value,
+                            document.getElementById(`q${n}-d`).value
+                        ];
+                    } else if (type === 'matching') {
+                        options = {
+                            left: document.getElementById(`q${n}-match-left`).value.split('\n'),
+                            right: document.getElementById(`q${n}-match-right`).value.split('\n')
+                        };
+                    } else if (type === 'true_false') {
+                        options = null;
+                    }
+                    window.addQuestionRow(containerId, { question_type: type, text, correct_answer: ans, options });
                 };
 
                 window.toggleQuestionType = function (n) {
@@ -530,12 +573,12 @@
                     document.getElementById('link-test-id').value = testId;
                     document.getElementById('link-result').classList.add('hidden');
                     document.getElementById('gen-link-alert').innerHTML = '';
-                    
+
                     const now = new Date();
                     const tzOffset = now.getTimezoneOffset() * 60000;
                     const localNow = new Date(now.getTime() - tzOffset);
                     const localLater = new Date(localNow.getTime() + 2 * 3600 * 1000);
-                    
+
                     document.getElementById('link-start').value = localNow.toISOString().slice(0, 16);
                     document.getElementById('link-end').value = localLater.toISOString().slice(0, 16);
                     openModal('modal-gen-link');

@@ -336,6 +336,46 @@ async def get_test_detail(
     }
 
 
+@router.post("/tests/{test_id}/duplicate", status_code=201)
+async def duplicate_test(
+    test_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(teacher_required),
+):
+    teacher = await get_teacher_profile(current_user, db)
+    result = await db.execute(select(Test).where(Test.id == test_id, Test.teacher_id == teacher.id))
+    test = result.scalar_one_or_none()
+    if not test:
+        raise HTTPException(status_code=404, detail="Test not found")
+
+    q_result = await db.execute(select(Question).where(Question.test_id == test_id))
+    questions = q_result.scalars().all()
+
+    new_test = Test(
+        title=f"{test.title} (Copy)",
+        description=test.description,
+        topic=test.topic,
+        time_limit_minutes=test.time_limit_minutes,
+        teacher_id=teacher.id
+    )
+    db.add(new_test)
+    await db.flush()
+
+    for q in questions:
+        new_q = Question(
+            test_id=new_test.id,
+            text=q.text,
+            options=q.options,
+            correct_answer=q.correct_answer,
+            question_type=q.question_type,
+            points=q.points,
+        )
+        db.add(new_q)
+
+    await db.commit()
+    return {"message": "Test duplicated", "id": new_test.id}
+
+
 @router.post("/tests/{test_id}/links", status_code=201)
 async def generate_link(
     test_id: int,

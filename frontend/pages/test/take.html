@@ -198,7 +198,7 @@
     </div>
 
     <script type="module">
-        import { api } from '../../assets/js/api.js?v=3';
+        import { api } from '../../assets/js/api.js?v=4';
         import { requireAuth, showToast } from '../../assets/js/utils.js';
 
         requireAuth('student');
@@ -492,7 +492,7 @@
             document.getElementById('overlay-confirm').classList.remove('hidden');
         }
 
-        async function submitTest(forceFail) {
+        window.submitTest = async function (forceFail) {
             if (isSubmitting) return;
             isSubmitting = true;
             isManualExit = true; // prevent violation trigger when we exit fullscreen programmatically next
