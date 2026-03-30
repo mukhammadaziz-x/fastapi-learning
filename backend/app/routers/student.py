@@ -337,7 +337,7 @@ async def submit_test(
                     
                     output = ""
                     try:
-                        result = subprocess.run([sys.executable, path], capture_output=True, text=True, timeout=2.0)
+                        result = subprocess.run(["python", path], capture_output=True, text=True, timeout=2.0)
                         output = result.stdout
                         if result.stderr:
                             output += "\n" + result.stderr

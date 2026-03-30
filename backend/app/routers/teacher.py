@@ -270,12 +270,14 @@ class TestUpdate(BaseModel):
 @router.put("/tests/{test_id}", status_code=200)
 async def update_test(
     test_id: int,
-    body: TestUpdate,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(teacher_required),
 ):
     teacher = await get_teacher_profile(current_user, db)
-    result = await db.execute(select(Test).where(Test.id == test_id, Test.teacher_id == teacher.id))
+    from sqlalchemy.orm import selectinload
+    result = await db.execute(
+        select(Test)
+        .options(selectinload(Test.questions))
+        .where(Test.id == test_id, Test.teacher_id == teacher.id)
+    )
     test = result.scalar_one_or_none()
     if not test:
         raise HTTPException(status_code=404, detail="Test not found")
