@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Test Session — PDP Education</title>
     <link rel="stylesheet" href="../../assets/css/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/darcula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
     <style>
         body {
             background: #0F172A;
@@ -249,6 +253,10 @@
 
                 if (q.question_type === 'open_ended') {
                     inputHtml = `<textarea name="q_${q.id}" class="form-textarea" rows="4" placeholder="Write your answer here..." style="width:100%;background:var(--bg-elevated);color:var(--text-primary);padding:16px;border:1px solid var(--border);border-radius:var(--radius-md)"></textarea>`;
+                } else if (q.question_type === 'code_editor') {
+                    inputHtml = `<div class="code-editor-container" style="border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border);">
+                       <textarea id="code_editor_${q.id}" name="q_${q.id}" class="code-editor-target"></textarea>
+                    </div>`;
                 } else if (q.question_type === 'true_false') {
                     inputHtml = ['True', 'False'].map(optText => `
                         <label class="option-label tf-label" onclick="selectOption(this, ${q.id})">
@@ -295,6 +303,21 @@
         </div>
       `;
             }).join('');
+
+            setTimeout(() => {
+                document.querySelectorAll('.code-editor-target').forEach(ta => {
+                    const cm = CodeMirror.fromTextArea(ta, {
+                        mode: 'python',
+                        theme: 'darcula',
+                        lineNumbers: true,
+                        indentUnit: 4,
+                        matchBrackets: true
+                    });
+                    cm.on('change', () => {
+                        ta.value = cm.getValue();
+                    });
+                });
+            }, 50);
         }
 
         window.selectOption = function (labelEl, qId) {
@@ -504,7 +527,7 @@
             if (testInfo) {
                 testInfo.questions.forEach(q => {
                     let val = null;
-                    if (q.question_type === 'open_ended') {
+                    if (q.question_type === 'open_ended' || q.question_type === 'code_editor') {
                         const ta = document.querySelector(`textarea[name="q_${q.id}"]`);
                         if (ta) val = ta.value.trim();
                     } else if (q.question_type === 'matching') {

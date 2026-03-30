@@ -1,0 +1,4 @@
+(7, 'Hello World!', 'print("Hello World!")')
+(7, 'Hello World!', 'print("Hello World")')
+(7, 'Hello World!', 'print("Hello World!")')
+(7, 'Hello World!', 'hello = "Hello World!"\nprint(hello)')

@@ -299,8 +299,19 @@ async def submit_test(
             )
             db.add(answer_record)
             
-            answer_val = str(answer_item.chosen_answer).strip().upper() if answer_item.chosen_answer else ""
-            correct_val = str(q.correct_answer).strip().upper()
+            answer_val = str(answer_item.chosen_answer) if answer_item.chosen_answer else ""
+            correct_val = str(q.correct_answer)
+            
+            def norm_text(t: str) -> str:
+                lines = t.replace('\r\n', '\n').replace('\t', '    ').split('\n')
+                lines = [l.rstrip() for l in lines]
+                while lines and not lines[-1]: lines.pop()
+                while lines and not lines[0]: lines.pop(0)
+                return '\n'.join(lines)
+            
+            answer_val_norm = norm_text(answer_val)
+            correct_val_norm = norm_text(correct_val)
+            
             is_correct = False
             
             import json
@@ -313,7 +324,38 @@ async def submit_test(
                         is_correct = True
                 except:
                     pass
-            elif answer_item.chosen_answer and answer_val == correct_val:
+            elif q.question_type == "code_editor":
+                if answer_item.chosen_answer:
+                    import subprocess
+                    import tempfile
+                    import os
+                    import sys
+                    
+                    fd, path = tempfile.mkstemp(suffix=".py")
+                    with os.fdopen(fd, 'w', encoding='utf-8') as f:
+                        f.write(answer_val)
+                    
+                    output = ""
+                    try:
+                        result = subprocess.run([sys.executable, path], capture_output=True, text=True, timeout=2.0)
+                        output = result.stdout
+                        if result.stderr:
+                            output += "\n" + result.stderr
+                    except subprocess.TimeoutExpired:
+                        output = "Timeout"
+                    finally:
+                        try:
+                            os.remove(path)
+                        except:
+                            pass
+                            
+                    output_norm = norm_text(output)
+                    if output_norm == correct_val_norm:
+                        is_correct = True
+            elif q.question_type == "open_ended":
+                if answer_item.chosen_answer and answer_val_norm == correct_val_norm:
+                    is_correct = True
+            elif answer_item.chosen_answer and answer_val_norm.upper() == correct_val_norm.upper():
                 is_correct = True
                 
             if is_correct:

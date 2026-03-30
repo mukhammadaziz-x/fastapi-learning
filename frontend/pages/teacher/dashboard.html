@@ -792,6 +792,7 @@
             <option value="open_ended" ${qType === 'open_ended' ? 'selected' : ''}>Open Ended</option>
             <option value="true_false" ${qType === 'true_false' ? 'selected' : ''}>True / False</option>
             <option value="matching" ${qType === 'matching' ? 'selected' : ''}>Matching (IELTS style)</option>
+            <option value="code_editor" ${qType === 'code_editor' ? 'selected' : ''}>Code Editor</option>
         </select>
         <input class="form-input" id="q${n}-text" placeholder="Question text…" value="${qText.replace(/"/g, '&quot;')}" />
       </div>
@@ -808,10 +809,13 @@
             Correct Answer format: {"Left 1":"Right Match", "Left 2":"Right Match"}
          </div>
       </div>
-      <div class="flex gap-2" style="align-items:center">
-        <label class="form-label" style="margin:0;white-space:nowrap">Correct Answer:</label>
-        <input type="text" class="form-input" id="q${n}-ans" placeholder="A, True, or full answer..." style="width: auto;" value="${qAns.replace(/"/g, '&quot;')}" />
-        <button class="btn btn-danger btn-sm" onclick="document.getElementById('q-row-${n}').remove()">Remove</button>
+      <div class="flex gap-2" style="align-items:center; flex-wrap: wrap;">
+        <label class="form-label" style="margin:0;white-space:nowrap;width:100%">Correct Answer:</label>
+        <textarea class="form-textarea" style="display:${qType === 'code_editor' ? 'block' : 'none'}; width: 100%; font-family: monospace;" id="q${n}-ans-code" placeholder="Write exact correct code...">${qType === 'code_editor' ? qAns.replace(/</g, '&lt;').replace(/>/g, '&gt;') : ''}</textarea>
+        <div style="display:flex; gap:8px; flex:1; width:100%">
+            <input type="text" class="form-input" id="q${n}-ans" placeholder="A, True, or full answer..." style="flex:1; display:${qType !== 'code_editor' ? 'block' : 'none'};" value="${qAns.replace(/"/g, '&quot;')}" />
+            <button class="btn btn-danger btn-sm" onclick="document.getElementById('q-row-${n}').remove()">Remove</button>
+        </div>
       </div>
     `;
                     document.getElementById(containerId).appendChild(div);
@@ -820,7 +824,7 @@
                 window.duplicateQuestionRow = function (n, containerId) {
                     const type = document.getElementById(`q${n}-type`).value;
                     const text = document.getElementById(`q${n}-text`).value;
-                    const ans = document.getElementById(`q${n}-ans`).value;
+                    const ans = type === 'code_editor' ? document.getElementById(`q${n}-ans-code`).value : document.getElementById(`q${n}-ans`).value;
                     let options = null;
 
                     if (type === 'multiple_choice') {
@@ -845,6 +849,20 @@
                     const type = document.getElementById(`q${n}-type`).value;
                     const grid = document.getElementById(`q${n}-options-grid`);
                     const matchGrid = document.getElementById(`q${n}-match-grid`);
+
+                    const ansInput = document.getElementById(`q${n}-ans`);
+                    const ansCode = document.getElementById(`q${n}-ans-code`);
+
+                    if (ansInput && ansCode) {
+                        if (type === 'code_editor') {
+                            ansInput.style.display = 'none';
+                            ansCode.style.display = 'block';
+                        } else {
+                            ansInput.style.display = 'block';
+                            ansCode.style.display = 'none';
+                        }
+                    }
+
                     if (type === 'multiple_choice') {
                         grid.style.display = 'grid';
                         if (matchGrid) matchGrid.style.display = 'none';
@@ -863,7 +881,10 @@
                         const n = row.id.split('-')[2];
                         const type = document.getElementById(`q${n}-type`).value;
                         const text = document.getElementById(`q${n}-text`)?.value.trim();
-                        const ans = document.getElementById(`q${n}-ans`)?.value.trim();
+                        let ans = document.getElementById(`q${n}-ans`)?.value.trim();
+                        if (type === 'code_editor') {
+                            ans = document.getElementById(`q${n}-ans-code`)?.value.trim();
+                        }
 
                         if (text && ans) {
                             if (type === 'multiple_choice') {

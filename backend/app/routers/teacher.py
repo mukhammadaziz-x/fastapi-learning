@@ -236,7 +236,8 @@ async def add_question(
         test_id=test_id,
         text=body.text,
         options=body.options,
-        correct_answer=body.correct_answer.upper(),
+        correct_answer=body.correct_answer if body.question_type in ["code_editor", "open_ended"] else body.correct_answer.upper(),
+        question_type=body.question_type,
         points=body.points,
     )
     db.add(question)
