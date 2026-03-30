@@ -270,6 +270,9 @@ class TestUpdate(BaseModel):
 @router.put("/tests/{test_id}", status_code=200)
 async def update_test(
     test_id: int,
+    body: TestUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(teacher_required),
 ):
     teacher = await get_teacher_profile(current_user, db)
     from sqlalchemy.orm import selectinload
